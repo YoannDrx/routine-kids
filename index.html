@@ -1,0 +1,3800 @@
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="RoutineKids" />
+    <title>RoutineKids - v1.1</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "space-dark": "#120d2b",
+              "input-bg": "rgba(255, 255, 255, 0.1)",
+              "card-bg": "rgba(255, 255, 255, 0.05)",
+              "accent-pink": "#ec4899",
+              "accent-orange": "#f97316",
+              success: "#10B981",
+              gold: "#FBBF24",
+            },
+            fontFamily: { sans: ["Poppins", "sans-serif"] },
+            backgroundImage: {
+              "button-gradient": "linear-gradient(to right, #ec4899, #f97316)",
+              "gold-gradient": "linear-gradient(to right, #F59E0B, #FBBF24, #F59E0B)",
+            },
+            boxShadow: {
+              pop: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
+              glow: "0 0 15px rgba(236, 72, 153, 0.3)",
+              "gold-glow": "0 0 20px rgba(251, 191, 36, 0.4)",
+            },
+            screens: {
+              landscape: { raw: "(orientation: landscape)" },
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      body {
+        background-image: radial-gradient(circle at 50% 0%, #2a1f52 0%, #0f0b24 100%);
+        color: white;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        overflow-x: hidden;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .stars {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.8;
+        background-image:
+          radial-gradient(1px 1px at 20px 30px, #fff, rgba(0, 0, 0, 0)),
+          radial-gradient(2px 2px at 250px 300px, rgba(255, 255, 255, 0.9), rgba(0, 0, 0, 0));
+        background-size: 600px 600px;
+        animation: twinkle 20s infinite linear;
+      }
+      @keyframes twinkle {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(-600px);
+        }
+      }
+
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      .task-scroll-container {
+        mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+      }
+
+      .glass-panel {
+        background: rgba(20, 15, 45, 0.9);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .full-view {
+        position: fixed;
+        inset: 0;
+        background-color: #0f0b24;
+        z-index: 40;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        visibility: hidden;
+        pointer-events: none;
+        padding-top: env(safe-area-inset-top);
+      }
+      .full-view.active {
+        transform: translateY(0);
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      .toggle-container {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .toggle-btn {
+        transition: all 0.3s ease;
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .toggle-btn:hover {
+        color: rgba(255, 255, 255, 0.8);
+      }
+      .toggle-btn.active {
+        background-color: #ce5e93;
+        color: white;
+        box-shadow: 0 2px 10px rgba(206, 94, 147, 0.4);
+      }
+
+      .task-card {
+        transition:
+          transform 0.2s,
+          filter 0.2s;
+      }
+      .task-card:active {
+        transform: scale(0.92);
+      }
+      .task-done {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        border: 2px solid #10b981 !important;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3) !important;
+        transform: scale(0.95);
+        order: 9999;
+      }
+      .task-done img,
+      .task-done i.task-icon {
+        filter: grayscale(0%) opacity(1);
+      }
+      .check-anim {
+        animation: check-bounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      @keyframes check-bounce {
+        0% {
+          transform: scale(0);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.5);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .task-trash {
+        display: none !important;
+        z-index: 30;
+      }
+      .delete-mode-active .task-trash {
+        display: flex !important;
+        animation: popIn 0.2s ease-out;
+      }
+      @keyframes popIn {
+        from {
+          transform: scale(0);
+        }
+        to {
+          transform: scale(1);
+        }
+      }
+
+      .progress-ring__circle {
+        transition: stroke-dashoffset 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+      }
+      .ring-victory {
+        animation: soft-breathe 3s infinite;
+        stroke: #10b981 !important;
+        filter: drop-shadow(0 0 6px #10b981);
+      }
+      @keyframes soft-breathe {
+        0%,
+        100% {
+          stroke-width: 5px;
+        }
+        50% {
+          stroke-width: 7px;
+        }
+      }
+      .avatar-victory {
+        animation: happy-bounce 2s infinite;
+        border-color: #10b981 !important;
+        box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+      }
+      @keyframes happy-bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+
+      .logo-glow {
+        box-shadow: 0 0 60px 20px rgba(236, 72, 153, 0.4);
+      }
+      .premium-text {
+        background: linear-gradient(to right, #fbbf24 20%, #fff 40%, #fbbf24 60%, #fff 80%, #fbbf24 100%);
+        background-size: 200% auto;
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        animation: shine 3s linear infinite;
+      }
+      .day-btn.active {
+        background-color: #ec4899 !important;
+        color: white !important;
+        border-color: #ec4899 !important;
+      }
+
+      #orientation-lock {
+        display: none;
+      }
+      @media screen and (orientation: portrait) {
+        #orientation-lock {
+          display: flex !important;
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+          background-color: #0f0b24;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 2rem;
+        }
+        #main-view,
+        #welcome-view,
+        .stars,
+        .full-view {
+          display: none !important;
+        }
+      }
+      .rotate-phone {
+        animation: rotate-device 2s infinite ease-in-out;
+        font-size: 4rem;
+        color: #ec4899;
+      }
+      @keyframes rotate-device {
+        0%,
+        10% {
+          transform: rotate(0deg);
+          opacity: 1;
+        }
+        40%,
+        60% {
+          transform: rotate(90deg);
+          opacity: 1;
+        }
+        100% {
+          transform: rotate(90deg);
+          opacity: 0;
+        }
+      }
+
+      .task-tooltip {
+        position: relative;
+      }
+      .task-tooltip-content {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        background: #1f2937;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 10px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+        z-index: 50;
+      }
+      .task-tooltip:hover .task-tooltip-content {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0px);
+      }
+
+      .cropper-view-box {
+        border-radius: 50%;
+        outline: none;
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5);
+      }
+      .cropper-face {
+        background-color: inherit !important;
+      }
+      .cropper-crop {
+        display: none !important;
+      }
+      .cropper-modal {
+        background-color: rgba(18, 13, 43, 0.8) !important;
+      }
+      .cropper-bg {
+        background-image: none !important;
+      }
+
+      /* === v1.1 PROGRESSION SYSTEM STYLES === */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes confetti-fall {
+        0% {
+          transform: translateY(-20px) translateX(0) rotate(0deg) scale(1);
+          opacity: 1;
+        }
+        25% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) translateX(var(--drift, 50px)) rotate(720deg) scale(0.5);
+          opacity: 0;
+        }
+      }
+      .confetti-piece {
+        position: fixed;
+        top: -20px;
+        z-index: 99999;
+        animation: confetti-fall ease-in-out forwards;
+        pointer-events: none;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Streak flame */
+      @keyframes flame-dance {
+        0%,
+        100% {
+          transform: scaleY(1) scaleX(1);
+        }
+        25% {
+          transform: scaleY(1.1) scaleX(0.9);
+        }
+        50% {
+          transform: scaleY(0.95) scaleX(1.05);
+        }
+        75% {
+          transform: scaleY(1.08) scaleX(0.95);
+        }
+      }
+      .streak-flame {
+        animation: flame-dance 0.8s infinite ease-in-out;
+      }
+
+      /* Planet unlock animation */
+      @keyframes planet-unlock {
+        0% {
+          transform: scale(0) rotate(-180deg);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.3) rotate(10deg);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1) rotate(0deg);
+          opacity: 1;
+        }
+      }
+      .planet-unlock-anim {
+        animation: planet-unlock 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      /* Space journey path */
+      .journey-path {
+        background: linear-gradient(90deg, rgba(236, 72, 153, 0.1) 0%, rgba(249, 115, 22, 0.1) 100%);
+      }
+      .planet-node {
+        transition: all 0.3s ease;
+      }
+      .planet-node.reached {
+        filter: drop-shadow(0 0 8px currentColor);
+        transform: scale(1.1);
+      }
+      .planet-node.current {
+        animation: soft-breathe 2s infinite;
+      }
+      .planet-node.locked {
+        opacity: 0.25;
+        filter: grayscale(1);
+      }
+
+      /* Streak badge in header */
+      .streak-badge {
+        background: linear-gradient(135deg, #f97316, #ef4444);
+      }
+
+      /* Journey modal */
+      .space-bg-deep {
+        background: radial-gradient(ellipse at 30% 20%, #1a1145 0%, #0a0618 50%, #000 100%);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex flex-col relative overflow-hidden">
+    <div id="intro-overlay" class="fixed inset-0 z-[100000] bg-black flex items-center justify-center">
+      <video id="intro-video" class="w-full h-full object-cover" playsinline muted>
+        <source src="Création_Vidéo_Astronaute_Énergique.mp4" type="video/mp4" />
+      </video>
+      <button
+        id="skip-intro-btn"
+        class="absolute bottom-8 right-8 text-white/50 border border-white/30 rounded-full px-4 py-2 text-xs hover:bg-white/10 hover:text-white transition z-50 uppercase tracking-widest font-bold backdrop-blur-md"
+      >
+        Passer <i class="fa-solid fa-forward ml-2"></i>
+      </button>
+    </div>
+
+    <div class="stars"></div>
+
+    <div id="orientation-lock">
+      <div class="rotate-phone mb-6"><i class="fa-solid fa-mobile-screen"></i></div>
+      <h2 class="text-2xl font-bold mb-2 text-white">Tourne ton vaisseau !</h2>
+      <p class="text-white/60 text-sm">L'aventure RoutineKids se vit en mode paysage.</p>
+    </div>
+
+    <input type="file" id="task-file-input" accept="image/*" class="hidden" />
+    <input type="file" id="profile-file-input-gallery" accept="image/*" class="hidden" />
+    <input type="file" id="profile-file-input-camera" accept="image/*" capture="environment" class="hidden" />
+
+    <div
+      id="welcome-view"
+      class="fixed inset-0 z-[500] bg-[#0f0b24] flex flex-col items-center justify-center p-6 text-center hidden"
+    >
+      <div class="relative z-10 flex flex-col items-center w-full max-w-md">
+        <div
+          class="w-20 h-20 rounded-full bg-gradient-to-br from-accent-pink to-accent-orange flex items-center justify-center text-3xl text-white mb-4 logo-glow animate-bounce"
+        >
+          <i class="fa-solid fa-rocket"></i>
+        </div>
+        <h1 class="text-3xl font-bold mb-2">RoutineKids</h1>
+        <div class="w-full max-w-xs space-y-3 mt-6">
+          <button
+            onclick="setAppLanguage('en')"
+            class="w-full p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-between group transition"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                <i class="fa-solid fa-earth-americas"></i>
+              </div>
+              <span class="font-bold">English</span>
+            </div>
+            <div class="w-4 h-4 rounded-full border-2 border-white/20 group-hover:border-accent-pink transition"></div>
+          </button>
+          <button
+            onclick="setAppLanguage('fr')"
+            class="w-full p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-between group transition"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-yellow-500/20 text-yellow-400 flex items-center justify-center">
+                <i class="fa-solid fa-earth-europe"></i>
+              </div>
+              <span class="font-bold">Français</span>
+            </div>
+            <div class="w-4 h-4 rounded-full border-2 border-white/20 group-hover:border-accent-pink transition"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="main-view" class="flex-1 flex flex-col h-screen transition-transform duration-300 relative z-10">
+      <header
+        class="sticky top-0 z-30 bg-[#120d2b]/90 backdrop-blur-md border-b border-white/5 px-6 py-2 flex justify-between items-center shadow-2xl relative shrink-0"
+      >
+        <div class="flex items-center gap-3">
+          <div>
+            <h1 class="font-bold text-lg leading-none tracking-tight">
+              Routine<span class="bg-gradient-to-r from-accent-pink to-accent-orange bg-clip-text text-transparent">Kids</span>
+            </h1>
+          </div>
+        </div>
+        <div
+          class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none select-none"
+        >
+          <div
+            id="digital-clock"
+            class="text-lg font-bold font-mono tracking-widest text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)] leading-none"
+          >
+            00:00
+          </div>
+          <div id="date-display" class="text-[8px] text-white/40 uppercase tracking-[0.2em] mt-0.5 font-semibold">...</div>
+        </div>
+        <div class="flex items-center gap-3">
+          <!-- v1.1: STREAK BADGE -->
+          <button
+            id="streak-badge-btn"
+            onclick="openJourneyModal()"
+            class="hidden items-center gap-1.5 px-2.5 py-1 rounded-full streak-badge text-white text-xs font-bold shadow-lg hover:scale-105 transition cursor-pointer"
+          >
+            <i class="fa-solid fa-fire streak-flame"></i>
+            <span id="streak-count-header">0</span>
+          </button>
+
+          <button
+            id="header-buy-btn"
+            onclick="
+              openPremiumModal();
+              SoundFX.click();
+            "
+            class="w-8 h-8 rounded-full bg-gold-gradient shadow-gold-glow flex items-center justify-center text-white animate-[pulse_3s_infinite] hover:scale-110 transition cursor-pointer"
+          >
+            <i class="fa-solid fa-crown text-xs"></i>
+          </button>
+          <div
+            id="header-premium-badge"
+            class="hidden w-8 h-8 rounded-full bg-white/10 border border-gold/50 flex items-center justify-center text-gold"
+          >
+            <i class="fa-solid fa-medal text-xs"></i>
+          </div>
+
+          <div class="toggle-container rounded-full p-1 flex items-center relative">
+            <button
+              onclick="setPeriod('morning')"
+              id="btn-morning"
+              class="toggle-btn px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-2 cursor-pointer"
+            >
+              <i class="fa-solid fa-sun"></i> <span data-t="morning">Matin</span>
+            </button>
+            <button
+              onclick="setPeriod('evening')"
+              id="btn-evening"
+              class="toggle-btn px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-2 cursor-pointer"
+            >
+              <i class="fa-solid fa-moon"></i> <span data-t="evening">Soir</span>
+            </button>
+          </div>
+          <button
+            onclick="
+              showParentalGate('settings');
+              SoundFX.click();
+            "
+            class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition border border-white/10 text-white/70 cursor-pointer z-50"
+          >
+            <i class="fa-solid fa-gear text-xs"></i>
+          </button>
+        </div>
+      </header>
+      <main id="family-wall" class="flex-1 p-2 space-y-2 overflow-y-auto pb-10 pt-2 z-0 relative flex flex-col"></main>
+    </div>
+
+    <div id="settings-view" class="full-view flex flex-col">
+      <header class="p-4 border-b border-white/10 flex items-center gap-4 sticky top-0 bg-[#120d2b] z-10 shadow-md shrink-0">
+        <button
+          onclick="closeSettings()"
+          class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 cursor-pointer"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h2 class="text-xl font-bold" data-t="settings">Paramètres</h2>
+      </header>
+      <div class="p-6 w-full max-w-5xl mx-auto pb-20 overflow-y-auto h-full">
+        <div
+          id="settings-premium-active"
+          class="hidden w-full p-4 bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl border border-gold/30 mb-6 flex items-center justify-between relative overflow-hidden"
+        >
+          <div class="absolute top-0 right-0 w-20 h-20 bg-gold/10 rounded-full -mr-5 -mt-5 blur-xl"></div>
+          <div class="flex items-center gap-4 z-10">
+            <div class="w-10 h-10 rounded-full bg-gold/20 text-gold flex items-center justify-center text-xl">
+              <i class="fa-solid fa-crown"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-gold" data-t="status_captain">Statut : Capitaine</h3>
+              <p class="text-xs text-white/60" data-t="premium_active">Version Premium active</p>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-8 h-full">
+          <div class="flex flex-col gap-6">
+            <div
+              id="settings-premium-banner"
+              class="hidden bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gold/30 relative overflow-hidden group cursor-pointer"
+              onclick="openPremiumModal()"
+            >
+              <div class="absolute top-0 right-0 w-24 h-24 bg-gold/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
+              <div class="flex items-center justify-between relative z-10">
+                <div>
+                  <h3 class="font-bold text-gold text-lg mb-1">
+                    <i class="fa-solid fa-crown mr-2"></i><span data-t="go_premium">Passer Premium</span>
+                  </h3>
+                  <p class="text-xs text-white/70" data-t="unlock_all">Débloquez l'illimité !</p>
+                </div>
+                <div
+                  class="w-10 h-10 rounded-full bg-gold text-black flex items-center justify-center font-bold group-hover:scale-110 transition"
+                >
+                  <i class="fa-solid fa-arrow-right"></i>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 class="text-xs font-bold text-white/40 uppercase tracking-widest mb-3 ml-2" data-t="management">Gestion</h3>
+              <div class="grid grid-cols-3 gap-4">
+                <button
+                  onclick="
+                    openProfileManager();
+                    SoundFX.click();
+                  "
+                  class="p-4 bg-input-bg rounded-2xl border border-white/5 hover:bg-white/10 hover:border-accent-pink transition flex flex-col items-center justify-center text-center gap-2 group shadow-lg aspect-[4/3]"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl group-hover:scale-110 transition"
+                  >
+                    <i class="fa-solid fa-users"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-sm" data-t="manage_crew">Équipage</h4>
+                    <p class="text-[10px] text-white/50 uppercase tracking-wider">Gérer</p>
+                  </div>
+                </button>
+                <button
+                  onclick="
+                    openGlobalLibrary('manage');
+                    SoundFX.click();
+                  "
+                  class="p-4 bg-input-bg rounded-2xl border border-white/5 hover:bg-white/10 hover:border-accent-pink transition flex flex-col items-center justify-center text-center gap-2 group shadow-lg aspect-[4/3]"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl group-hover:scale-110 transition"
+                  >
+                    <i class="fa-solid fa-book"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-sm" data-t="library">Biblio</h4>
+                    <p class="text-[10px] text-white/50 uppercase tracking-wider">Tâches</p>
+                  </div>
+                </button>
+                <button
+                  onclick="
+                    openScheduler();
+                    SoundFX.click();
+                  "
+                  class="p-4 bg-input-bg rounded-2xl border border-white/5 hover:bg-white/10 hover:border-accent-pink transition flex flex-col items-center justify-center text-center gap-2 group shadow-lg aspect-[4/3]"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full bg-muted-pink/20 text-muted-pink flex items-center justify-center text-xl group-hover:scale-110 transition"
+                  >
+                    <i class="fa-solid fa-calendar-days"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-sm" data-t="scheduler">Planif.</h4>
+                    <p class="text-[10px] text-white/50 uppercase tracking-wider">Auto</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-6">
+            <div>
+              <h3 class="text-xs font-bold text-white/40 uppercase tracking-widest mb-3 ml-2" data-t="application">
+                Application
+              </h3>
+              <div class="bg-input-bg rounded-2xl overflow-hidden border border-white/5">
+                <button
+                  onclick="
+                    openPeriodSettings();
+                    SoundFX.click();
+                  "
+                  class="w-full p-4 flex items-center justify-between hover:bg-white/5 transition border-b border-white/5 cursor-pointer"
+                >
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-yellow-500/20 text-yellow-400 flex items-center justify-center mr-4">
+                      <i class="fa-regular fa-clock"></i>
+                    </div>
+                    <div class="text-left">
+                      <h4 class="font-bold text-sm" data-t="schedule">Horaires</h4>
+                      <p class="text-xs text-white/60" data-t="schedule_desc">Matin / Soir</p>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-chevron-right text-white/30 text-sm"></i>
+                </button>
+                <button
+                  onclick="
+                    toggleSound();
+                    SoundFX.click();
+                  "
+                  class="w-full p-4 flex items-center justify-between hover:bg-white/5 transition border-b border-white/5 cursor-pointer"
+                >
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center mr-4">
+                      <i class="fa-solid fa-volume-high"></i>
+                    </div>
+                    <div class="text-left">
+                      <h4 class="font-bold text-sm" data-t="sound">Sons</h4>
+                      <p class="text-xs text-white/60" id="sound-status">Activé</p>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-toggle-on text-white/30 text-xl" id="sound-toggle"></i>
+                </button>
+                <button
+                  onclick="
+                    openLanguageModal();
+                    SoundFX.click();
+                  "
+                  class="w-full p-4 flex items-center justify-between hover:bg-white/5 transition cursor-pointer"
+                >
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center mr-4">
+                      <i class="fa-solid fa-language"></i>
+                    </div>
+                    <div class="text-left">
+                      <h4 class="font-bold text-sm" data-t="language">Langue</h4>
+                      <p class="text-xs text-white/60" data-t="language_desc">Français / English</p>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-chevron-right text-white/30 text-sm"></i>
+                </button>
+              </div>
+            </div>
+            <div class="bg-input-bg rounded-2xl overflow-hidden border border-white/5">
+              <button
+                onclick="
+                  openAboutModal();
+                  SoundFX.click();
+                "
+                class="w-full p-4 flex items-center justify-between hover:bg-white/5 transition cursor-pointer"
+              >
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-white/10 text-white/60 flex items-center justify-center mr-4">
+                    <i class="fa-solid fa-circle-info"></i>
+                  </div>
+                  <div class="text-left">
+                    <h4 class="font-bold text-sm" data-t="about">À Propos</h4>
+                    <p class="text-xs text-white/60">RoutineKids v1.1</p>
+                  </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-white/30 text-sm"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="language-modal" class="fixed inset-0 bg-black/90 z-[105] hidden items-center justify-center p-6">
+      <div class="glass-panel p-6 rounded-3xl max-w-sm w-full relative">
+        <button onclick="closeModal('language-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h3 class="text-xl font-bold mb-6" data-t="choose_lang">Choisir la langue</h3>
+        <div class="space-y-3">
+          <button
+            onclick="changeLanguageFromSettings('fr')"
+            class="w-full p-4 rounded-xl border border-white/10 bg-white/5 flex items-center gap-4 hover:border-accent-pink transition cursor-pointer"
+          >
+            <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
+              <i class="fa-solid fa-earth-europe"></i>
+            </div>
+            <span class="font-bold">Français</span></button
+          ><button
+            onclick="changeLanguageFromSettings('en')"
+            class="w-full p-4 rounded-xl border border-white/10 bg-white/5 flex items-center gap-4 hover:border-accent-pink transition cursor-pointer"
+          >
+            <div class="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+              <i class="fa-solid fa-earth-americas"></i>
+            </div>
+            <span class="font-bold">English</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="premium-modal" class="fixed inset-0 bg-black/95 z-[120] hidden items-center justify-center p-4">
+      <div
+        class="glass-panel p-6 rounded-3xl max-w-md w-full relative overflow-hidden border border-gold/30 shadow-gold-glow flex flex-col max-h-[90vh] overflow-y-auto"
+      >
+        <button onclick="closeModal('premium-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white z-20">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <div class="text-center mb-6 relative z-10">
+          <div
+            class="w-16 h-16 rounded-full bg-gold-gradient mx-auto flex items-center justify-center text-2xl text-white shadow-lg mb-3 animate-bounce"
+          >
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <h2 class="text-2xl font-bold premium-text" data-t="premium_title">Devenez Capitaine !</h2>
+          <p class="text-sm text-white/60 mt-1" id="premium-reason"></p>
+        </div>
+        <div class="space-y-3 mb-6">
+          <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl">
+            <div class="w-8 h-8 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="text-sm"><span class="font-bold text-white" data-t="unlimited_profiles">Profils Illimités</span></div>
+          </div>
+          <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl">
+            <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
+              <i class="fa-solid fa-list-check"></i>
+            </div>
+            <div class="text-sm"><span class="font-bold text-white" data-t="unlimited_tasks">Tâches Illimitées</span></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <button
+            onclick="buyPremium('month')"
+            class="p-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-accent-pink transition text-center group relative overflow-hidden"
+          >
+            <span class="block text-xs text-white/50 uppercase tracking-wider mb-1" data-t="monthly">Mensuel</span>
+            <span class="block text-xl font-bold text-white group-hover:text-accent-pink transition">1,99€</span>
+          </button>
+          <button
+            onclick="buyPremium('lifetime')"
+            class="p-4 rounded-2xl border-2 border-gold/50 bg-gold/10 hover:bg-gold/20 transition text-center relative shadow-lg transform hover:scale-105"
+          >
+            <div class="absolute -top-2 right-0 bg-gold text-black text-[8px] font-bold px-2 py-0.5 rounded-full uppercase">
+              Best
+            </div>
+            <span class="block text-xs text-gold uppercase tracking-wider mb-1" data-t="lifetime">À Vie</span>
+            <span class="block text-xl font-bold text-white">24,99€</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="confirm-modal" class="fixed inset-0 bg-black/95 z-[9999] hidden items-center justify-center p-6">
+      <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center border border-white/10 relative shadow-2xl">
+        <h3 class="text-xl font-bold mb-2" id="confirm-title" data-t="attention">Attention</h3>
+        <p class="text-sm text-white/60 mb-6" id="confirm-message">Sur ?</p>
+        <div class="flex gap-3">
+          <button onclick="closeConfirm()" class="flex-1 py-3 rounded-xl bg-white/10 font-bold" data-t="cancel">Non</button
+          ><button id="confirm-action-btn" class="flex-1 py-3 rounded-xl bg-red-500 font-bold" data-t="confirm">Oui</button>
+        </div>
+      </div>
+    </div>
+    <div
+      id="success-modal"
+      class="fixed inset-0 bg-black/90 z-[130] hidden items-center justify-center p-6 animate-[fadeIn_0.3s]"
+    >
+      <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center border border-success/30 relative shadow-2xl">
+        <button onclick="closeModal('success-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <div
+          class="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center text-4xl text-success mb-6 mx-auto animate-bounce"
+        >
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h3 class="text-2xl font-bold mb-2 text-success" id="success-title">Succès !</h3>
+        <p class="text-sm text-white/70 mb-6" id="success-message">Opération réussie.</p>
+        <button onclick="closeModal('success-modal')" class="w-full py-3 rounded-xl bg-white/10 font-bold hover:bg-white/20">
+          OK
+        </button>
+      </div>
+    </div>
+
+    <!-- v1.1: STYLED ALERT MODAL (replaces native alert()) -->
+    <div id="alert-modal" class="fixed inset-0 bg-black/90 z-[9998] hidden items-center justify-center p-6">
+      <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center border border-white/10 relative shadow-2xl">
+        <div
+          class="w-14 h-14 rounded-full bg-accent-pink/20 flex items-center justify-center text-2xl text-accent-pink mb-4 mx-auto"
+        >
+          <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <p class="text-sm text-white/80 mb-6" id="alert-message"></p>
+        <button onclick="closeModal('alert-modal')" class="w-full py-3 rounded-xl bg-white/10 font-bold hover:bg-white/20">
+          OK
+        </button>
+      </div>
+    </div>
+
+    <div id="about-modal" class="fixed inset-0 bg-black/90 z-[110] hidden items-center justify-center p-6">
+      <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center border border-white/10 relative">
+        <button onclick="closeModal('about-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <div
+          class="w-20 h-20 rounded-full bg-gradient-to-br from-accent-pink to-accent-orange flex items-center justify-center text-4xl text-white mb-6 mx-auto logo-glow"
+        >
+          <i class="fa-solid fa-rocket"></i>
+        </div>
+        <h3 class="text-2xl font-bold mb-2">RoutineKids</h3>
+        <p class="text-sm text-white/50 italic mb-6" data-t="tagline">Pensé par des parents pour des parents et leurs enfants.</p>
+        <div class="text-xs text-white/40 space-y-2 border-t border-white/10 pt-6">
+          <p>Version 1.1.0</p>
+          <p>© 2025 RoutineKids</p>
+          <div class="flex justify-center gap-4 mt-4">
+            <button onclick="openModalGeneric('privacy-modal')" class="hover:text-white underline" data-t="privacy_policy">
+              Confidentialité
+            </button>
+            <button onclick="window.location.href = 'mailto:support.routinekids@gmail.com'" class="hover:text-white underline">
+              Support
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="privacy-modal" class="fixed inset-0 bg-black/95 z-[150] hidden items-center justify-center p-4">
+      <div class="bg-white text-black p-8 rounded-xl max-w-2xl w-full h-[80vh] overflow-y-auto relative shadow-2xl">
+        <button
+          onclick="closeModal('privacy-modal')"
+          class="absolute top-4 right-4 text-gray-500 hover:text-black bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h2 class="text-2xl font-bold mb-6 border-b-2 border-black pb-2" data-t="privacy_policy_title">
+          Politique de Confidentialité
+        </h2>
+        <div class="space-y-4 text-sm text-justify" id="privacy-content"></div>
+        <div class="mt-8 pt-4 border-t border-gray-200 text-center">
+          <button
+            onclick="closeModal('privacy-modal')"
+            class="px-6 py-2 bg-black text-white rounded-lg font-bold hover:bg-gray-800"
+            data-t="close_doc"
+          >
+            Fermer le document
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="scheduler-modal" class="fixed inset-0 bg-black/90 z-[90] hidden items-center justify-center p-4">
+      <div class="glass-panel rounded-3xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden relative">
+        <div class="flex justify-between items-center p-4 border-b border-white/10 shrink-0 bg-[#120d2b]/50">
+          <h3 class="text-xl font-bold" data-t="scheduler">Planificateur</h3>
+          <button
+            onclick="closeModal('scheduler-modal')"
+            class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="flex-1 flex overflow-hidden">
+          <div
+            class="w-24 bg-white/5 border-r border-white/10 flex flex-col items-center py-4 gap-4 overflow-y-auto no-scrollbar shrink-0"
+          >
+            <p class="text-[10px] font-bold uppercase text-white/30 mb-2 w-full text-center" data-t="who">Qui ?</p>
+            <div id="scheduler-profile-list" class="flex flex-col gap-3 w-full items-center px-2"></div>
+            <button
+              onclick="runMagicAutoAssign()"
+              class="mt-auto mb-2 w-10 h-10 rounded-full bg-accent-pink/20 text-accent-pink flex items-center justify-center hover:bg-accent-pink/40 transition animate-pulse border border-accent-pink/30"
+            >
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
+          </div>
+          <div class="flex-1 flex flex-col p-4 overflow-hidden relative">
+            <div class="flex p-1 bg-white/5 rounded-xl mb-4 shrink-0 border border-white/10 w-full max-w-md mx-auto">
+              <button
+                onclick="switchSchedulerTab('view')"
+                id="tab-view"
+                class="flex-1 py-2 rounded-lg text-xs font-bold bg-accent-pink text-white shadow-lg transition-all"
+              >
+                <i class="fa-solid fa-calendar-week mr-2"></i>Vue Semaine
+              </button>
+              <button
+                onclick="switchSchedulerTab('add')"
+                id="tab-add"
+                class="flex-1 py-2 rounded-lg text-xs font-bold text-white/50 hover:bg-white/5 transition-all"
+              >
+                <i class="fa-solid fa-list-check mr-2"></i>Ajout Multiple
+              </button>
+            </div>
+            <div id="scheduler-view-container" class="flex-1 overflow-y-auto space-y-3 pr-1"></div>
+            <div id="scheduler-add-container" class="hidden flex-1 overflow-y-auto flex flex-col">
+              <div class="space-y-6 pr-2">
+                <div class="bg-white/5 rounded-xl p-3 border border-white/10">
+                  <p class="text-xs font-bold uppercase text-white/50 mb-2" data-t="what">1. Quoi ?</p>
+                  <div class="bg-[#120d2b] rounded-xl flex items-center px-3 border border-white/10 mb-2">
+                    <i class="fa-solid fa-search text-white/30"></i
+                    ><input
+                      type="text"
+                      id="scheduler-task-search"
+                      class="bg-transparent p-2 w-full outline-none text-sm"
+                      onkeyup="filterSchedulerTasks()"
+                    />
+                  </div>
+                  <div
+                    class="bg-[#120d2b] rounded-xl p-2 h-48 overflow-y-auto grid grid-cols-2 gap-2"
+                    id="scheduler-task-list"
+                  ></div>
+                </div>
+                <div>
+                  <p class="text-xs font-bold uppercase text-white/50 mb-2" data-t="when_time">2. Quand ?</p>
+                  <div class="grid grid-cols-2 gap-3">
+                    <button
+                      onclick="schedulerSetPeriod('morning')"
+                      id="sched-btn-morning"
+                      class="p-3 bg-input-bg border border-white/10 rounded-xl flex items-center justify-center gap-2 opacity-50"
+                    >
+                      <i class="fa-solid fa-sun text-yellow-400"></i> <span data-t="morning">Matin</span></button
+                    ><button
+                      onclick="schedulerSetPeriod('evening')"
+                      id="sched-btn-evening"
+                      class="p-3 bg-input-bg border border-white/10 rounded-xl flex items-center justify-center gap-2 opacity-50"
+                    >
+                      <i class="fa-solid fa-moon text-purple-400"></i> <span data-t="evening">Soir</span>
+                    </button>
+                  </div>
+                  <button
+                    onclick="schedulerSetPeriod('both')"
+                    id="sched-btn-both"
+                    class="w-full mt-3 p-3 bg-input-bg border border-white/10 rounded-xl flex items-center justify-center gap-2 opacity-50"
+                  >
+                    <i class="fa-solid fa-arrows-rotate"></i> <span data-t="both">Les deux</span>
+                  </button>
+                </div>
+                <div>
+                  <p class="text-xs font-bold uppercase text-white/50 mb-2" data-t="days">3. Jours ?</p>
+                  <div class="flex justify-between gap-1" id="scheduler-day-buttons">
+                    <button
+                      onclick="toggleSchedDay(1)"
+                      id="day-1"
+                      class="day-btn w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-xs font-bold bg-white/5"
+                    >
+                      L
+                    </button>
+                    <button
+                      onclick="toggleSchedDay(2)"
+                      id="day-2"
+                      class="day-btn w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-xs font-bold bg-white/5"
+                    >
+                      M
+                    </button>
+                    <button
+                      onclick="toggleSchedDay(3)"
+                      id="day-3"
+                      class="day-btn w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-xs font-bold bg-white/5"
+                    >
+                      M
+                    </button>
+                    <button
+                      onclick="toggleSchedDay(4)"
+                      id="day-4"
+                      class="day-btn w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-xs font-bold bg-white/5"
+                    >
+                      J
+                    </button>
+                    <button
+                      onclick="toggleSchedDay(5)"
+                      id="day-5"
+                      class="day-btn w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-xs font-bold bg-white/5"
+                    >
+                      V
+                    </button>
+                    <button
+                      onclick="toggleSchedDay(6)"
+                      id="day-6"
+                      class="day-btn w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-xs font-bold bg-white/5"
+                    >
+                      S
+                    </button>
+                    <button
+                      onclick="toggleSchedDay(0)"
+                      id="day-0"
+                      class="day-btn w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-xs font-bold bg-white/5"
+                    >
+                      D
+                    </button>
+                  </div>
+                  <div class="flex justify-end mt-2">
+                    <button onclick="schedulerSelectAllDays()" class="text-xs text-accent-pink hover:underline" data-t="all">
+                      Tous
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="pt-4 border-t border-white/10 mt-auto">
+                <button
+                  onclick="saveSchedule()"
+                  class="w-full py-3 rounded-xl bg-button-gradient font-bold shadow-lg"
+                  data-t="confirm"
+                >
+                  Confirmer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="task-editor-modal" class="fixed inset-0 bg-black/95 z-[100] hidden items-center justify-center p-6">
+      <div class="glass-panel p-6 rounded-3xl max-w-lg w-full relative flex flex-row gap-6">
+        <button onclick="closeModal('task-editor-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white z-10">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <div class="flex flex-col items-center justify-center gap-4 w-1/3">
+          <div
+            id="task-preview-circle"
+            class="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-4xl shadow-lg overflow-hidden border-4 border-white/10 relative"
+          >
+            <i id="task-preview-icon" class="fa-solid fa-star"></i>
+          </div>
+          <button onclick="triggerTaskPhotoUpload()" class="text-xs bg-white/10 px-3 py-1 rounded-full hover:bg-white/20">
+            <i class="fa-solid fa-camera mr-1"></i> <span data-t="photo">Photo</span>
+          </button>
+        </div>
+        <div class="flex-1 flex flex-col justify-center">
+          <h3 class="text-lg font-bold mb-4" data-t="task">Tâche</h3>
+          <input
+            type="text"
+            id="task-name-input"
+            placeholder="Nom"
+            class="w-full p-4 bg-input-bg rounded-xl font-bold mb-4 outline-none border border-white/10"
+          />
+          <div class="flex justify-between gap-2 mb-4" id="color-picker"></div>
+          <div class="grid grid-cols-5 gap-2 mb-6 h-24 overflow-y-auto p-1 bg-input-bg rounded-xl" id="icon-grid"></div>
+          <div class="flex gap-3 mt-auto">
+            <button
+              id="btn-delete-task"
+              onclick="requestDeleteTaskFromLibrary()"
+              class="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 hidden"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+            <button onclick="saveTaskToLibrary()" class="flex-1 py-3 rounded-xl bg-button-gradient font-bold" data-t="save">
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="global-library-modal" class="fixed inset-0 bg-black/90 backdrop-blur z-[90] hidden items-center justify-center p-6">
+      <div class="glass-panel p-6 rounded-3xl max-w-5xl w-full relative flex flex-col h-[85vh]">
+        <button onclick="closeModal('global-library-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h3 class="text-xl font-bold mb-4" id="library-title" data-t="library">Bibliothèque</h3>
+        <div class="flex gap-2 mb-4">
+          <div class="flex-1 bg-white/5 rounded-xl flex items-center px-3 border border-white/10">
+            <i class="fa-solid fa-search text-white/30"></i
+            ><input
+              type="text"
+              id="task-search"
+              placeholder="..."
+              class="bg-transparent p-3 w-full outline-none text-sm"
+              onkeyup="filterLibrary()"
+            />
+          </div>
+          <button
+            onclick="openTaskEditor()"
+            class="bg-white/10 px-4 rounded-xl hover:bg-accent-pink transition border border-white/10 flex items-center justify-center"
+          >
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+        <div id="global-tasks-list" class="grid grid-cols-2 gap-3 overflow-y-auto p-1 flex-1"></div>
+      </div>
+    </div>
+
+    <div
+      id="assign-period-modal"
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[95] hidden items-center justify-center p-6"
+    >
+      <div class="glass-panel p-6 rounded-3xl max-w-sm w-full relative flex flex-col">
+        <button onclick="closeModal('assign-period-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h3 class="text-lg font-bold mb-4 text-center" data-t="when">C'est pour quand ?</h3>
+        <div id="assign-preview" class="flex justify-center mb-6"></div>
+        <div class="grid grid-cols-2 gap-4 w-full">
+          <button
+            onclick="finalizeAssign('morning')"
+            class="p-4 bg-input-bg border border-white/10 rounded-xl hover:border-yellow-400 transition flex flex-col items-center gap-2"
+          >
+            <i class="fa-solid fa-sun text-yellow-400 text-2xl"></i> <span data-t="morning">Matin</span></button
+          ><button
+            onclick="finalizeAssign('evening')"
+            class="p-4 bg-input-bg border border-white/10 rounded-xl hover:border-purple-400 transition flex flex-col items-center gap-2"
+          >
+            <i class="fa-solid fa-moon text-purple-400 text-2xl"></i> <span data-t="evening">Soir</span>
+          </button>
+        </div>
+        <button
+          onclick="finalizeAssign('both')"
+          class="w-full p-4 bg-input-bg border border-white/10 rounded-xl hover:border-accent-pink transition font-bold mt-4"
+          data-t="both"
+        >
+          Les deux
+        </button>
+      </div>
+    </div>
+    <div id="parental-modal" class="fixed inset-0 bg-black/90 backdrop-blur z-[100] hidden items-center justify-center p-6">
+      <div class="bg-input-bg p-8 rounded-3xl max-w-sm w-full text-center border border-white/10 relative shadow-2xl">
+        <button onclick="closeParentalGate()" class="absolute top-4 right-4 text-white/50 hover:text-white cursor-pointer z-50">
+          <i class="fa-solid fa-xmark text-xl"></i></button
+        ><i class="fa-solid fa-shield-halved text-4xl text-muted-pink mb-4"></i>
+        <h3 class="text-xl font-bold mb-2" data-t="parental_security">Sécurité Parents</h3>
+        <p class="text-sm text-white/50 mb-6">
+          <span data-t="math_q">Combien font</span> <span id="math-q" class="text-white font-bold"></span> ?
+        </p>
+        <input
+          type="number"
+          id="math-a"
+          class="w-full p-4 bg-[#120d2b] rounded-xl text-center font-bold text-xl mb-4 outline-none focus:ring-2 ring-muted-pink border border-white/10"
+        /><button onclick="checkMath()" class="w-full py-3 rounded-xl bg-button-gradient font-bold">Valider</button>
+      </div>
+    </div>
+    <div id="period-settings-modal" class="fixed inset-0 bg-black/90 z-[95] hidden items-center justify-center p-6">
+      <div class="glass-panel p-6 rounded-3xl max-w-sm w-full relative">
+        <button onclick="closeModal('period-settings-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h3 class="text-xl font-bold mb-6" data-t="schedule">Horaires</h3>
+        <div class="mb-4 p-4 bg-white/5 rounded-xl border border-yellow-500/30">
+          <div class="flex items-center gap-2 mb-3 text-yellow-400 font-bold">
+            <i class="fa-solid fa-sun"></i> <span data-t="morning">Matin</span>
+          </div>
+          <div class="flex gap-2">
+            <input
+              type="time"
+              id="morning-start"
+              value="06:00"
+              class="bg-[#120d2b] p-2 rounded w-full text-center font-bold outline-none"
+            /><span class="self-center">-</span
+            ><input
+              type="time"
+              id="morning-end"
+              value="12:00"
+              class="bg-[#120d2b] p-2 rounded w-full text-center font-bold outline-none"
+            />
+          </div>
+        </div>
+        <div class="mb-6 p-4 bg-white/5 rounded-xl border border-purple-500/30">
+          <div class="flex items-center gap-2 mb-3 text-purple-400 font-bold">
+            <i class="fa-solid fa-moon"></i> <span data-t="evening">Soir</span>
+          </div>
+          <div class="flex gap-2">
+            <input
+              type="time"
+              id="evening-start"
+              value="18:00"
+              class="bg-[#120d2b] p-2 rounded w-full text-center font-bold outline-none"
+            /><span class="self-center">-</span
+            ><input
+              type="time"
+              id="evening-end"
+              value="21:00"
+              class="bg-[#120d2b] p-2 rounded w-full text-center font-bold outline-none"
+            />
+          </div>
+        </div>
+        <button
+          onclick="savePeriods()"
+          class="w-full py-3 rounded-xl bg-button-gradient font-bold shadow-lg text-white hover:opacity-90 transition"
+        >
+          Enregistrer
+        </button>
+      </div>
+    </div>
+    <div
+      id="profile-manager-modal"
+      class="fixed inset-0 bg-black/90 z-[200] hidden items-center justify-center p-6"
+      style="z-index: 200 !important"
+    >
+      <div class="glass-panel p-6 rounded-3xl max-w-md w-full h-[70vh] flex flex-col relative">
+        <button onclick="closeModal('profile-manager-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h3 class="text-xl font-bold mb-4" data-t="manage_crew">L'Équipage</h3>
+        <div id="profile-manager-list" class="space-y-2 overflow-y-auto pr-2 flex-1"></div>
+        <div class="pt-4 border-t border-white/10 mt-2">
+          <button
+            onclick="
+              closeModal('profile-manager-modal');
+              openFullProfileEditor('create');
+            "
+            class="w-full py-3 rounded-xl border border-white/20 hover:bg-white/5 font-bold"
+            data-t="add_member"
+          >
+            Ajouter un membre
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="quick-edit-modal" class="fixed inset-0 bg-black/90 z-[60] hidden items-center justify-center p-6">
+      <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center border border-white/10 relative">
+        <button onclick="closeModal('quick-edit-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h3 class="text-xl font-bold mb-6" data-t="choose_avatar">Choisir un avatar</h3>
+        <div id="quick-avatar-grid" class="grid grid-cols-4 gap-4 mb-8 justify-items-center max-h-60 overflow-y-auto p-2"></div>
+        <button onclick="saveQuickEdit()" class="w-full py-3 rounded-xl bg-button-gradient font-bold shadow-lg mb-4">
+          Valider</button
+        ><button
+          id="btn-advanced-edit"
+          onclick=""
+          class="w-full py-3 rounded-xl border border-white/20 text-white/70 font-bold hover:bg-white/5 hover:text-white flex items-center justify-center gap-2"
+        >
+          <i class="fa-solid fa-user-pen"></i> <span data-t="edit_full">Modifier le profil (Parents)</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="full-profile-editor-modal" class="fixed inset-0 bg-black/95 z-[105] hidden items-center justify-center p-6">
+      <div class="glass-panel p-6 rounded-3xl max-w-lg w-full relative flex flex-row gap-6">
+        <button
+          onclick="closeModal('full-profile-editor-modal')"
+          class="absolute top-4 right-4 text-white/50 hover:text-white z-10"
+        >
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <div class="flex flex-col items-center justify-center gap-4 w-1/3">
+          <div
+            id="profile-preview-circle"
+            class="w-24 h-24 rounded-full bg-input-bg flex items-center justify-center text-4xl shadow-lg overflow-hidden border-4 border-white/10 relative"
+          >
+            <i id="profile-preview-icon" class="fa-solid fa-user"></i>
+          </div>
+          <div class="flex gap-2 flex-wrap justify-center">
+            <button
+              onclick="triggerProfileUpload('gallery')"
+              class="text-xs bg-white/10 px-3 py-2 rounded-full hover:bg-white/20 flex items-center gap-2"
+            >
+              <i class="fa-solid fa-image"></i> <span data-t="photo">Photo</span>
+            </button>
+          </div>
+        </div>
+        <div class="flex-1 flex flex-col">
+          <h3 class="text-lg font-bold mb-4" data-t="profile">Profil</h3>
+          <div class="space-y-4 mb-4">
+            <input
+              type="text"
+              id="profile-name-input"
+              placeholder="Nom"
+              class="w-full p-3 bg-input-bg rounded-xl font-bold outline-none border border-white/10 focus:border-accent-pink text-center"
+              oninput="updateProfileNameState(this.value)"
+            />
+            <div class="flex items-center justify-center gap-3 bg-input-bg rounded-xl border border-white/10 p-2">
+              <span class="text-white/50 text-sm mr-2" data-t="age">Âge :</span>
+              <button
+                onclick="adjustAge(-1)"
+                class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <input
+                type="number"
+                id="profile-age-input"
+                min="1"
+                max="99"
+                value="5"
+                class="w-12 bg-transparent font-bold outline-none text-center"
+                oninput="updateProfileAgeState(this.value)"
+              />
+              <button
+                onclick="adjustAge(1)"
+                class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+          </div>
+          <p class="text-xs font-bold uppercase text-white/50 mb-2 text-center" data-t="choose_avatar">Choisir un avatar</p>
+          <div
+            class="grid grid-cols-6 gap-3 mb-6 h-28 overflow-y-auto p-2 bg-input-bg rounded-xl justify-items-center"
+            id="full-editor-avatar-grid"
+          ></div>
+          <div class="flex gap-3 mt-auto">
+            <button id="btn-delete-profile" class="px-4 py-3 rounded-xl bg-red-500/20 text-red-400 hidden">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+            <button onclick="saveFullProfile()" class="flex-1 py-3 rounded-xl bg-button-gradient font-bold" data-t="save">
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="offer-auto-assign-modal"
+      class="fixed inset-0 bg-black/90 z-[110] hidden items-center justify-center p-6 animate-[fadeIn_0.3s]"
+    >
+      <div class="glass-panel p-8 rounded-3xl max-w-sm w-full text-center border border-accent-pink/50 relative shadow-2xl">
+        <div
+          class="w-16 h-16 rounded-full bg-accent-pink/20 text-accent-pink flex items-center justify-center mx-auto mb-4 text-3xl animate-pulse"
+        >
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-2" data-t="magic_setup">Configuration Magique ?</h3>
+        <p class="text-sm text-white/60 mb-6" data-t="magic_desc">
+          Voulez-vous que l'IA ajoute automatiquement les tâches adaptées à l'âge ? (Fonction Premium)
+        </p>
+        <div class="flex flex-col gap-3">
+          <button
+            onclick="
+              triggerAutoAssignFlow(null);
+              closeModal('offer-auto-assign-modal');
+              SoundFX.click();
+            "
+            class="w-full py-3 rounded-xl bg-button-gradient font-bold shadow-lg text-white"
+          >
+            <i class="fa-solid fa-check mr-2"></i> <span data-t="yes_please">Oui, magie !</span></button
+          ><button
+            onclick="
+              closeModal('offer-auto-assign-modal');
+              SoundFX.click();
+            "
+            class="w-full py-3 rounded-xl bg-white/10 font-bold hover:bg-white/20 text-white/70"
+            data-t="no_thanks"
+          >
+            Non, je gère
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="auto-assign-confirm-modal" class="fixed inset-0 bg-black/90 z-[115] hidden items-center justify-center p-6">
+      <div class="glass-panel p-6 rounded-3xl max-w-md w-full relative flex flex-col max-h-[80vh]">
+        <button onclick="closeModal('auto-assign-confirm-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h3 class="text-xl font-bold mb-4 text-center" data-t="tasks_found">Tâches Trouvées</h3>
+        <p class="text-xs text-white/50 text-center mb-4" data-t="tasks_found_desc">Voici les tâches suggérées pour cet âge.</p>
+        <div id="auto-assign-list" class="flex-1 overflow-y-auto space-y-2 pr-2 bg-white/5 p-2 rounded-xl mb-4"></div>
+        <button
+          onclick="
+            confirmAutoAssign();
+            SoundFX.click();
+          "
+          class="w-full py-3 rounded-xl bg-button-gradient font-bold shadow-lg"
+          data-t="add_all"
+        >
+          Tout Ajouter
+        </button>
+      </div>
+    </div>
+
+    <div id="cropper-modal" class="fixed inset-0 bg-black/95 z-[160] hidden items-center justify-center p-4">
+      <div class="glass-panel p-4 rounded-3xl w-full max-w-3xl h-[80vh] flex flex-col relative">
+        <h3 class="text-xl font-bold mb-4 text-center" id="cropper-title" data-t="crop_image">Recadrer l'image</h3>
+        <div class="flex-1 min-h-0 relative mb-4">
+          <div class="w-full h-full overflow-hidden bg-gray-900 flex items-center justify-center">
+            <img id="cropper-image" src="" class="block max-w-full max-h-full" />
+          </div>
+        </div>
+        <div class="flex gap-3 justify-between shrink-0">
+          <button
+            onclick="closeCropperModal(true)"
+            class="py-3 px-6 rounded-xl bg-white/10 font-bold text-white/70 hover:bg-white/20"
+            data-t="cancel"
+          >
+            Annuler
+          </button>
+          <div class="flex gap-2">
+            <button onclick="cropper.rotate(-45)" class="py-3 px-4 rounded-xl bg-white/10 font-bold hover:bg-white/20">
+              <i class="fa-solid fa-rotate-left"></i>
+            </button>
+            <button onclick="cropper.rotate(45)" class="py-3 px-4 rounded-xl bg-white/10 font-bold hover:bg-white/20">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+          <button onclick="saveCroppedImage()" class="py-3 px-6 rounded-xl bg-button-gradient font-bold shadow-lg" data-t="save">
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- v1.1: JOURNEY / PROGRESSION MODAL -->
+    <div id="journey-modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
+      <div
+        class="space-bg-deep rounded-3xl w-full max-w-3xl h-[80vh] flex flex-col overflow-hidden relative border border-white/10 shadow-2xl"
+      >
+        <button onclick="closeModal('journey-modal')" class="absolute top-4 right-4 text-white/50 hover:text-white z-20">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+
+        <!-- Profile selector tabs -->
+        <div class="flex items-center gap-3 p-4 border-b border-white/10 bg-black/30 shrink-0 overflow-x-auto no-scrollbar">
+          <span class="text-xs font-bold text-white/40 uppercase tracking-wider shrink-0" data-t="journey_title"
+            >Voyage Spatial</span
+          >
+          <div id="journey-profile-tabs" class="flex gap-2 ml-auto"></div>
+        </div>
+
+        <!-- Journey content -->
+        <div id="journey-content" class="flex-1 overflow-y-auto p-6 relative"></div>
+      </div>
+    </div>
+
+    <script>
+      // --- 1. MOTEUR SONORE (FIX IPHONE : UNLOCK AGRESSIF) ---
+      const SoundFX = {
+        ctx: null,
+        init: function () {
+          if (!this.ctx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioContext();
+          }
+        },
+        playTone: function (freq, type, duration, delay = 0) {
+          if (!this.ctx) this.init();
+          if (this.ctx && this.ctx.state === "suspended") this.ctx.resume();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+          gain.gain.setValueAtTime(0.1, this.ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + delay + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + delay);
+          osc.stop(this.ctx.currentTime + delay + duration);
+        },
+        click: function () {
+          if (!appState.soundOn) return;
+          this.playTone(600, "sine", 0.05);
+        },
+        playSuccess: function () {
+          if (!appState.soundOn) return;
+          this.playTone(523.25, "sine", 0.1);
+          this.playTone(659.25, "sine", 0.1, 0.1);
+          this.playTone(783.99, "sine", 0.3, 0.2);
+        },
+        playMagic: function () {
+          if (!appState.soundOn) return;
+          for (let i = 0; i < 5; i++) {
+            this.playTone(800 + i * 200, "sine", 0.1, i * 0.05);
+          }
+        },
+        playFanfare: function () {
+          if (!appState.soundOn) return;
+          // Triumphant trumpet-like fanfare: C-E-G-C with sustain
+          this.playTone(523.25, "square", 0.25); // C5
+          this.playTone(659.25, "square", 0.25, 0.25); // E5
+          this.playTone(783.99, "square", 0.25, 0.5); // G5
+          this.playTone(1046.5, "square", 0.5, 0.75); // C6 (long)
+          // Harmony layer
+          this.playTone(392, "triangle", 0.3, 0.5); // G4 base
+          this.playTone(523.25, "triangle", 0.6, 0.75); // C5 sustain
+        },
+        // v1.1: New sounds
+        playStreak: function () {
+          if (!appState.soundOn) return;
+          this.playTone(440, "sine", 0.1);
+          this.playTone(554.37, "sine", 0.1, 0.1);
+          this.playTone(659.25, "sine", 0.15, 0.2);
+          this.playTone(880, "sine", 0.3, 0.35);
+        },
+        playPlanetUnlock: function () {
+          if (!appState.soundOn) return;
+          for (let i = 0; i < 8; i++) {
+            this.playTone(300 + i * 100, "sine", 0.15, i * 0.08);
+          }
+          this.playTone(1200, "triangle", 0.5, 0.7);
+        },
+        playConfetti: function () {
+          if (!appState.soundOn) return;
+          // Sparkly ascending arpeggio
+          const notes = [523, 587, 659, 698, 784, 880, 988, 1047];
+          notes.forEach((n, i) => {
+            this.playTone(n, "sine", 0.08, i * 0.04);
+          });
+          this.playTone(1318, "triangle", 0.4, 0.35);
+        },
+      };
+
+      // --- 2. ÉTAT & TRADUCTIONS ---
+      let appState = {
+        isPremium: false,
+        soundOn: true,
+        language: null,
+        currentTime: "morning",
+        periods: { mStart: "06:00", mEnd: "12:00", eStart: "18:00", eEnd: "21:00" },
+        profiles: [],
+        lastResetDate: null,
+      };
+      let currentEditingProfileId = null;
+      let gatePurpose = "";
+      let libraryMode = "assign";
+      let selectedTaskIdForAssign = null;
+      let editorTaskState = {};
+      let schedState = { taskId: null, profileId: null, period: null, days: [] };
+      let tempAvatarSelection = null;
+      let editorProfileState = { id: null, name: "", age: 5, avatar: "", image: null };
+      let pendingParentalActionId = null;
+      let deleteModeProfileId = null;
+      let schedSelectedTasks = [];
+      let premiumPurchaseIntent = null;
+      let pendingAutoAssignProfileId = null;
+      let mathRes = 0;
+      let cropper = null;
+      let cropperPurpose = null;
+      let journeySelectedProfileId = null; // v1.1
+
+      const translations = {
+        fr: {
+          welcome_title: "RoutineKids",
+          welcome_sub: "Bienvenue dans votre aventure spatiale !",
+          choose_lang: "CHOISISSEZ VOTRE LANGUE",
+          morning: "Matin",
+          evening: "Soir",
+          settings: "Paramètres",
+          go_premium: "Passer Premium",
+          unlock_all: "Débloquez l'illimité !",
+          manage_crew: "Gérer l'Équipage",
+          manage_crew_desc: "Modifier/Supprimer",
+          theme: "Thème (Vaisseau)",
+          theme_desc: "Personnaliser l'app",
+          language: "Langue",
+          language_desc: "Français / English",
+          library: "Bibliothèque",
+          library_desc: "Gérer les tâches",
+          scheduler: "Planificateur",
+          scheduler_desc: "Attribution avancée",
+          schedule: "Horaires",
+          add_member: "Ajouter un Astronaute",
+          premium_title: "Devenez Capitaine !",
+          premium_msg_profile: "Désolé cadet, il faut être Capitaine pour agrandir l'équipage !",
+          premium_msg_task: "Pas plus de 4 missions pour les cadets ! Passez Capitaine pour tout débloquer.",
+          unlimited_profiles: "Profils Illimités",
+          unlimited_tasks: "Tâches Illimitées",
+          monthly: "Mensuel",
+          lifetime: "À Vie",
+          choose_avatar: "Choisir un avatar",
+          edit_full: "Modifier le profil (Parents)",
+          when: "C'est pour quand ?",
+          both: "Les deux",
+          parental_security: "Sécurité Parents",
+          age: "Âge :",
+          attention: "Attention",
+          cancel: "Annuler",
+          confirm: "Confirmer",
+          yes: "Oui",
+          no: "Non",
+          delete_sure: "Êtes-vous sûr ?",
+          task: "Tâche",
+          photo: "Photo",
+          save: "Enregistrer",
+          gallery: "Galerie",
+          who: "1. Qui ?",
+          when_time: "2. Quand ?",
+          what: "1. What ?",
+          days: "3. Jours ?",
+          all: "Tous",
+          profile: "Profil",
+          management: "Gestion",
+          application: "Application",
+          about: "À Propos",
+          tagline: "Pensé par des parents pour des parents et leurs enfants.",
+          math_q: "Combien font",
+          schedule_desc: "Matin / Soir",
+          success: "Succès !",
+          success_msg: "Bienvenue à bord Capitaine !",
+          magic_auto: "Auto",
+          magic_setup: "Configuration Magique ?",
+          magic_desc: "Voulez-vous que l'IA ajoute automatiquement les tâches adaptées à l'âge ? (Fonction Premium)",
+          yes_please: "Oui, magie !",
+          no_thanks: "Non, je gère",
+          tasks_found: "Tâches Trouvées",
+          tasks_found_desc: "Voici les tâches suggérées pour cet âge.",
+          add_all: "Tout Ajouter",
+          sound: "Sons",
+          sound_on: "Activé",
+          sound_off: "Désactivé",
+          status_captain: "Statut : Capitaine",
+          premium_active: "Version Premium active",
+          privacy_policy: "Confidentialité",
+          privacy_policy_title: "Politique de Confidentialité",
+          close_doc: "Fermer le document",
+          remove_task_confirm: "Retirer <TASK_TITLE> pour <PERIOD_TITLE> ?",
+          morning_part: "la matinée",
+          evening_part: "la soirée",
+          crop_image: "Recadrer l'image",
+          // v1.1 translations
+          journey_title: "Voyage Spatial",
+          streak_days: "jours d'affilée",
+          current_planet: "Planète actuelle",
+          next_planet: "Prochaine étape",
+          journey_complete: "Mission accomplie !",
+          no_streak_yet: "Complète toutes tes routines pour démarrer ton voyage !",
+          day_labels: ["D", "L", "M", "M", "J", "V", "S"],
+        },
+        en: {
+          welcome_title: "RoutineKids",
+          welcome_sub: "Welcome to your space adventure!",
+          choose_lang: "CHOOSE YOUR LANGUAGE",
+          morning: "Morning",
+          evening: "Evening",
+          settings: "Settings",
+          go_premium: "Go Premium",
+          unlock_all: "Unlock everything!",
+          manage_crew: "Manage Crew",
+          manage_crew_desc: "Edit/Remove",
+          theme: "Theme (Spaceship)",
+          theme_desc: "Customize app",
+          language: "Language",
+          language_desc: "Français / English",
+          library: "Task Library",
+          library_desc: "Manage tasks",
+          scheduler: "Scheduler",
+          scheduler_desc: "Advanced planning",
+          schedule: "Schedule",
+          add_member: "Add Astronaut",
+          premium_title: "Become Captain!",
+          premium_msg_profile: "Sorry cadet, you need to be Captain to expand the crew!",
+          premium_msg_task: "Max 4 missions for cadets! Go Captain to unlock all.",
+          unlimited_profiles: "Unlimited Profiles",
+          unlimited_tasks: "Unlimited Tasks",
+          monthly: "Monthly",
+          lifetime: "Lifetime",
+          choose_avatar: "Choose Avatar",
+          edit_full: "Edit Profile (Parents)",
+          when: "When is it for?",
+          both: "Both",
+          parental_security: "Parental Check",
+          age: "Age:",
+          attention: "Warning",
+          cancel: "Cancel",
+          confirm: "Confirm",
+          yes: "Yes",
+          no: "No",
+          delete_sure: "Are you sure?",
+          task: "Task",
+          photo: "Photo",
+          save: "Save",
+          gallery: "Gallery",
+          who: "1. Who?",
+          when_time: "2. When?",
+          what: "1. What?",
+          days: "3. Days?",
+          all: "All",
+          profile: "Profile",
+          management: "Management",
+          application: "Application",
+          about: "About",
+          tagline: "Thought by parents for parents and their kids.",
+          math_q: "What is",
+          schedule_desc: "Morning / Evening",
+          success: "Success!",
+          success_msg: "Welcome aboard Captain!",
+          magic_auto: "Auto",
+          magic_setup: "Magic Setup?",
+          magic_desc: "Do you want AI to automatically add age-appropriate tasks? (Premium Feature)",
+          yes_please: "Yes, magic!",
+          no_thanks: "No, I'll manage",
+          tasks_found: "Tasks Found",
+          tasks_found_desc: "Here are the suggested tasks for this age.",
+          add_all: "Add All",
+          sound: "Sounds",
+          sound_on: "On",
+          sound_off: "Off",
+          status_captain: "Status: Captain",
+          premium_active: "Premium Version Active",
+          privacy_policy: "Privacy Policy",
+          privacy_policy_title: "Privacy Policy",
+          close_doc: "Close Document",
+          remove_task_confirm: "Remove <TASK_TITLE> for <PERIOD_TITLE>?",
+          morning_part: "morning",
+          evening_part: "evening",
+          crop_image: "Crop Image",
+          // v1.1 translations
+          journey_title: "Space Journey",
+          streak_days: "days in a row",
+          current_planet: "Current planet",
+          next_planet: "Next stop",
+          journey_complete: "Mission complete!",
+          no_streak_yet: "Complete all your routines to start your journey!",
+          day_labels: ["S", "M", "T", "W", "T", "F", "S"],
+        },
+      };
+
+      let taskLibrary = [
+        { id: 1, title: "Dents", title_en: "Teeth", icon: "fa-tooth", color: "bg-blue-500", minAge: 2, defaultPeriod: "both" },
+        {
+          id: 2,
+          title: "Douche",
+          title_en: "Shower",
+          icon: "fa-bath",
+          color: "bg-cyan-500",
+          minAge: 0,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 3,
+          title: "Habiller",
+          title_en: "Dress up",
+          icon: "fa-shirt",
+          color: "bg-purple-500",
+          minAge: 3,
+          defaultPeriod: "morning",
+        },
+        {
+          id: 4,
+          title: "Pyjama",
+          title_en: "Pajamas",
+          icon: "fa-moon",
+          color: "bg-indigo-600",
+          minAge: 0,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 5,
+          title: "Devoirs",
+          title_en: "Homework",
+          icon: "fa-pencil",
+          color: "bg-green-500",
+          minAge: 6,
+          defaultPeriod: "evening",
+          category: "school",
+        },
+        {
+          id: 6,
+          title: "Ranger",
+          title_en: "Tidy up",
+          icon: "fa-box-open",
+          color: "bg-red-500",
+          minAge: 3,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 7,
+          title: "Sac",
+          title_en: "Bag",
+          icon: "fa-school",
+          color: "bg-yellow-500",
+          minAge: 5,
+          defaultPeriod: "evening",
+          category: "school_prep",
+        },
+        { id: 8, title: "Lit", title_en: "Bed", icon: "fa-bed", color: "bg-indigo-400", minAge: 4, defaultPeriod: "evening" },
+        {
+          id: 9,
+          title: "Mains",
+          title_en: "Hands",
+          icon: "fa-hands-bubbles",
+          color: "bg-blue-300",
+          minAge: 2,
+          defaultPeriod: "both",
+        },
+        {
+          id: 10,
+          title: "Eau",
+          title_en: "Water",
+          icon: "fa-glass-water",
+          color: "bg-cyan-300",
+          minAge: 2,
+          defaultPeriod: "both",
+        },
+        { id: 11, title: "Chat", title_en: "Cat", icon: "fa-cat", color: "bg-orange-400", minAge: 5, defaultPeriod: "both" },
+        { id: 12, title: "Chien", title_en: "Dog", icon: "fa-dog", color: "bg-orange-600", minAge: 8, defaultPeriod: "both" },
+        {
+          id: 13,
+          title: "Plantes",
+          title_en: "Plants",
+          icon: "fa-plant-wilt",
+          color: "bg-green-600",
+          minAge: 6,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 14,
+          title: "Table",
+          title_en: "Table",
+          icon: "fa-utensils",
+          color: "bg-gray-500",
+          minAge: 5,
+          defaultPeriod: "both",
+        },
+        {
+          id: 15,
+          title: "Lave-V",
+          title_en: "Dishwasher",
+          icon: "fa-sink",
+          color: "bg-slate-500",
+          minAge: 8,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 16,
+          title: "Poubelle",
+          title_en: "Trash",
+          icon: "fa-trash-can",
+          color: "bg-slate-600",
+          minAge: 7,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 17,
+          title: "Chaussures",
+          title_en: "Shoes",
+          icon: "fa-shoe-prints",
+          color: "bg-amber-600",
+          minAge: 3,
+          defaultPeriod: "morning",
+        },
+        {
+          id: 18,
+          title: "Manteau",
+          title_en: "Coat",
+          icon: "fa-vest",
+          color: "bg-amber-500",
+          minAge: 3,
+          defaultPeriod: "morning",
+        },
+        {
+          id: 19,
+          title: "Jouets",
+          title_en: "Toys",
+          icon: "fa-shapes",
+          color: "bg-pink-500",
+          minAge: 3,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 20,
+          title: "Livres",
+          title_en: "Books",
+          icon: "fa-book",
+          color: "bg-blue-700",
+          minAge: 4,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 21,
+          title: "Musique",
+          title_en: "Music",
+          icon: "fa-music",
+          color: "bg-purple-600",
+          minAge: 6,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 22,
+          title: "Sport",
+          title_en: "Sport",
+          icon: "fa-person-running",
+          color: "bg-red-600",
+          minAge: 5,
+          defaultPeriod: "both",
+        },
+        {
+          id: 23,
+          title: "Toilettes",
+          title_en: "Toilet",
+          icon: "fa-toilet",
+          color: "bg-white text-black",
+          minAge: 2,
+          maxAge: 4,
+          defaultPeriod: "both",
+        },
+        {
+          id: 24,
+          title: "Cheveux",
+          title_en: "Hair",
+          icon: "fa-scissors",
+          color: "bg-yellow-600",
+          minAge: 4,
+          defaultPeriod: "morning",
+        },
+        {
+          id: 25,
+          title: "Vitamines",
+          title_en: "Vitamins",
+          icon: "fa-capsules",
+          color: "bg-green-300",
+          minAge: 3,
+          defaultPeriod: "morning",
+        },
+        {
+          id: 26,
+          title: "Lunettes",
+          title_en: "Glasses",
+          icon: "fa-glasses",
+          color: "bg-indigo-800",
+          minAge: 3,
+          defaultPeriod: "morning",
+        }, // FIX: was 'fa-indigo-800'
+        {
+          id: 27,
+          title: "Gouter",
+          title_en: "Snack",
+          icon: "fa-cookie-bite",
+          color: "bg-amber-300",
+          minAge: 2,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 28,
+          title: "Fruits",
+          title_en: "Fruits",
+          icon: "fa-apple-whole",
+          color: "bg-red-500",
+          minAge: 2,
+          defaultPeriod: "both",
+        },
+        {
+          id: 29,
+          title: "Legumes",
+          title_en: "Veggies",
+          icon: "fa-carrot",
+          color: "bg-orange-500",
+          minAge: 2,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 30,
+          title: "Calin",
+          title_en: "Hug",
+          icon: "fa-heart",
+          color: "bg-pink-600",
+          minAge: 0,
+          defaultPeriod: "both",
+          auto: false,
+        },
+        {
+          id: 31,
+          title: "Gourde",
+          title_en: "Water Bottle",
+          icon: "fa-bottle-water",
+          color: "bg-cyan-600",
+          minAge: 4,
+          defaultPeriod: "morning",
+          category: "school",
+        },
+        {
+          id: 32,
+          title: "Cahier",
+          title_en: "Notebook",
+          icon: "fa-book-open",
+          color: "bg-indigo-300",
+          minAge: 6,
+          defaultPeriod: "evening",
+          category: "school",
+        },
+        {
+          id: 33,
+          title: "Linge",
+          title_en: "Laundry",
+          icon: "fa-socks",
+          color: "bg-indigo-400",
+          minAge: 3,
+          defaultPeriod: "evening",
+        },
+        {
+          id: 34,
+          title: "Prêt demain",
+          title_en: "Ready for tmrw",
+          icon: "fa-shirt",
+          color: "bg-purple-400",
+          minAge: 4,
+          defaultPeriod: "evening",
+          category: "school_prep",
+        },
+        {
+          id: 35,
+          title: "Débarrasser",
+          title_en: "Clear table",
+          icon: "fa-utensils",
+          color: "bg-gray-400",
+          minAge: 5,
+          defaultPeriod: "evening",
+        },
+      ];
+
+      const iconSet = [
+        "fa-star",
+        "fa-heart",
+        "fa-bolt",
+        "fa-gamepad",
+        "fa-bicycle",
+        "fa-car",
+        "fa-plane",
+        "fa-bug",
+        "fa-ghost",
+        "fa-dragon",
+        "fa-robot",
+        "fa-rocket",
+        "fa-football",
+        "fa-basketball",
+        "fa-carrot",
+        "fa-apple-whole",
+        "fa-drum",
+        "fa-guitar",
+        "fa-book",
+        "fa-bed",
+        "fa-cat",
+        "fa-dog",
+        "fa-fish",
+        "fa-crow",
+        "fa-socks",
+        "fa-bottle-water",
+      ];
+      const colors = [
+        "bg-blue-500",
+        "bg-purple-500",
+        "bg-pink-500",
+        "bg-orange-500",
+        "bg-green-500",
+        "bg-yellow-500",
+        "bg-red-500",
+        "bg-teal-500",
+        "bg-indigo-500",
+        "bg-gray-500",
+      ];
+      const avatarList = [
+        "fa-user-astronaut",
+        "fa-robot",
+        "fa-cat",
+        "fa-rocket",
+        "fa-dog",
+        "fa-spider",
+        "fa-ghost",
+        "fa-dragon",
+        "fa-frog",
+        "fa-hippo",
+        "fa-fish",
+        "fa-crow",
+      ];
+
+      // === v1.1: PLANET JOURNEY SYSTEM ===
+      const PLANETS = [
+        { id: "start", name: "Base Spatiale", name_en: "Space Base", icon: "fa-rocket", color: "#6366f1", streakNeeded: 0 },
+        { id: "moon", name: "La Lune", name_en: "The Moon", icon: "fa-moon", color: "#a3a3a3", streakNeeded: 3 },
+        { id: "mars", name: "Mars", name_en: "Mars", icon: "fa-circle", color: "#ef4444", streakNeeded: 7 },
+        { id: "jupiter", name: "Jupiter", name_en: "Jupiter", icon: "fa-circle", color: "#f97316", streakNeeded: 14 },
+        { id: "saturn", name: "Saturne", name_en: "Saturn", icon: "fa-circle-dot", color: "#eab308", streakNeeded: 21 },
+        { id: "neptune", name: "Neptune", name_en: "Neptune", icon: "fa-circle", color: "#3b82f6", streakNeeded: 30 },
+        { id: "galaxy", name: "Galaxie Lointaine", name_en: "Far Galaxy", icon: "fa-star", color: "#a855f7", streakNeeded: 50 },
+        {
+          id: "nebula",
+          name: "Nébuleuse Secrète",
+          name_en: "Secret Nebula",
+          icon: "fa-cloud",
+          color: "#ec4899",
+          streakNeeded: 100,
+        },
+      ];
+
+      // === v1.1: showAlert replaces native alert() ===
+      function showAlert(msg) {
+        document.getElementById("alert-message").innerText = msg;
+        openModalGeneric("alert-modal");
+      }
+
+      // === v1.1: CONFETTI SYSTEM (enhanced) ===
+      function launchConfetti(count = 40) {
+        SoundFX.playConfetti(); // sound on confetti
+        const confettiColors = ["#ec4899", "#f97316", "#10B981", "#3b82f6", "#eab308", "#a855f7", "#ef4444", "#06b6d4", "#fff"];
+        const shapes = ["circle", "square", "strip"];
+        for (let i = 0; i < count; i++) {
+          const piece = document.createElement("div");
+          piece.className = "confetti-piece";
+          const shape = shapes[Math.floor(Math.random() * shapes.length)];
+          const size = 5 + Math.random() * 10;
+          piece.style.left = 10 + Math.random() * 80 + "vw";
+          piece.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+          piece.style.animationDuration = 2.5 + Math.random() * 3 + "s";
+          piece.style.animationDelay = Math.random() * 0.8 + "s";
+          piece.style.opacity = 0.7 + Math.random() * 0.3;
+          if (shape === "circle") {
+            piece.style.width = size + "px";
+            piece.style.height = size + "px";
+            piece.style.borderRadius = "50%";
+          } else if (shape === "square") {
+            piece.style.width = size + "px";
+            piece.style.height = size + "px";
+            piece.style.borderRadius = "2px";
+          } else {
+            piece.style.width = size * 0.4 + "px";
+            piece.style.height = size * 2 + "px";
+            piece.style.borderRadius = "2px";
+          }
+          // Random horizontal drift
+          piece.style.setProperty("--drift", Math.random() * 200 - 100 + "px");
+          document.body.appendChild(piece);
+          setTimeout(() => piece.remove(), 6000);
+        }
+      }
+
+      // === v1.1: STREAK / PROGRESSION ENGINE ===
+      function getProfileStreak(profile) {
+        if (!profile.streakHistory || !Array.isArray(profile.streakHistory)) return 0;
+        let streak = 0;
+        const today = getTodayStr();
+        const yesterday = getDateStr(new Date(Date.now() - 86400000));
+
+        // Check if today is completed — if so, count it
+        const sortedDates = [...profile.streakHistory].sort().reverse();
+        if (sortedDates.length === 0) return 0;
+
+        // Start counting from the most recent completed date
+        let checkDate = sortedDates[0];
+        if (checkDate !== today && checkDate !== yesterday) return 0; // streak broken
+
+        for (let i = 0; i < sortedDates.length; i++) {
+          if (sortedDates[i] === checkDate) {
+            streak++;
+            checkDate = getDateStr(new Date(new Date(checkDate + "T12:00:00").getTime() - 86400000));
+          } else {
+            break;
+          }
+        }
+        return streak;
+      }
+
+      function getTodayStr() {
+        return getDateStr(new Date());
+      }
+      function getDateStr(d) {
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      }
+
+      function checkAndRecordDayCompletion(profile) {
+        const today = new Date();
+        const todayDay = today.getDay();
+        const todayStr = getTodayStr();
+
+        // Get all tasks for today (morning + evening)
+        const morningTasks = profile.assignedTasks.filter(
+          (a) => a.period === "morning" && (a.days ? a.days.includes(todayDay) : true),
+        );
+        const eveningTasks = profile.assignedTasks.filter(
+          (a) => a.period === "evening" && (a.days ? a.days.includes(todayDay) : true),
+        );
+        const allTodayTasks = [...morningTasks, ...eveningTasks];
+
+        if (allTodayTasks.length === 0) return false;
+
+        const allDone = allTodayTasks.every((a) => profile.completedKeys.includes(`${a.taskId}_${a.period}`));
+
+        if (!profile.streakHistory) profile.streakHistory = [];
+
+        if (allDone && !profile.streakHistory.includes(todayStr)) {
+          profile.streakHistory.push(todayStr);
+          // Keep only last 120 days of history to avoid bloat
+          if (profile.streakHistory.length > 120) {
+            profile.streakHistory = profile.streakHistory.slice(-120);
+          }
+          return true; // newly completed
+        }
+        return false;
+      }
+
+      function getCurrentPlanet(streak) {
+        let current = PLANETS[0];
+        for (const p of PLANETS) {
+          if (streak >= p.streakNeeded) current = p;
+        }
+        return current;
+      }
+
+      function getNextPlanet(streak) {
+        for (const p of PLANETS) {
+          if (streak < p.streakNeeded) return p;
+        }
+        return null; // all planets reached
+      }
+
+      function updateStreakBadge() {
+        const btn = document.getElementById("streak-badge-btn");
+        const countEl = document.getElementById("streak-count-header");
+
+        // Show badge if any profile has a streak > 0
+        let maxStreak = 0;
+        appState.profiles.forEach((p) => {
+          const s = getProfileStreak(p);
+          if (s > maxStreak) maxStreak = s;
+        });
+
+        if (maxStreak > 0) {
+          btn.classList.remove("hidden");
+          btn.classList.add("flex");
+          countEl.innerText = maxStreak;
+        } else {
+          btn.classList.add("hidden");
+          btn.classList.remove("flex");
+        }
+      }
+
+      function openJourneyModal() {
+        SoundFX.click();
+        // Default to first profile
+        journeySelectedProfileId = appState.profiles.length > 0 ? appState.profiles[0].id : null;
+        renderJourneyProfileTabs();
+        renderJourneyContent();
+        openModalGeneric("journey-modal");
+      }
+
+      function renderJourneyProfileTabs() {
+        const container = document.getElementById("journey-profile-tabs");
+        container.innerHTML = "";
+        appState.profiles.forEach((p) => {
+          const isActive = p.id === journeySelectedProfileId;
+          container.innerHTML += `<button onclick="journeySelectedProfileId=${p.id}; renderJourneyContent(); renderJourneyProfileTabs(); SoundFX.click()" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition ${isActive ? "bg-accent-pink text-white shadow-lg" : "bg-white/5 text-white/50 hover:bg-white/10"}"><div class="w-6 h-6 rounded-full overflow-hidden bg-white/10 flex items-center justify-center">${getAvatarHTML(p.avatar, "text-xs")}</div><span>${p.name}</span></button>`;
+        });
+      }
+
+      function renderJourneyContent() {
+        const container = document.getElementById("journey-content");
+        const lang = appState.language || "fr";
+        const t = translations[lang];
+
+        if (!journeySelectedProfileId) {
+          container.innerHTML = `<div class="flex items-center justify-center h-full text-white/30 italic">${t.no_streak_yet}</div>`;
+          return;
+        }
+
+        const profile = appState.profiles.find((p) => p.id === journeySelectedProfileId);
+        if (!profile) return;
+
+        const streak = getProfileStreak(profile);
+        const currentPlanet = getCurrentPlanet(streak);
+        const nextPlanet = getNextPlanet(streak);
+
+        // Build the visual journey
+        let html = "";
+
+        // Streak header
+        html += `<div class="text-center mb-8">
+            <div class="inline-flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-6 py-4">
+                <div class="text-3xl ${streak > 0 ? "streak-flame" : "opacity-30"}"><i class="fa-solid fa-fire text-orange-400"></i></div>
+                <div>
+                    <div class="text-3xl font-bold text-white">${streak}</div>
+                    <div class="text-xs text-white/50 uppercase tracking-wider">${t.streak_days}</div>
+                </div>
+            </div>
+        </div>`;
+
+        // Planet path - horizontal visual
+        html += `<div class="relative mb-8">`;
+        html += `<div class="flex items-center justify-between relative">`;
+
+        // Connecting line
+        html += `<div class="absolute top-1/2 left-0 right-0 h-1 bg-white/5 -translate-y-1/2 rounded-full z-0"></div>`;
+        const progress = nextPlanet
+          ? (streak - currentPlanet.streakNeeded) / (nextPlanet.streakNeeded - currentPlanet.streakNeeded)
+          : 1;
+        const progressPct = Math.min(Math.max(progress, 0), 1) * 100;
+        html += `<div class="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-accent-pink to-accent-orange -translate-y-1/2 rounded-full z-0 transition-all duration-1000" style="width: ${progressPct * (PLANETS.indexOf(nextPlanet || PLANETS[PLANETS.length - 1]) / (PLANETS.length - 1)) * 100}%"></div>`;
+
+        PLANETS.forEach((planet, i) => {
+          const isReached = streak >= planet.streakNeeded;
+          const isCurrent = planet.id === currentPlanet.id;
+          const isLocked = !isReached;
+          const planetName = lang === "en" ? planet.name_en : planet.name;
+
+          let stateClass = "locked";
+          if (isCurrent) stateClass = "current";
+          else if (isReached) stateClass = "reached";
+
+          html += `<div class="flex flex-col items-center z-10 relative planet-node ${stateClass}" style="color: ${planet.color}">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg border-2 transition-all ${isReached ? "bg-white/10 border-current shadow-lg" : "bg-gray-900 border-white/10"}">
+                    ${isLocked ? '<i class="fa-solid fa-lock text-xs text-white/20"></i>' : `<i class="fa-solid ${planet.icon}"></i>`}
+                </div>
+                <span class="text-[9px] mt-1.5 font-bold ${isReached ? "text-white/80" : "text-white/20"} max-w-16 text-center leading-tight">${planetName}</span>
+                <span class="text-[8px] ${isReached ? "text-white/40" : "text-white/15"}">${planet.streakNeeded}j</span>
+            </div>`;
+        });
+
+        html += `</div></div>`;
+
+        // Current status card
+        const currentName = lang === "en" ? currentPlanet.name_en : currentPlanet.name;
+        html += `<div class="bg-white/5 rounded-2xl p-5 border border-white/10 mb-4">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center text-2xl border-2" style="color: ${currentPlanet.color}; border-color: ${currentPlanet.color}; background: ${currentPlanet.color}20">
+                    <i class="fa-solid ${currentPlanet.icon}"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-xs uppercase tracking-wider text-white/40 mb-1">${t.current_planet}</div>
+                    <div class="text-lg font-bold" style="color: ${currentPlanet.color}">${currentName}</div>
+                </div>`;
+
+        if (nextPlanet) {
+          const nextName = lang === "en" ? nextPlanet.name_en : nextPlanet.name;
+          const remaining = nextPlanet.streakNeeded - streak;
+          html += `<div class="text-right">
+                    <div class="text-xs text-white/40 mb-1">${t.next_planet}</div>
+                    <div class="text-sm font-bold" style="color: ${nextPlanet.color}">${nextName}</div>
+                    <div class="text-xs text-white/30">${remaining} ${t.streak_days}</div>
+                </div>`;
+        } else {
+          html += `<div class="text-right"><div class="text-sm font-bold text-success"><i class="fa-solid fa-trophy mr-1"></i>${t.journey_complete}</div></div>`;
+        }
+
+        html += `</div></div>`;
+
+        // Progress bar to next planet
+        if (nextPlanet) {
+          html += `<div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                <div class="flex justify-between text-xs text-white/50 mb-2">
+                    <span>${currentName}</span>
+                    <span>${lang === "en" ? nextPlanet.name_en : nextPlanet.name}</span>
+                </div>
+                <div class="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-accent-pink to-accent-orange rounded-full transition-all duration-1000" style="width: ${progressPct}%"></div>
+                </div>
+                <div class="text-center text-xs text-white/40 mt-2">${Math.round(progressPct)}%</div>
+            </div>`;
+        }
+
+        container.innerHTML = html;
+      }
+
+      // === FONCTIONS UTILITAIRES & HORLOGE ===
+      function startSpaceClock() {
+        const update = () => {
+          const now = new Date();
+          const lang = appState.language || "fr";
+          const timeStr = now
+            .toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+            .replace(":", '<span class="animate-pulse text-white/80">:</span>');
+          const dateOptions = { weekday: "short", day: "numeric", month: "short" };
+          const dateStr = now.toLocaleDateString(lang === "en" ? "en-US" : "fr-FR", dateOptions);
+          const clockEl = document.getElementById("digital-clock");
+          const dateEl = document.getElementById("date-display");
+          if (clockEl) clockEl.innerHTML = timeStr;
+          if (dateEl) dateEl.innerText = dateStr;
+
+          const currentMins = now.getHours() * 60 + now.getMinutes();
+          const getMins = (t) => {
+            const [h, m] = t.split(":").map(Number);
+            return h * 60 + m;
+          };
+          if (currentMins >= getMins(appState.periods.mStart) && currentMins < getMins(appState.periods.mEnd)) {
+            if (appState.currentTime !== "morning") setPeriod("morning");
+          } else if (currentMins >= getMins(appState.periods.eStart) && currentMins < getMins(appState.periods.eEnd)) {
+            if (appState.currentTime !== "evening") setPeriod("evening");
+          }
+        };
+        setInterval(update, 1000);
+        update();
+      }
+
+      // --- IMAGE PROCESSING / CROPPER ---
+      function openCropperModal(imageURL, purpose) {
+        cropperPurpose = purpose;
+        const cropperImage = document.getElementById("cropper-image");
+
+        if (purpose === "task") {
+          document.getElementById("task-editor-modal").classList.add("hidden");
+        } else if (purpose === "profile") {
+          document.getElementById("full-profile-editor-modal").classList.add("hidden");
+        }
+        openModalGeneric("cropper-modal");
+
+        // FIX v1.1: Use onload instead of setTimeout
+        if (cropper) {
+          cropper.destroy();
+          cropper = null;
+        }
+        cropperImage.onload = function () {
+          cropper = new Cropper(cropperImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            dragMode: "move",
+            autoCropArea: 1,
+            responsive: true,
+            background: false,
+            modal: false,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false,
+          });
+        };
+        cropperImage.src = imageURL;
+      }
+
+      function closeCropperModal(isCancel = false) {
+        const purposeToReopen = cropperPurpose;
+        if (cropper) {
+          cropper.destroy();
+          cropper = null;
+        }
+        closeModal("cropper-modal");
+        if (purposeToReopen === "task") {
+          openModalGeneric("task-editor-modal");
+        } else if (purposeToReopen === "profile") {
+          openModalGeneric("full-profile-editor-modal");
+        }
+      }
+
+      function saveCroppedImage() {
+        if (!cropper) return;
+        const canvas = cropper.getCroppedCanvas({ width: 256, height: 256 });
+        const croppedDataURL = canvas.toDataURL("image/jpeg", 0.8);
+        if (cropperPurpose === "task") {
+          editorTaskState.image = croppedDataURL;
+          editorTaskState.icon = null;
+          updateEditorUI();
+        } else if (cropperPurpose === "profile") {
+          editorProfileState.avatar = croppedDataURL;
+          updateFullProfileEditorUI();
+        }
+        closeCropperModal(false);
+      }
+
+      // --- INITIALISATION & PERSISTANCE ---
+      function saveData() {
+        const data = {
+          profiles: appState.profiles,
+          taskLibrary: taskLibrary,
+          isPremium: appState.isPremium,
+          soundOn: appState.soundOn,
+          periods: appState.periods,
+          language: appState.language,
+          lastResetDate: appState.lastResetDate,
+        };
+        localStorage.setItem("routineKidsData", JSON.stringify(data));
+      }
+      function loadData() {
+        const data = localStorage.getItem("routineKidsData");
+        if (data) {
+          const parsed = JSON.parse(data);
+          appState.profiles = parsed.profiles || [];
+          appState.isPremium = parsed.isPremium || false;
+          appState.soundOn = parsed.soundOn !== undefined ? parsed.soundOn : true;
+          appState.periods = parsed.periods || { mStart: "06:00", mEnd: "12:00", eStart: "18:00", eEnd: "21:00" };
+          appState.lastResetDate = parsed.lastResetDate || null;
+          if (parsed.language) {
+            appState.language = parsed.language;
+            document.getElementById("welcome-view").classList.remove("flex");
+            document.getElementById("welcome-view").classList.add("hidden");
+          }
+          if (parsed.taskLibrary && parsed.taskLibrary.length > 0) {
+            taskLibrary = parsed.taskLibrary;
+            // v1.1 MIGRATION: Restore default icons for all built-in tasks (ids 1-35)
+            // This fixes any corrupted icons in localStorage while preserving user-created tasks
+            const defaults = [
+              { id: 1, icon: "fa-tooth", color: "bg-blue-500" },
+              { id: 2, icon: "fa-bath", color: "bg-cyan-500" },
+              { id: 3, icon: "fa-shirt", color: "bg-purple-500" },
+              { id: 4, icon: "fa-moon", color: "bg-indigo-600" },
+              { id: 5, icon: "fa-pencil", color: "bg-green-500" },
+              { id: 6, icon: "fa-box-open", color: "bg-red-500" },
+              { id: 7, icon: "fa-school", color: "bg-yellow-500" },
+              { id: 8, icon: "fa-bed", color: "bg-indigo-400" },
+              { id: 9, icon: "fa-hands-bubbles", color: "bg-blue-300" },
+              { id: 10, icon: "fa-glass-water", color: "bg-cyan-300" },
+              { id: 11, icon: "fa-cat", color: "bg-orange-400" },
+              { id: 12, icon: "fa-dog", color: "bg-orange-600" },
+              { id: 13, icon: "fa-plant-wilt", color: "bg-green-600" },
+              { id: 14, icon: "fa-utensils", color: "bg-gray-500" },
+              { id: 15, icon: "fa-sink", color: "bg-slate-500" },
+              { id: 16, icon: "fa-trash-can", color: "bg-slate-600" },
+              { id: 17, icon: "fa-shoe-prints", color: "bg-amber-600" },
+              { id: 18, icon: "fa-vest", color: "bg-amber-500" },
+              { id: 19, icon: "fa-shapes", color: "bg-pink-500" },
+              { id: 20, icon: "fa-book", color: "bg-blue-700" },
+              { id: 21, icon: "fa-music", color: "bg-purple-600" },
+              { id: 22, icon: "fa-person-running", color: "bg-red-600" },
+              { id: 23, icon: "fa-toilet", color: "bg-white text-black" },
+              { id: 24, icon: "fa-scissors", color: "bg-yellow-600" },
+              { id: 25, icon: "fa-capsules", color: "bg-green-300" },
+              { id: 26, icon: "fa-glasses", color: "bg-indigo-800" },
+              { id: 27, icon: "fa-cookie-bite", color: "bg-amber-300" },
+              { id: 28, icon: "fa-apple-whole", color: "bg-red-500" },
+              { id: 29, icon: "fa-carrot", color: "bg-orange-500" },
+              { id: 30, icon: "fa-heart", color: "bg-pink-600" },
+              { id: 31, icon: "fa-bottle-water", color: "bg-cyan-600" },
+              { id: 32, icon: "fa-book-open", color: "bg-indigo-300" },
+              { id: 33, icon: "fa-socks", color: "bg-indigo-400" },
+              { id: 34, icon: "fa-shirt", color: "bg-purple-400" },
+              { id: 35, icon: "fa-utensils", color: "bg-gray-400" },
+            ];
+            defaults.forEach((d) => {
+              const t = taskLibrary.find((x) => x.id === d.id);
+              if (t && !t.image) {
+                t.icon = d.icon;
+                t.color = d.color;
+              }
+            });
+          }
+          // v1.1: Ensure streakHistory exists on all profiles
+          appState.profiles.forEach((p) => {
+            if (!p.streakHistory) p.streakHistory = [];
+          });
+          return true;
+        }
+        return false;
+      }
+
+      // v1.1: DAILY RESET — clears completedKeys each new day
+      function performDailyReset() {
+        const today = getTodayStr();
+        if (appState.lastResetDate !== today) {
+          appState.profiles.forEach((p) => {
+            p.completedKeys = [];
+          });
+          appState.lastResetDate = today;
+          saveData();
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const introOverlay = document.getElementById("intro-overlay");
+        const introVideo = document.getElementById("intro-video");
+        const skipBtn = document.getElementById("skip-intro-btn");
+        if (introOverlay && introVideo) {
+          const finishIntro = () => {
+            introOverlay.style.transition = "opacity 0.8s ease-out";
+            introOverlay.style.opacity = "0";
+            setTimeout(() => {
+              introOverlay.style.display = "none";
+            }, 800);
+          };
+          introVideo.onended = finishIntro;
+          if (skipBtn)
+            skipBtn.onclick = () => {
+              introVideo.pause();
+              finishIntro();
+            };
+          introVideo.play().catch(() => finishIntro());
+        }
+
+        const hasData = loadData();
+        performDailyReset(); // v1.1: Reset completedKeys if new day
+        if (!appState.language && !hasData) {
+          document.getElementById("welcome-view").classList.remove("hidden");
+          document.getElementById("welcome-view").classList.add("flex");
+        } else {
+          initApp();
+        }
+
+        document.getElementById("task-file-input").addEventListener("change", handleTaskImageUpload);
+        document.getElementById("profile-file-input-gallery").addEventListener("change", handleProfileImageUpload);
+        document.getElementById("profile-file-input-camera").addEventListener("change", handleProfileImageUpload);
+
+        const unlockAudio = () => {
+          SoundFX.init();
+          document.removeEventListener("touchstart", unlockAudio, { capture: true });
+          document.removeEventListener("click", unlockAudio, { capture: true });
+        };
+        document.body.addEventListener("touchstart", unlockAudio, { capture: true });
+        document.body.addEventListener("click", unlockAudio, { capture: true });
+
+        startSpaceClock();
+      });
+
+      function wrapWithSave(fnName) {
+        const oldFn = window[fnName];
+        if (oldFn) {
+          window[fnName] = function (...args) {
+            oldFn.apply(this, args);
+            saveData();
+          };
+        }
+      }
+
+      // --- LOGIQUE APPLICATION ---
+      function setAppLanguage(lang) {
+        appState.language = lang;
+        document.getElementById("welcome-view").style.display = "none";
+        SoundFX.playMagic();
+        initApp();
+      }
+      function changeLanguageFromSettings(lang) {
+        appState.language = lang;
+        updateTranslations();
+        updateSchedulerDayLabels();
+        renderFamilyWall();
+        closeModal("language-modal");
+        SoundFX.click();
+      }
+      function closeModal(id) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.classList.add("hidden");
+          el.classList.remove("flex");
+          if (id === "cropper-modal") {
+            if (cropper) {
+              cropper.destroy();
+              cropper = null;
+            }
+            cropperPurpose = null;
+          }
+        }
+      }
+      function openModalGeneric(id) {
+        const el = document.getElementById(id);
+        if (el) {
+          if (id === "privacy-modal") {
+            renderPrivacyPolicy();
+          }
+          el.classList.remove("hidden");
+          el.classList.add("flex");
+        }
+      }
+      function openLanguageModal() {
+        openModalGeneric("language-modal");
+      }
+      function openAboutModal() {
+        openModalGeneric("about-modal");
+      }
+      function initApp() {
+        updateTranslations();
+        updateSchedulerDayLabels();
+        renderFamilyWall();
+        updateToggleUI();
+        updatePremiumUI();
+        updateSoundUI();
+        updateStreakBadge();
+      }
+      function toggleSound() {
+        appState.soundOn = !appState.soundOn;
+        updateSoundUI();
+      }
+      function updateSoundUI() {
+        const l = appState.language || "fr";
+        document.getElementById("sound-status").innerText = appState.soundOn
+          ? translations[l].sound_on
+          : translations[l].sound_off;
+        const icon = document.getElementById("sound-toggle");
+        if (appState.soundOn) {
+          icon.className = "fa-solid fa-toggle-on text-accent-pink text-xl";
+        } else {
+          icon.className = "fa-solid fa-toggle-off text-white/30 text-xl";
+        }
+      }
+
+      function updateTranslations() {
+        const lang = appState.language || "fr";
+        const t = translations[lang];
+        document.querySelectorAll("[data-t]").forEach((el) => {
+          const key = el.getAttribute("data-t");
+          if (t[key]) el.innerText = t[key];
+        });
+        const searchTxt = lang === "en" ? "Search..." : "Rechercher...";
+        const nameTxt = lang === "en" ? "Name" : "Nom";
+        document.getElementById("task-search").placeholder = searchTxt;
+        document.getElementById("scheduler-task-search").placeholder = searchTxt;
+        document.getElementById("task-name-input").placeholder = nameTxt;
+        document.getElementById("profile-name-input").placeholder = nameTxt;
+      }
+
+      // v1.1 FIX: Update scheduler day labels based on language
+      function updateSchedulerDayLabels() {
+        const lang = appState.language || "fr";
+        const labels = translations[lang].day_labels;
+        // Day buttons order in HTML: 1(Mon), 2(Tue), 3(Wed), 4(Thu), 5(Fri), 6(Sat), 0(Sun)
+        const dayOrder = [1, 2, 3, 4, 5, 6, 0];
+        const buttons = document.querySelectorAll("#scheduler-day-buttons .day-btn");
+        buttons.forEach((btn, i) => {
+          btn.innerText = labels[dayOrder[i]];
+        });
+      }
+
+      function getTaskVisual(t) {
+        return t.image
+          ? `<img src="${t.image}" class="w-full h-full object-cover">`
+          : `<i class="fa-solid ${t.icon} task-icon"></i>`;
+      }
+      function getAvatarHTML(s, sizeClass = "text-3xl") {
+        return s.startsWith("data:image")
+          ? `<img src="${s}" class="w-full h-full object-cover">`
+          : `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/10 to-transparent"><i class="fa-solid ${s} ${sizeClass}"></i></div>`;
+      }
+      function showConfirm(title, message, onConfirm) {
+        document.getElementById("confirm-title").innerText = title;
+        document.getElementById("confirm-message").innerText = message;
+        const oldBtn = document.getElementById("confirm-action-btn");
+        const newBtn = oldBtn.cloneNode(true);
+        oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+        newBtn.addEventListener("click", () => {
+          onConfirm();
+          closeConfirm();
+        });
+        openModalGeneric("confirm-modal");
+      }
+      function closeConfirm() {
+        closeModal("confirm-modal");
+      }
+
+      function renderPrivacyPolicy() {
+        const lang = appState.language || "fr";
+        const fr_content = `<p class="text-xs text-gray-500 mb-4 text-center">Dernière mise à jour : 24 Novembre 2025</p><p>Chez RoutineKids, la sécurité et la confidentialité de vos enfants sont notre priorité absolue. Cette politique détaille comment nous traitons les données.</p><h3 class="font-bold mt-4 mb-2">Collecte des Données</h3><p>RoutineKids est une application fonctionnant localement. Nous ne collectons, ne stockons et ne transmettons aucune donnée personnelle (noms, photos, tâches) vers des serveurs externes.</p><h3 class="font-bold mt-4 mb-2">Stockage Local</h3><p>Toutes les informations créées dans l'application (profils, photos, historique) sont stockées uniquement dans la mémoire de votre appareil. Si vous supprimez l'application, ces données sont effacées.</p><h3 class="font-bold mt-4 mb-2">Partage avec des Tiers</h3><p>Nous ne partageons aucune information avec des entreprises tierces, des annonceurs ou des partenaires commerciaux.</p><h3 class="font-bold mt-4 mb-2">Données Techniques (Apple/Google)</h3><p>Apple ou Google peuvent collecter des données techniques anonymes (rapports de plantage, statistiques d'installation) conformément à leurs propres politiques de confidentialité, indépendantes de RoutineKids.</p><h3 class="font-bold mt-4 mb-2">Contact</h3><p>Pour toute question légale : <a href="mailto:support.routinekids@gmail.com" class="text-blue-600 underline">support.routinekids@gmail.com</a></p>`;
+        const en_content = `<p class="text-xs text-gray-500 mb-4 text-center">Last updated: November 24, 2025</p><p>At RoutineKids, the safety and privacy of your children are our top priority. This policy details how we handle data.</p><h3 class="font-bold mt-4 mb-2">Data Collection</h3><p>RoutineKids is a locally functioning application. We do not collect, store, or transmit any personal data (names, photos, tasks) to external servers.</p><h3 class="font-bold mt-4 mb-2">Local Storage</h3><p>All information created within the app (profiles, photos, history) is stored solely on your device's local memory. If you delete the application, this data is erased.</p><h3 class="font-bold mt-4 mb-2">Third-Party Sharing</h3><p>We do not share any information with third-party companies, advertisers, or commercial partners.</p><h3 class="font-bold mt-4 mb-2">Technical Data (Apple/Google)</h3><p>Apple or Google may collect anonymous technical data (crash reports, installation statistics) in accordance with their own privacy policies, which are independent of RoutineKids.</p><h3 class="font-bold mt-4 mb-2">Contact</h3><p>For any legal questions: <a href="mailto:support.routinekids@gmail.com" class="text-blue-600 underline">support.routinekids@gmail.com</a></p>`;
+        document.getElementById("privacy-content").innerHTML = lang === "en" ? en_content : fr_content;
+      }
+
+      // --- RENDER FAMILY WALL ---
+      function renderFamilyWall() {
+        const container = document.getElementById("family-wall");
+        container.innerHTML = "";
+        if (appState.profiles.length === 0) {
+          const msg = appState.language === "en" ? "No astronauts yet." : "Aucun astronaute.";
+          container.innerHTML = `<div class="text-center text-white/30 mt-10 italic">${msg}</div>`;
+        }
+        const today = new Date().getDay();
+        appState.profiles.forEach((profile) => {
+          const assignments = profile.assignedTasks.filter(
+            (a) => a.period === appState.currentTime && (a.days ? a.days.includes(today) : true),
+          );
+          const doneCount = assignments.filter((a) => profile.completedKeys.includes(`${a.taskId}_${a.period}`)).length;
+          const total = assignments.length;
+          const percent = total === 0 ? 0 : (doneCount / total) * 100;
+          const radius = 36;
+          const circumference = 2 * Math.PI * radius;
+          const offset = circumference - (percent / 100) * circumference;
+          const sortedTasks = [...assignments].sort((a, b) => {
+            const aDone = profile.completedKeys.includes(`${a.taskId}_${a.period}`);
+            const bDone = profile.completedKeys.includes(`${b.taskId}_${b.period}`);
+            return aDone - bDone;
+          });
+          const isDeleteMode = deleteModeProfileId === profile.id;
+
+          // v1.1: Streak info
+          const streak = getProfileStreak(profile);
+          const currentPlanet = getCurrentPlanet(streak);
+
+          let tasksHtml = "";
+          if (sortedTasks.length === 0) {
+            tasksHtml = `<div class="flex flex-col justify-center items-center h-20 w-full text-white/20 italic text-xs"><i class="fa-regular fa-face-smile mb-1"></i>Repos</div>`;
+          } else {
+            tasksHtml = sortedTasks
+              .map((assign) => {
+                const t = taskLibrary.find((x) => x.id === assign.taskId) || {
+                  title: "?",
+                  icon: "fa-question",
+                  color: "bg-gray-500",
+                };
+                const lang = appState.language || "fr";
+                const displayTitle = lang === "en" && t.title_en ? t.title_en : t.title;
+                const done = profile.completedKeys.includes(`${assign.taskId}_${assign.period}`);
+                return `<div onclick="toggleTask(${profile.id}, ${assign.taskId}, '${assign.period}')" class="task-card flex-shrink-0 w-20 h-20 rounded-xl ${done ? "task-done" : "bg-card-bg border border-white/10 shadow-pop"} flex flex-col items-center justify-center relative cursor-pointer group transition-all" title="${displayTitle}">${done ? `<div class="absolute -top-1 -right-1 text-success text-base check-anim z-20 bg-space-dark rounded-full border border-success"><i class="fa-solid fa-circle-check"></i></div>` : ""}<div class="w-full h-full flex items-center justify-center text-3xl text-white drop-shadow-md overflow-hidden rounded-lg p-2">${getTaskVisual(t)}</div>${!done ? `<span class="absolute bottom-1 text-[8px] font-bold text-white/80 uppercase tracking-wide w-full text-center px-1 truncate z-10">${displayTitle}</span>` : ""}<div onclick="event.stopPropagation(); requestDeleteAssignment(${profile.id}, ${assign.taskId}, '${assign.period}')" class="task-trash absolute -top-2 -left-2 bg-red-500 w-6 h-6 rounded-full flex items-center justify-center text-xs text-white shadow-md cursor-pointer hover:scale-110 transition z-30"><i class="fa-solid fa-trash"></i></div></div>`;
+              })
+              .join("");
+          }
+
+          // v1.1: Streak indicator under avatar
+          const streakHTML =
+            streak > 0
+              ? `<div class="flex items-center gap-1 mt-0.5"><i class="fa-solid fa-fire text-orange-400 text-[8px] streak-flame"></i><span class="text-[9px] font-bold text-orange-300">${streak}</span></div>`
+              : "";
+
+          container.innerHTML += `
+            <div class="w-full flex items-center gap-2 mb-2 relative animate-[fadeIn_0.5s] ${isDeleteMode ? "delete-mode-active" : ""}">
+                <div class="w-24 flex-shrink-0 flex flex-col items-center justify-center z-10 relative">
+                    <div onclick="openQuickEdit(${profile.id})" class="relative w-20 h-20 flex items-center justify-center cursor-pointer group">
+                        <svg class="absolute inset-0 w-full h-full z-0 -rotate-90" viewBox="0 0 80 80">
+                            <circle class="text-white/5" stroke-width="4" stroke="currentColor" fill="transparent" r="${radius}" cx="40" cy="40"/>
+                            <circle class="${percent === 100 ? "text-success" : "text-accent-pink"} progress-ring__circle ${percent === 100 ? "ring-victory" : ""}" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="transparent" r="${radius}" cx="40" cy="40" style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${offset};"/>
+                        </svg>
+                        <div class="w-14 h-14 rounded-full bg-[#1e163d] overflow-hidden border-2 border-white/10 z-10 relative ${percent === 100 ? "avatar-victory" : ""}">${getAvatarHTML(profile.avatar, "text-2xl")}</div>
+                        <div class="absolute bottom-0 right-1 bg-white text-black border border-[#120d2b] w-5 h-5 rounded-full flex items-center justify-center z-20 shadow-lg opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-pen text-[8px]"></i></div>
+                    </div>
+                    <span class="text-[10px] font-bold text-white/80 mt-1 truncate max-w-full px-1 py-0.5 rounded bg-white/5 border border-white/5">${profile.name}</span>
+                    ${streakHTML}
+                </div>
+                <div class="flex-1 min-w-0 bg-white/5 rounded-2xl p-2 border border-white/5 flex items-center gap-3 overflow-x-auto no-scrollbar task-scroll-container h-24">
+                    ${tasksHtml}
+                    <div class="w-1 flex-shrink-0"></div>
+                </div>
+                <div class="flex-shrink-0 flex flex-col gap-2 w-10 items-center justify-center">
+                    <button onclick="openGlobalLibrary('assign', ${profile.id}); SoundFX.click()" class="w-10 h-10 rounded-xl bg-accent-pink/20 hover:bg-accent-pink text-accent-pink hover:text-white border border-accent-pink/30 flex items-center justify-center transition shadow-lg"><i class="fa-solid fa-plus text-sm"></i></button>
+                    <button onclick="toggleDeleteMode(${profile.id}); SoundFX.click()" class="w-10 h-10 rounded-xl ${isDeleteMode ? "bg-red-500 text-white" : "bg-white/5 hover:bg-red-500/20 text-white/30"} border border-white/10 flex items-center justify-center transition"><i class="fa-solid fa-minus text-sm"></i></button>
+                </div>
+            </div>`;
+        });
+        const addBtnText = translations[appState.language || "fr"].add_member;
+        container.innerHTML += `<div class="px-4 py-2 mt-2 border-t border-white/5"><button onclick="showParentalGate('create'); SoundFX.click()" class="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white/50 hover:text-white font-bold text-xs flex items-center justify-center gap-2 transition border-dashed"><i class="fa-solid fa-plus"></i><span>${addBtnText}</span></button></div>`;
+
+        updateStreakBadge(); // v1.1
+      }
+
+      function openPremiumModal(msg) {
+        const l = appState.language || "fr";
+        document.getElementById("premium-reason").innerText = msg || translations[l].unlock_all;
+        openModalGeneric("premium-modal");
+        SoundFX.click();
+      }
+      function buyPremium(plan) {
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-2xl"></i>';
+        setTimeout(() => {
+          appState.isPremium = true;
+          updatePremiumUI();
+          closeModal("premium-modal");
+          btn.innerHTML = originalText;
+          SoundFX.playFanfare();
+          if (premiumPurchaseIntent === "auto_assign" && pendingAutoAssignProfileId) {
+            triggerAutoAssignFlow(pendingAutoAssignProfileId);
+            premiumPurchaseIntent = null;
+          } else {
+            const l = appState.language || "fr";
+            document.getElementById("success-title").innerText = translations[l].success;
+            document.getElementById("success-message").innerText = translations[l].success_msg;
+            openModalGeneric("success-modal");
+            renderFamilyWall();
+          }
+        }, 1500);
+      }
+      function updatePremiumUI() {
+        const headerBuyBtn = document.getElementById("header-buy-btn");
+        const headerBadge = document.getElementById("header-premium-badge");
+        const settingsBanner = document.getElementById("settings-premium-banner");
+        const settingsActive = document.getElementById("settings-premium-active");
+        if (appState.isPremium) {
+          headerBuyBtn.classList.add("hidden");
+          headerBadge.classList.remove("hidden");
+          settingsBanner.classList.add("hidden");
+          settingsActive.classList.remove("hidden");
+        } else {
+          headerBuyBtn.classList.remove("hidden");
+          headerBadge.classList.add("hidden");
+          settingsBanner.classList.remove("hidden");
+          settingsActive.classList.add("hidden");
+        }
+      }
+      function checkProfileLimit() {
+        if (!appState.isPremium && appState.profiles.length >= 1) {
+          openPremiumModal(translations[appState.language || "fr"].premium_msg_profile);
+          return false;
+        }
+        return true;
+      }
+      function checkTaskLimit(profileId, period) {
+        if (appState.isPremium) return true;
+        const p = appState.profiles.find((x) => x.id === profileId);
+        const count = p.assignedTasks.filter((t) => t.period === period).length;
+        if (count >= 4) {
+          openPremiumModal(translations[appState.language || "fr"].premium_msg_task);
+          return false;
+        }
+        return true;
+      }
+      function toggleDeleteMode(pid) {
+        deleteModeProfileId = deleteModeProfileId === pid ? null : pid;
+        renderFamilyWall();
+      }
+      function setPeriod(p) {
+        appState.currentTime = p;
+        updateToggleUI();
+        renderFamilyWall();
+        SoundFX.click();
+      }
+      function updateToggleUI() {
+        const btnM = document.getElementById("btn-morning");
+        const btnE = document.getElementById("btn-evening");
+        if (appState.currentTime === "morning") {
+          btnM.classList.add("active");
+          btnE.classList.remove("active");
+        } else {
+          btnM.classList.remove("active");
+          btnE.classList.add("active");
+        }
+      }
+
+      function toggleTask(pid, tid, per) {
+        if (deleteModeProfileId === pid) return;
+        const p = appState.profiles.find((x) => x.id === pid);
+        const key = `${tid}_${per}`;
+        const wasAlreadyDone = p.completedKeys.includes(key);
+
+        if (wasAlreadyDone) {
+          p.completedKeys = p.completedKeys.filter((x) => x !== key);
+          SoundFX.click();
+          renderFamilyWall();
+          return;
+        }
+
+        // Task just completed
+        p.completedKeys.push(key);
+        SoundFX.playSuccess();
+        renderFamilyWall();
+
+        // Check if current period is fully done
+        const today = new Date().getDay();
+        const currentTasks = p.assignedTasks.filter(
+          (a) => a.period === appState.currentTime && (a.days ? a.days.includes(today) : true),
+        );
+        const doneCount = currentTasks.filter((a) => p.completedKeys.includes(`${a.taskId}_${a.period}`)).length;
+        const periodComplete = doneCount === currentTasks.length && currentTasks.length > 0;
+
+        // Check if ALL tasks for the day (both periods) are done
+        const newlyCompleted = checkAndRecordDayCompletion(p);
+
+        if (newlyCompleted) {
+          // FULL DAY DONE — big celebration with delay
+          const oldStreak = getProfileStreak(p) - 1;
+          const newStreak = getProfileStreak(p);
+          const oldPlanet = getCurrentPlanet(oldStreak);
+          const newPlanet = getCurrentPlanet(newStreak);
+
+          setTimeout(() => {
+            if (newPlanet.id !== oldPlanet.id) {
+              // New planet unlocked! Epic celebration
+              SoundFX.playPlanetUnlock();
+              setTimeout(() => launchConfetti(80), 300);
+            } else {
+              // Day streak recorded
+              SoundFX.playFanfare();
+              setTimeout(() => launchConfetti(35), 200);
+            }
+            updateStreakBadge();
+          }, 600); // Wait for playSuccess to finish
+        } else if (periodComplete) {
+          // Just this period done — smaller fanfare with delay
+          setTimeout(() => {
+            SoundFX.playFanfare();
+            launchConfetti(15);
+          }, 500);
+        }
+      }
+
+      // SETTINGS, LIB, EDITOR
+      function openSettings() {
+        document.getElementById("settings-view").classList.add("active");
+        SoundFX.click();
+      }
+      function closeSettings() {
+        document.getElementById("settings-view").classList.remove("active");
+        SoundFX.click();
+      }
+      function openPeriodSettings() {
+        openModalGeneric("period-settings-modal");
+      }
+      function savePeriods() {
+        appState.periods.mStart = document.getElementById("morning-start").value;
+        appState.periods.mEnd = document.getElementById("morning-end").value;
+        appState.periods.eStart = document.getElementById("evening-start").value;
+        appState.periods.eEnd = document.getElementById("evening-end").value;
+        closeModal("period-settings-modal");
+      }
+
+      function openGlobalLibrary(mode, profileId = null) {
+        libraryMode = mode;
+        currentEditingProfileId = profileId;
+        if (mode === "assign" && !checkTaskLimit(profileId, appState.currentTime)) return;
+        document.getElementById("task-search").value = "";
+        renderLibraryList();
+        openModalGeneric("global-library-modal");
+      }
+
+      function renderLibraryList(query = "") {
+        const container = document.getElementById("global-tasks-list");
+        container.innerHTML = "";
+        const lang = appState.language || "fr";
+        const filtered = taskLibrary.filter((t) => {
+          const title = lang === "en" && t.title_en ? t.title_en : t.title;
+          return title.toLowerCase().includes(query.toLowerCase());
+        });
+        filtered.forEach((t) => {
+          const title = lang === "en" && t.title_en ? t.title_en : t.title;
+          let onClick = "";
+          let icon = "";
+          if (libraryMode === "assign") {
+            onClick = `selectTaskForAssign(${t.id})`;
+            icon = '<i class="fa-solid fa-plus text-white/30"></i>';
+          } else if (libraryMode === "scheduler_quick") {
+            onClick = `finalizeSchedulerQuickAdd(${t.id})`;
+            icon = '<i class="fa-solid fa-calendar-plus text-white/30"></i>';
+          } else {
+            onClick = `openTaskEditor(${t.id})`;
+            icon = '<i class="fa-solid fa-pen text-white/30"></i>';
+          }
+          container.innerHTML += `<div onclick="${onClick}" class="flex items-center gap-3 bg-white/5 p-3 rounded-xl cursor-pointer hover:bg-white/10 border border-transparent hover:border-accent-pink mb-2"><div class="w-8 h-8 rounded-full ${t.color} flex items-center justify-center text-xs overflow-hidden">${getTaskVisual(t)}</div><p class="font-bold text-sm flex-1">${title}</p>${icon}</div>`;
+        });
+      }
+
+      function filterLibrary() {
+        renderLibraryList(document.getElementById("task-search").value);
+      }
+      function selectTaskForAssign(tid) {
+        selectedTaskIdForAssign = tid;
+        closeModal("global-library-modal");
+        const t = taskLibrary.find((x) => x.id === tid);
+        const title = appState.language === "en" && t.title_en ? t.title_en : t.title;
+        document.getElementById("assign-preview").innerHTML =
+          `<div class="flex flex-col items-center"><div class="w-16 h-16 rounded-full ${t.color} flex items-center justify-center text-2xl shadow-lg mb-2 overflow-hidden">${getTaskVisual(t)}</div><span class="font-bold">${title}</span></div>`;
+        openModalGeneric("assign-period-modal");
+      }
+      function finalizeAssign(p) {
+        const prof = appState.profiles.find((x) => x.id === currentEditingProfileId);
+        const tid = selectedTaskIdForAssign;
+        const periodsToAdd = p === "both" ? ["morning", "evening"] : [p];
+        for (let per of periodsToAdd) {
+          if (!checkTaskLimit(prof.id, per)) {
+            closeModal("assign-period-modal");
+            return;
+          }
+        }
+        periodsToAdd.forEach((per) => {
+          if (!prof.assignedTasks.some((a) => a.taskId === tid && a.period === per)) {
+            prof.assignedTasks.push({ taskId: tid, period: per, days: [0, 1, 2, 3, 4, 5, 6] });
+          }
+        });
+        closeModal("assign-period-modal");
+        renderFamilyWall();
+        SoundFX.playMagic();
+      }
+
+      function openTaskEditor(id = null) {
+        closeModal("global-library-modal");
+        const deleteBtn = document.getElementById("btn-delete-task");
+        document.getElementById("color-picker").innerHTML = colors
+          .map(
+            (c) =>
+              `<button onclick="setEditorColor('${c}')" class="w-8 h-8 rounded-full ${c} ring-2 ring-transparent focus:ring-white"></button>`,
+          )
+          .join("");
+        document.getElementById("icon-grid").innerHTML = iconSet
+          .map(
+            (i) =>
+              `<button onclick="setEditorIcon('${i}')" class="w-8 h-8 rounded flex items-center justify-center hover:bg-white/10 text-white/70"><i class="fa-solid ${i}"></i></button>`,
+          )
+          .join("");
+        if (id) {
+          const t = taskLibrary.find((x) => x.id === id);
+          editorTaskState = { ...t };
+          deleteBtn.classList.remove("hidden");
+        } else {
+          editorTaskState = { id: null, title: "", color: "bg-blue-500", icon: "fa-star", image: null };
+          deleteBtn.classList.add("hidden");
+        }
+        updateEditorUI();
+        openModalGeneric("task-editor-modal");
+      }
+      function updateEditorUI() {
+        document.getElementById("task-name-input").value = editorTaskState.title;
+        const preview = document.getElementById("task-preview-circle");
+        preview.className = `w-24 h-24 rounded-full ${editorTaskState.color} flex items-center justify-center text-4xl shadow-lg overflow-hidden border-4 border-white/10 relative`;
+        preview.innerHTML = editorTaskState.image
+          ? `<img src="${editorTaskState.image}" class="w-full h-full object-cover">`
+          : `<i class="fa-solid ${editorTaskState.icon}"></i>`;
+      }
+      function setEditorColor(c) {
+        editorTaskState.color = c;
+        updateEditorUI();
+      }
+      function setEditorIcon(i) {
+        editorTaskState.icon = i;
+        editorTaskState.image = null;
+        updateEditorUI();
+      }
+
+      function triggerTaskPhotoUpload() {
+        document.getElementById("task-file-input").click();
+      }
+      function handleTaskImageUpload(e) {
+        const f = e.target.files[0];
+        if (f) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            openCropperModal(event.target.result, "task");
+          };
+          reader.readAsDataURL(f);
+        }
+        e.target.value = "";
+      }
+      function triggerProfileUpload(source) {
+        editorProfileState.name = document.getElementById("profile-name-input").value;
+        editorProfileState.age = document.getElementById("profile-age-input").value;
+        if (source === "gallery") document.getElementById("profile-file-input-gallery").click();
+        else document.getElementById("profile-file-input-camera").click();
+      }
+      function handleProfileImageUpload(e) {
+        const f = e.target.files[0];
+        if (f) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            openCropperModal(event.target.result, "profile");
+          };
+          reader.readAsDataURL(f);
+        }
+        e.target.value = "";
+      }
+
+      function saveTaskToLibrary() {
+        editorTaskState.title = document.getElementById("task-name-input").value;
+        if (!editorTaskState.title) return;
+        if (editorTaskState.id) {
+          const idx = taskLibrary.findIndex((t) => t.id === editorTaskState.id);
+          taskLibrary[idx] = { ...editorTaskState };
+        } else {
+          editorTaskState.id = Date.now();
+          taskLibrary.push({ ...editorTaskState });
+        }
+        closeModal("task-editor-modal");
+        if (libraryMode) openGlobalLibrary(libraryMode, currentEditingProfileId);
+        else openGlobalLibrary("manage");
+        renderFamilyWall();
+      }
+
+      function requestDeleteTaskFromLibrary() {
+        showConfirm(
+          translations[appState.language || "fr"].attention,
+          translations[appState.language || "fr"].delete_sure,
+          () => {
+            taskLibrary = taskLibrary.filter((t) => t.id !== editorTaskState.id);
+            appState.profiles.forEach((p) => {
+              p.assignedTasks = p.assignedTasks.filter((a) => a.taskId !== editorTaskState.id);
+            });
+            closeModal("task-editor-modal");
+            openGlobalLibrary("manage");
+            renderFamilyWall();
+          },
+        );
+      }
+      function openProfileManager() {
+        const list = document.getElementById("profile-manager-list");
+        list.innerHTML = "";
+        if (appState.profiles.length === 0) {
+          list.innerHTML = `<div class="text-center text-white/50 italic p-4">Aucun profil.</div>`;
+        } else {
+          appState.profiles.forEach((p) => {
+            list.innerHTML += `<div class="flex items-center justify-between bg-white/5 p-3 rounded-xl mb-2"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">${getAvatarHTML(p.avatar, "text-xl")}</div><div><p class="font-bold text-sm">${p.name}</p><p class="text-xs text-white/50">${p.age} ans</p></div></div><div class="flex gap-2"><button onclick="closeModal('profile-manager-modal'); openFullProfileEditor('edit', ${p.id})" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"><i class="fa-solid fa-pen text-sm"></i></button><button onclick="requestDeleteProfile(${p.id})" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500/20 flex items-center justify-center"><i class="fa-solid fa-trash text-sm"></i></button></div></div>`;
+          });
+        }
+        openModalGeneric("profile-manager-modal");
+      }
+      function requestDeleteProfile(pid) {
+        showConfirm(
+          translations[appState.language || "fr"].attention,
+          translations[appState.language || "fr"].delete_sure,
+          () => {
+            appState.profiles = appState.profiles.filter((p) => p.id !== pid);
+            closeModal("full-profile-editor-modal");
+            renderFamilyWall();
+            openProfileManager();
+          },
+        );
+      }
+
+      function requestDeleteAssignment(pid, tid, per) {
+        const lang = appState.language || "fr";
+        const t = taskLibrary.find((x) => x.id === tid);
+        const title = lang === "en" && t.title_en ? t.title_en : t.title;
+        const periodTitle = translations[lang][`${per}_part`];
+        const msg = translations[lang].remove_task_confirm.replace("<TASK_TITLE>", title).replace("<PERIOD_TITLE>", periodTitle);
+        showConfirm(translations[lang].attention, msg, () => {
+          const p = appState.profiles.find((x) => x.id === pid);
+          p.assignedTasks = p.assignedTasks.filter((a) => !(a.taskId === tid && a.period === per));
+          p.completedKeys = p.completedKeys.filter((k) => k !== `${tid}_${per}`);
+          renderFamilyWall();
+        });
+      }
+      function openQuickEdit(pid) {
+        currentEditingProfileId = pid;
+        const p = appState.profiles.find((x) => x.id === pid);
+        tempAvatarSelection = p.avatar;
+        document.getElementById("btn-advanced-edit").onclick = function () {
+          pendingParentalActionId = pid;
+          showParentalGate("edit-full");
+        };
+        const grid = document.getElementById("quick-avatar-grid");
+        grid.innerHTML = "";
+        avatarList.forEach((icon) => {
+          const btn = document.createElement("button");
+          const isSelected = tempAvatarSelection === icon;
+          btn.className = `w-12 h-12 rounded-full transition-all duration-200 flex items-center justify-center text-xl ${isSelected ? "bg-accent-pink text-white ring-2 ring-white scale-110 shadow-lg" : "bg-white/10 text-white/70 hover:bg-white/20"}`;
+          btn.innerHTML = `<i class="fa-solid ${icon}"></i>`;
+          btn.onclick = () => {
+            tempAvatarSelection = icon;
+            Array.from(grid.children).forEach(
+              (c) =>
+                (c.className =
+                  "w-12 h-12 rounded-full transition-all duration-200 flex items-center justify-center text-xl bg-white/10 text-white/70 hover:bg-white/20"),
+            );
+            btn.className =
+              "w-12 h-12 rounded-full transition-all duration-200 flex items-center justify-center text-xl bg-accent-pink text-white ring-2 ring-white scale-110 shadow-lg";
+          };
+          grid.appendChild(btn);
+        });
+        openModalGeneric("quick-edit-modal");
+      }
+      function saveQuickEdit() {
+        const p = appState.profiles.find((x) => x.id === currentEditingProfileId);
+        if (p && tempAvatarSelection) {
+          p.avatar = tempAvatarSelection;
+        }
+        closeModal("quick-edit-modal");
+        renderFamilyWall();
+      }
+      function openFullProfileEditor(mode, profileId = null) {
+        if (mode === "create") {
+          if (!checkProfileLimit()) return;
+        } else {
+          closeModal("quick-edit-modal");
+          closeModal("profile-manager-modal");
+        }
+        const deleteBtn = document.getElementById("btn-delete-profile");
+        if (mode === "edit" && profileId) {
+          const p = appState.profiles.find((x) => x.id === profileId);
+          editorProfileState = { id: p.id, name: p.name, age: p.age || 5, avatar: p.avatar };
+          deleteBtn.classList.remove("hidden");
+          deleteBtn.onclick = () => requestDeleteProfile(p.id);
+        } else {
+          editorProfileState = { id: null, name: "", age: 5, avatar: avatarList[0] };
+          deleteBtn.classList.add("hidden");
+        }
+        updateFullProfileEditorUI();
+        openModalGeneric("full-profile-editor-modal");
+      }
+      function updateFullProfileEditorUI() {
+        document.getElementById("profile-name-input").value = editorProfileState.name;
+        document.getElementById("profile-age-input").value = editorProfileState.age;
+        document.getElementById("profile-preview-circle").innerHTML = getAvatarHTML(editorProfileState.avatar, "text-4xl");
+        const grid = document.getElementById("full-editor-avatar-grid");
+        grid.innerHTML = "";
+        avatarList.forEach((icon) => {
+          const isSelected = editorProfileState.avatar === icon;
+          const styleClass = isSelected
+            ? "bg-accent-pink text-white ring-2 ring-white scale-110 shadow-lg"
+            : "bg-white/10 text-white/70 hover:bg-white/20";
+          grid.innerHTML += `<button onclick="setFullEditorAvatar('${icon}')" class="w-12 h-12 rounded-full transition-all duration-200 flex items-center justify-center text-xl ${styleClass}"><i class="fa-solid ${icon}"></i></button>`;
+        });
+      }
+      function updateProfileNameState(val) {
+        editorProfileState.name = val;
+      }
+      function updateProfileAgeState(val) {
+        editorProfileState.age = val;
+      }
+      function setFullEditorAvatar(icon) {
+        editorProfileState.avatar = icon;
+        editorProfileState.name = document.getElementById("profile-name-input").value;
+        editorProfileState.age = document.getElementById("profile-age-input").value;
+        updateFullProfileEditorUI();
+      }
+      function adjustAge(delta) {
+        let v = parseInt(document.getElementById("profile-age-input").value) || 5;
+        v += delta;
+        if (v < 1) v = 1;
+        if (v > 99) v = 99;
+        document.getElementById("profile-age-input").value = v;
+        editorProfileState.age = v;
+      }
+
+      function saveFullProfile() {
+        const name = document.getElementById("profile-name-input").value.trim();
+        const age = parseInt(document.getElementById("profile-age-input").value) || 5;
+        if (!name) {
+          showAlert(appState.language === "en" ? "Name required!" : "Nom requis !");
+          return;
+        }
+        editorProfileState.name = name;
+        editorProfileState.age = age;
+        let isNew = false;
+        let profileId = editorProfileState.id;
+        if (profileId) {
+          const p = appState.profiles.find((x) => x.id === profileId);
+          p.name = editorProfileState.name;
+          p.age = editorProfileState.age;
+          p.avatar = editorProfileState.avatar;
+        } else {
+          isNew = true;
+          profileId = Date.now();
+          const newProfile = {
+            id: profileId,
+            name: editorProfileState.name,
+            age: editorProfileState.age,
+            avatar: editorProfileState.avatar,
+            assignedTasks: [],
+            completedKeys: [],
+            streakHistory: [],
+          };
+          appState.profiles.push(newProfile);
+        }
+        closeModal("full-profile-editor-modal");
+        renderFamilyWall();
+        if (isNew) {
+          pendingAutoAssignProfileId = profileId;
+          setTimeout(() => openModalGeneric("offer-auto-assign-modal"), 300);
+        }
+      }
+
+      // --- AUTO ASSIGN LOGIC ---
+      function triggerAutoAssignFlow(pid) {
+        const targetId = pid || pendingAutoAssignProfileId;
+        if (!appState.isPremium) {
+          pendingAutoAssignProfileId = targetId;
+          premiumPurchaseIntent = "auto_assign";
+          openPremiumModal("L'automatisation magique est réservée aux Capitaines !");
+          return;
+        }
+        if (!targetId) return;
+        schedState.profileId = targetId;
+        const profile = appState.profiles.find((p) => p.id === targetId);
+        const suitableTasks = taskLibrary.filter((t) => {
+          const ageOk = profile.age >= (t.minAge || 0) && (!t.maxAge || profile.age <= t.maxAge);
+          const autoOk = t.auto !== false;
+          return ageOk && autoOk;
+        });
+        if (suitableTasks.length === 0) {
+          showAlert(appState.language === "en" ? "No tasks found for this age." : "Aucune tâche trouvée pour cet âge.");
+          return;
+        }
+        const listContainer = document.getElementById("auto-assign-list");
+        listContainer.innerHTML = "";
+        const lang = appState.language || "fr";
+        suitableTasks.forEach((t) => {
+          const title = lang === "en" && t.title_en ? t.title_en : t.title;
+          listContainer.innerHTML += `<div class="flex items-center gap-3 bg-white/10 p-2 rounded-lg"><div class="w-6 h-6 rounded-full ${t.color} flex items-center justify-center text-[10px]">${getTaskVisual(t)}</div><div class="flex-1 text-xs font-bold">${title}</div><div class="text-[10px] opacity-50">${t.defaultPeriod === "both" ? (lang === "en" ? "Morning & Evening" : "Matin & Soir") : t.defaultPeriod === "morning" ? (lang === "en" ? "Morning" : "Matin") : lang === "en" ? "Evening" : "Soir"}</div></div>`;
+        });
+        schedSelectedTasks = suitableTasks.map((t) => t.id);
+        openModalGeneric("auto-assign-confirm-modal");
+      }
+
+      function confirmAutoAssign() {
+        const profile = appState.profiles.find((p) => p.id === schedState.profileId);
+        let addedCount = 0;
+        schedSelectedTasks.forEach((tid) => {
+          const t = taskLibrary.find((x) => x.id === tid);
+          const periods = t.defaultPeriod === "both" ? ["morning", "evening"] : [t.defaultPeriod];
+          let daysToAssign = [0, 1, 2, 3, 4, 5, 6];
+          if (t.category === "school") {
+            daysToAssign = [1, 2, 3, 4, 5];
+          } else if (t.category === "school_prep") {
+            daysToAssign = [0, 1, 2, 3, 4];
+          }
+          periods.forEach((per) => {
+            if (!profile.assignedTasks.some((a) => a.taskId === tid && a.period === per)) {
+              profile.assignedTasks.push({ taskId: tid, period: per, days: daysToAssign });
+              addedCount++;
+            }
+          });
+        });
+        closeModal("auto-assign-confirm-modal");
+        renderFamilyWall();
+        SoundFX.playMagic();
+        const l = appState.language || "fr";
+        const msg = l === "fr" ? `${addedCount} tâches ajoutées intelligemment !` : `${addedCount} tasks smartly added!`;
+        showAlert(msg);
+      }
+
+      function runMagicAutoAssign() {
+        if (!schedState.profileId) {
+          showAlert(appState.language === "en" ? "Select an astronaut!" : "Sélectionnez un astronaute !");
+          return;
+        }
+        triggerAutoAssignFlow(schedState.profileId);
+      }
+
+      // --- SCHEDULER ---
+      let schedulerTab = "view";
+      function switchSchedulerTab(tab) {
+        schedulerTab = tab;
+        const btnView = document.getElementById("tab-view");
+        const btnAdd = document.getElementById("tab-add");
+        const containerView = document.getElementById("scheduler-view-container");
+        const containerAdd = document.getElementById("scheduler-add-container");
+        if (tab === "view") {
+          btnView.className = "flex-1 py-2 rounded-lg text-xs font-bold bg-accent-pink text-white shadow-lg transition-all";
+          btnAdd.className = "flex-1 py-2 rounded-lg text-xs font-bold text-white/50 hover:bg-white/5 transition-all";
+          containerView.classList.remove("hidden");
+          containerAdd.classList.add("hidden");
+          renderWeeklyView();
+        } else {
+          btnAdd.className = "flex-1 py-2 rounded-lg text-xs font-bold bg-button-gradient text-white shadow-lg transition-all";
+          btnView.className = "flex-1 py-2 rounded-lg text-xs font-bold text-white/50 hover:bg-white/5 transition-all";
+          containerView.classList.add("hidden");
+          containerAdd.classList.remove("hidden");
+        }
+        SoundFX.click();
+      }
+
+      function renderWeeklyView() {
+        const container = document.getElementById("scheduler-view-container");
+        container.innerHTML = "";
+        if (!schedState.profileId) {
+          container.innerHTML = `<div class="flex flex-col items-center justify-center h-48 text-white/40 italic gap-2"><i class="fa-solid fa-user-astronaut text-2xl"></i><span>${appState.language === "en" ? "Select an astronaut above" : "Sélectionnez un astronaute ci-dessus"}</span></div>`;
+          return;
+        }
+        const profile = appState.profiles.find((p) => p.id === schedState.profileId);
+        const lang = appState.language || "fr";
+        const daysNames =
+          lang === "en"
+            ? ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+            : ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+        const dayOrder = [1, 2, 3, 4, 5, 6, 0];
+        dayOrder.forEach((dayIndex) => {
+          const dayTasks = profile.assignedTasks.filter((a) => a.days && a.days.includes(dayIndex));
+          const morningTasks = dayTasks.filter((t) => t.period === "morning");
+          const eveningTasks = dayTasks.filter((t) => t.period === "evening");
+          const count = morningTasks.length + eveningTasks.length;
+          const addMorning = `<button onclick="openQuickAddScheduler('morning', ${dayIndex})" class="w-8 h-8 rounded-lg border border-white/10 border-dashed flex items-center justify-center text-white/30 hover:text-white hover:border-white text-xs hover:bg-white/5 transition"><i class="fa-solid fa-plus"></i></button>`;
+          const addEvening = `<button onclick="openQuickAddScheduler('evening', ${dayIndex})" class="w-8 h-8 rounded-lg border border-white/10 border-dashed flex items-center justify-center text-white/30 hover:text-white hover:border-white text-xs hover:bg-white/5 transition"><i class="fa-solid fa-plus"></i></button>`;
+          const dayHTML = `<div class="bg-white/5 rounded-xl border border-white/10 overflow-hidden animate-[fadeIn_0.3s]"><div onclick="toggleDayAccordion(this)" class="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5 transition"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs border border-white/5">${daysNames[dayIndex].substring(0, 3)}</div><span class="font-bold text-sm text-white/90">${daysNames[dayIndex]}</span></div><div class="flex items-center gap-2">${count > 0 ? `<span class="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/60 font-bold">${count}</span>` : ""}<i class="fa-solid fa-chevron-down text-white/30 transition-transform duration-300 accordion-icon"></i></div></div><div class="hidden accordion-content bg-[#0f0b24]/30 border-t border-white/5"><div class="p-3 border-b border-white/5 flex items-start gap-3"><div class="mt-1.5 opacity-80"><i class="fa-solid fa-sun text-yellow-400 text-xs mr-1"></i><span class="text-xs font-semibold text-white/60">${translations[lang].morning}</span></div><div class="flex-1 flex flex-wrap gap-2">${renderMiniTaskIcons(morningTasks, dayIndex, "morning")}${addMorning}</div></div><div class="p-3 flex items-start gap-3"><div class="mt-1.5 opacity-80"><i class="fa-solid fa-moon text-purple-400 text-xs mr-1"></i><span class="text-xs font-semibold text-white/60">${translations[lang].evening}</span></div><div class="flex-1 flex flex-wrap gap-2">${renderMiniTaskIcons(eveningTasks, dayIndex, "evening")}${addEvening}</div></div></div></div>`;
+          container.innerHTML += dayHTML;
+        });
+      }
+
+      function renderMiniTaskIcons(assignments, dayIndex, period) {
+        if (assignments.length === 0) return "";
+        const lang = appState.language || "fr";
+        return assignments
+          .map((a) => {
+            const t = taskLibrary.find((x) => x.id === a.taskId);
+            if (!t) return "";
+            const title = lang === "en" && t.title_en ? t.title_en : t.title;
+            return `<div onclick="removeTaskFromDay(${schedState.profileId}, ${a.taskId}, '${a.period}', ${dayIndex})" class="task-tooltip w-8 h-8 rounded-lg ${t.color} flex items-center justify-center text-xs shadow-sm cursor-pointer hover:scale-110 transition relative group">${getTaskVisual(t)}<span class="task-tooltip-content">${title}</span><div class="absolute -top-1 -right-1 bg-red-500 rounded-full w-3 h-3 flex items-center justify-center text-[8px] opacity-0 group-hover:opacity-100 transition shadow-sm border border-white"><i class="fa-solid fa-xmark text-white"></i></div></div>`;
+          })
+          .join("");
+      }
+      function toggleDayAccordion(header) {
+        const content = header.nextElementSibling;
+        const icon = header.querySelector(".accordion-icon");
+        if (content.classList.contains("hidden")) {
+          content.classList.remove("hidden");
+          icon.style.transform = "rotate(180deg)";
+          SoundFX.click();
+        } else {
+          content.classList.add("hidden");
+          icon.style.transform = "rotate(0deg)";
+        }
+      }
+
+      function openQuickAddScheduler(period, day) {
+        schedState.period = period;
+        schedState.days = [day];
+        openGlobalLibrary("scheduler_quick", schedState.profileId);
+      }
+
+      // FIX v1.1: Merge days instead of overwriting
+      function finalizeSchedulerQuickAdd(taskId) {
+        const p = appState.profiles.find((x) => x.id === schedState.profileId);
+        const period = schedState.period;
+        const currentCount = p.assignedTasks.filter((a) => a.period === period).length;
+        if (!appState.isPremium && currentCount >= 4) {
+          closeModal("global-library-modal");
+          openPremiumModal(translations[appState.language || "fr"].premium_msg_task);
+          return;
+        }
+        // FIX: Merge days instead of replacing
+        const existing = p.assignedTasks.find((a) => a.taskId === taskId && a.period === period);
+        if (existing) {
+          existing.days = [...new Set([...existing.days, ...schedState.days])];
+        } else {
+          p.assignedTasks.push({ taskId: taskId, period: period, days: [...schedState.days] });
+        }
+        closeModal("global-library-modal");
+        renderWeeklyView();
+        renderFamilyWall();
+        SoundFX.playMagic();
+      }
+
+      function removeTaskFromDay(pid, tid, period, dayToRemove) {
+        const lang = appState.language || "fr";
+        const t = taskLibrary.find((x) => x.id === tid);
+        const title = lang === "en" && t.title_en ? t.title_en : t.title;
+        const periodText = translations[lang][period + "_part"];
+        const msg = translations[lang].remove_task_confirm.replace("<TASK_TITLE>", title).replace("<PERIOD_TITLE>", periodText);
+        showConfirm(translations[lang].attention, msg, () => {
+          const p = appState.profiles.find((x) => x.id === pid);
+          const assignmentIndex = p.assignedTasks.findIndex((a) => a.taskId === tid && a.period === period);
+          if (assignmentIndex > -1) {
+            const assignment = p.assignedTasks[assignmentIndex];
+            assignment.days = assignment.days.filter((d) => d !== dayToRemove);
+            if (assignment.days.length === 0) {
+              p.assignedTasks.splice(assignmentIndex, 1);
+              p.completedKeys = p.completedKeys.filter((k) => k !== `${tid}_${period}`);
+            }
+            renderWeeklyView();
+            renderFamilyWall();
+            SoundFX.click();
+          }
+        });
+      }
+
+      function openScheduler() {
+        schedState = { taskId: null, profileId: null, period: null, days: [] };
+        schedSelectedTasks = [];
+        renderSchedulerTaskList();
+        const list = document.getElementById("scheduler-profile-list");
+        list.innerHTML = "";
+        appState.profiles.forEach((p) => {
+          list.innerHTML += `<div onclick="schedSelectProfile(this, ${p.id})" class="sched-item w-full flex flex-col items-center gap-1 p-2 rounded-xl cursor-pointer border border-transparent transition hover:bg-white/5 opacity-60 hover:opacity-100"><div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center overflow-hidden border-2 border-transparent transition-all shadow-md">${getAvatarHTML(p.avatar, "text-xl")}</div><span class="text-[9px] font-bold truncate max-w-full text-center">${p.name}</span></div>`;
+        });
+        resetSchedUI();
+        document.getElementById("scheduler-task-search").value = "";
+        switchSchedulerTab("view");
+        openModalGeneric("scheduler-modal");
+      }
+
+      function renderSchedulerTaskList(query = "") {
+        const list = document.getElementById("scheduler-task-list");
+        list.innerHTML = "";
+        const lang = appState.language || "fr";
+        const filtered = taskLibrary.filter((t) => {
+          const title = lang === "en" && t.title_en ? t.title_en : t.title;
+          return title.toLowerCase().includes(query.toLowerCase());
+        });
+        filtered.forEach((t) => {
+          const title = lang === "en" && t.title_en ? t.title_en : t.title;
+          const isSelected = schedSelectedTasks.includes(t.id);
+          const styleClass = isSelected ? "bg-white/20 border-accent-pink" : "hover:bg-white/5 border-transparent";
+          list.innerHTML += `<div onclick="schedToggleTask(this, ${t.id})" class="sched-item flex items-center gap-2 p-2 rounded-lg cursor-pointer border ${styleClass}" data-task-id="${t.id}"><div class="w-6 h-6 rounded-full ${t.color} flex items-center justify-center text-[10px] overflow-hidden">${getTaskVisual(t)}</div><span class="text-sm font-bold flex-1">${title}</span></div>`;
+        });
+      }
+      function filterSchedulerTasks() {
+        renderSchedulerTaskList(document.getElementById("scheduler-task-search").value);
+      }
+      function schedToggleTask(el, id) {
+        if (schedSelectedTasks.includes(id)) {
+          schedSelectedTasks = schedSelectedTasks.filter((tid) => tid !== id);
+          el.classList.remove("bg-white/20", "border-accent-pink");
+          el.classList.add("hover:bg-white/5", "border-transparent");
+        } else {
+          schedSelectedTasks.push(id);
+          el.classList.add("bg-white/20", "border-accent-pink");
+          el.classList.remove("hover:bg-white/5", "border-transparent");
+        }
+      }
+      function schedSelectProfile(el, id) {
+        schedState.profileId = id;
+        document.querySelectorAll("#scheduler-profile-list .sched-item").forEach((e) => {
+          e.classList.remove("opacity-100", "bg-white/10");
+          e.classList.add("opacity-60", "border-transparent");
+          e.querySelector("div").classList.remove("border-accent-pink", "scale-110");
+        });
+        el.classList.remove("opacity-60", "border-transparent");
+        el.classList.add("opacity-100", "bg-white/10");
+        el.querySelector("div").classList.add("border-accent-pink", "scale-110");
+        if (schedulerTab === "view") {
+          renderWeeklyView();
+        }
+        SoundFX.click();
+      }
+      function schedulerSetPeriod(p) {
+        schedState.period = p;
+        document.getElementById("sched-btn-morning").className =
+          `p-3 bg-input-bg border rounded-xl flex items-center justify-center gap-2 opacity-50 border-white/10`;
+        document.getElementById("sched-btn-evening").className =
+          `p-3 bg-input-bg border rounded-xl flex items-center justify-center gap-2 opacity-50 border-white/10`;
+        document.getElementById("sched-btn-both").className =
+          `w-full mt-3 p-3 bg-input-bg border border-white/10 rounded-xl flex items-center justify-center gap-2 opacity-50 border-white/10`;
+        if (p === "morning" || p === "both")
+          document.getElementById("sched-btn-morning").className =
+            `p-3 bg-input-bg border rounded-xl flex items-center justify-center gap-2 opacity-100 border-yellow-400`;
+        if (p === "evening" || p === "both")
+          document.getElementById("sched-btn-evening").className =
+            `p-3 bg-input-bg border rounded-xl flex items-center justify-center gap-2 opacity-100 border-purple-400`;
+        if (p === "both")
+          document.getElementById("sched-btn-both").className =
+            `w-full mt-3 p-3 bg-input-bg border border-white/10 rounded-xl flex items-center justify-center gap-2 opacity-100 border-accent-pink`;
+      }
+      function toggleSchedDay(d) {
+        if (schedState.days.includes(d)) schedState.days = schedState.days.filter((x) => x !== d);
+        else schedState.days.push(d);
+        updateDayButtons();
+      }
+      function schedulerSelectAllDays() {
+        schedState.days = [1, 2, 3, 4, 5, 6, 0];
+        updateDayButtons();
+      }
+      function updateDayButtons() {
+        document.querySelectorAll(".day-btn").forEach((btn) => {
+          const day = parseInt(btn.id.split("-")[1]);
+          if (schedState.days.includes(day)) btn.classList.add("active");
+          else btn.classList.remove("active");
+        });
+      }
+      function resetSchedUI() {
+        schedulerSetPeriod(null);
+        schedState.days = [];
+        updateDayButtons();
+        schedSelectedTasks = [];
+        renderSchedulerTaskList();
+      }
+
+      function saveSchedule() {
+        if (!schedState.profileId) {
+          showAlert(appState.language === "en" ? "Select an astronaut!" : "Sélectionnez un astronaute !");
+          return;
+        }
+        if (!schedState.period) {
+          showAlert(appState.language === "en" ? "Select a time period!" : "Sélectionnez une période !");
+          return;
+        }
+        if (schedState.days.length === 0) {
+          showAlert(appState.language === "en" ? "Select at least one day!" : "Sélectionnez au moins un jour !");
+          return;
+        }
+        if (schedSelectedTasks.length === 0) {
+          showAlert(appState.language === "en" ? "Select at least one task!" : "Sélectionnez au moins une tâche !");
+          return;
+        }
+        const p = appState.profiles.find((x) => x.id === schedState.profileId);
+        const periodsToAdd = schedState.period === "both" ? ["morning", "evening"] : [schedState.period];
+        let tasksProcess = [...schedSelectedTasks];
+        for (let taskId of tasksProcess) {
+          for (let per of periodsToAdd) {
+            const currentCount = p.assignedTasks.filter((a) => a.period === per && a.taskId !== taskId).length;
+            if (!appState.isPremium && currentCount >= 4) {
+              openPremiumModal(translations[appState.language || "fr"].premium_msg_task);
+              return;
+            }
+          }
+        }
+        // FIX v1.1: Merge days instead of replacing
+        tasksProcess.forEach((taskId) => {
+          periodsToAdd.forEach((per) => {
+            const existing = p.assignedTasks.find((a) => a.taskId === taskId && a.period === per);
+            if (existing) {
+              existing.days = [...new Set([...existing.days, ...schedState.days])];
+            } else {
+              p.assignedTasks.push({ taskId: taskId, period: per, days: [...schedState.days] });
+            }
+            p.completedKeys = p.completedKeys.filter((k) => k !== `${taskId}_${per}`);
+          });
+        });
+        resetSchedUI();
+        document.getElementById("scheduler-task-search").value = "";
+        filterSchedulerTasks();
+        switchSchedulerTab("view");
+        renderFamilyWall();
+        SoundFX.playMagic();
+      }
+
+      function showParentalGate(purpose) {
+        if (purpose === "create") {
+          if (!checkProfileLimit()) return;
+          openFullProfileEditor("create");
+          return;
+        }
+        gatePurpose = purpose;
+        const a = Math.floor(Math.random() * 12) + 2; // 2-13
+        const b = Math.floor(Math.random() * 12) + 1; // 1-13
+        mathRes = a + b;
+        document.getElementById("math-q").innerHTML = `${a} + ${b}`;
+        document.getElementById("math-a").value = "";
+        openModalGeneric("parental-modal");
+      }
+      function checkMath() {
+        if (parseInt(document.getElementById("math-a").value) === mathRes) {
+          closeModal("parental-modal");
+          if (gatePurpose === "settings") openSettings();
+          else if (gatePurpose === "edit-full") openFullProfileEditor("edit", pendingParentalActionId);
+        } else {
+          showAlert(appState.language === "en" ? "Error!" : "Erreur !");
+        }
+      }
+      function closeParentalGate() {
+        closeModal("parental-modal");
+        pendingParentalActionId = null;
+      }
+
+      const actionsToSave = [
+        "setAppLanguage",
+        "changeLanguageFromSettings",
+        "toggleSound",
+        "savePeriods",
+        "finalizeAssign",
+        "saveTaskToLibrary",
+        "requestDeleteTaskFromLibrary",
+        "requestDeleteProfile",
+        "requestDeleteAssignment",
+        "saveQuickEdit",
+        "saveFullProfile",
+        "confirmAutoAssign",
+        "saveSchedule",
+        "buyPremium",
+        "toggleTask",
+        "toggleDeleteMode",
+        "finalizeSchedulerQuickAdd",
+        "removeTaskFromDay",
+        "saveCroppedImage",
+      ];
+      actionsToSave.forEach((fn) => wrapWithSave(fn));
+    </script>
+  </body>
+</html>
