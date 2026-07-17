@@ -283,6 +283,6 @@ The first development tranche has already started in code:
 1. Finish app-wide i18n, especially data-driven labels imported from older snapshots.
 2. Expand the sound engine beyond the first feedback vocabulary.
 3. Complete the iPad landscape modal E2E matrix and accessibility pass.
-4. Create a Vercel preview with isolated Neon/Stripe/Blob configuration, then repeat the verified local Stripe and media lifecycle remotely.
+4. Expand the live Vercel preview coverage from the verified signup/profile/private-read/Stripe lifecycle to the complete modal and file-picker E2E matrix.
 5. Add household export/deletion coverage, including deletion of every referenced private Blob.
 6. Audit any legacy live subscriptions before creating or archiving a live RoutineKids catalog.

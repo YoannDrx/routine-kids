@@ -21,6 +21,7 @@ RoutineKids est en cours de migration depuis le prototype HTML monolithique vers
 - Une routine live vide reste vide : aucune mission prototype n'est affichee comme une vraie donnee. Les journees terminees figent leur snapshot de streak afin qu'une future modification de routine ne reecrive pas l'historique.
 - Le parcours Stripe test a ete valide avec une vraie Checkout Session de test, webhook signe et idempotent, activation Family Premium, annulation et retour au plan Free. Les fixtures Stripe et la branche Neon de test ont ete supprimees apres verification.
 - Le catalogue Stripe de test conserve un seul produit `RoutineKids Family Premium`, avec une offre mensuelle a 9 EUR et annuelle a 90 EUR. Son visuel de marque est genere par l'application sur `/family-premium-card` afin de rester versionne avec l'identite du produit.
+- La preview publique `https://routine-kids-yoanndrx-yoanndrxs-projects.vercel.app` utilise une branche Neon isolee, un Blob prive et un webhook Stripe de test. Inscription, profil, lecture authentifiee du media, Checkout, rejeu idempotent, annulation et purge QA ont ete verifies a distance. La branche Neon principale et Stripe live restent intacts.
 
 ## Stack cible
 

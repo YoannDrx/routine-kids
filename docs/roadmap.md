@@ -358,8 +358,8 @@ Authoritative status:
 
 ## Immediate Next Steps
 
-1. Create an isolated Vercel preview with its own Neon branch, private Blob store and Stripe test webhook.
-2. Run the full modal E2E matrix at 1024x768 and 1366x1024, including media replacement and deletion.
+1. Keep the isolated Vercel/Neon/Blob/Stripe preview smoke test green; the first remote lifecycle is complete.
+2. Run the full modal E2E matrix at 1024x768 and 1366x1024, including media replacement and deletion through the file picker.
 3. Complete the remaining i18n pass for imported and data-driven labels.
 4. Preserve weekday-specific prototype scheduling fidelity with explicit weekly overrides.
 5. Add export/backup and a documented household deletion path, including Blob cleanup.
