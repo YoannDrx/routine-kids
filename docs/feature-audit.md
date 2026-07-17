@@ -735,12 +735,11 @@ The list below tracks the distinct user-visible actions in the current app.
 
 ## Zero-Mock Gaps
 
-The project is not yet release-complete because of four structural gaps:
+The project is not yet release-complete because of three structural gaps:
 
 1. Some user-facing copy and imported data-driven labels are not localized yet.
 2. Modal, accessibility and exact iPad viewport coverage remain incomplete.
-3. The remote destructive-account scenario still needs a private-media fixture to prove Blob removal after deletion.
-4. Prototype import still compresses old weekday-specific scheduling into the current V1 routine model until weekly overrides exist.
+3. Prototype import still compresses old weekday-specific scheduling into the current V1 routine model until weekly overrides exist.
 
 ## Zero-Mock Implementation Plan
 
@@ -808,5 +807,4 @@ The project is not yet release-complete because of four structural gaps:
 
 1. Add exact 1024x768 and 1366x1024 modal E2E coverage.
 2. Finish i18n for imported/data-driven labels and complete the accessibility pass.
-3. Replay destructive account deletion with a private-media fixture and assert that its Blob URL is revoked.
-4. Preserve weekday-specific prototype scheduling data with weekly overrides.
+3. Preserve weekday-specific prototype scheduling data with weekly overrides.

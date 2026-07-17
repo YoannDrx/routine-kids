@@ -28,11 +28,11 @@ Last updated: July 17, 2026
    - delete the account and return to the public board;
    - verify that the former credentials can no longer sign in.
 
-The disposable household used for the destructive smoke test contained no uploaded media. The database/auth cascade is therefore verified remotely; the Blob cleanup implementation is tested and retried in code, but its hosted proof still requires a dedicated fixture with one private file.
+A second destructive smoke test included a real private profile image. The exact Blob pathname was listed before deletion and absent afterwards. A read-only Neon query on the isolated branch also returned zero remaining `codex-media-*` users after both disposable households were deleted.
 
 ## Remaining release gates
 
-- Full modal matrix at 1024x768 and 1366x1024, including file-picker replace/delete flows.
+- Full modal matrix at 1024x768 and 1366x1024, including file-picker replacement flows beyond the verified upload/crop/account-deletion path.
 - Final imported/data-driven i18n pass and accessibility audit.
 - Weekday-specific scheduler overrides if exact prototype parity remains in V1.
 - Live Stripe catalog audit before any production-mode billing activation.

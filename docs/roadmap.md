@@ -363,7 +363,7 @@ Authoritative status:
 2. Run the full modal E2E matrix at 1024x768 and 1366x1024, including media replacement and deletion through the file picker.
 3. Complete the remaining i18n pass for imported and data-driven labels.
 4. Preserve weekday-specific prototype scheduling fidelity with explicit weekly overrides.
-5. Add a private-media fixture to the remote destructive-account scenario, then verify the referenced Blob is no longer readable after deletion.
+5. Keep the verified destructive-account scenario with private media in the release smoke matrix.
 6. Audit accessibility, reduced motion and deterministic sound behavior.
 7. Fix the intro-video parity issue in the preserved original prototype without reintroducing it into the production app.
 

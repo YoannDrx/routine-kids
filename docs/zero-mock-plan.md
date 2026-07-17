@@ -273,7 +273,7 @@ The first development tranche has already started in code:
 - streak and journey progression are now derived from `TaskCompletion` for the live board
 - settings persists locale, sounds, and periods; premium state now comes from Stripe-synchronized subscriptions
 - private Vercel Blob storage is live for new profile and task images, with session and household authorization on reads and cleanup on replace/delete
-- the major remaining product gaps are localization of imported data labels, modal E2E coverage, weekday-specific scheduling fidelity and a remote deletion fixture containing private media
+- the major remaining product gaps are localization of imported data labels, modal E2E coverage and weekday-specific scheduling fidelity
 - live empty routines no longer fall back to prototype missions
 - completed-day streak snapshots now remain stable when routines change later
 - the Stripe test lifecycle is verified end to end: card Checkout, signed webhook, idempotent replay, Family Premium entitlement, cancellation, and return to Free
@@ -284,5 +284,5 @@ The first development tranche has already started in code:
 2. Expand the sound engine beyond the first feedback vocabulary.
 3. Complete the iPad landscape modal E2E matrix and accessibility pass.
 4. Expand the live Vercel preview coverage from the verified signup/profile/private-read/Stripe/account-deletion lifecycle to the complete modal and file-picker E2E matrix.
-5. Add a private-media fixture to the remote account-deletion scenario; export and deletion are already implemented and the no-media destructive flow is verified remotely.
+5. Keep the now-verified private-media account-deletion scenario in release regression coverage.
 6. Audit any legacy live subscriptions before creating or archiving a live RoutineKids catalog.
