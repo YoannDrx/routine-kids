@@ -1,12 +1,12 @@
 "use client";
 
-import { CreateProfileForm } from "@/components/admin/create-profile-form";
-import { HouseholdSettingsForm } from "@/components/admin/household-settings-form";
-import { ParentSecurityForm } from "@/components/admin/parent-security-form";
-import { ProfileThemeForm } from "@/components/admin/profile-theme-form";
-import { PrototypeImportCard } from "@/components/admin/prototype-import-card";
-import { RoutineWorkbench } from "@/components/admin/routine-workbench";
-import { TaskTemplateWorkbench } from "@/components/admin/task-template-workbench";
+import { CreateProfileForm } from "@/components/parent/create-profile-form";
+import { HouseholdSettingsForm } from "@/components/parent/household-settings-form";
+import { ParentSecurityForm } from "@/components/parent/parent-security-form";
+import { ProfileThemeForm } from "@/components/parent/profile-theme-form";
+import { PrototypeImportCard } from "@/components/parent/prototype-import-card";
+import { RoutineWorkbench } from "@/components/parent/routine-workbench";
+import { TaskTemplateWorkbench } from "@/components/parent/task-template-workbench";
 import { useAppMessages } from "@/components/i18n/app-i18n-provider";
 import { OverlayModalShell } from "@/components/settings/overlay-modal-shell";
 import { ProfileAvatar } from "@/components/shared/profile-avatar";
@@ -19,17 +19,17 @@ import {
 } from "@/lib/parent-workspace";
 import {
   type CreateChildProfileState,
-} from "@/components/admin/create-profile-form-state";
+} from "@/components/parent/create-profile-form-state";
 import {
   type UpdateChildProfileThemeState,
-} from "@/components/admin/profile-theme-form-state";
+} from "@/components/parent/profile-theme-form-state";
 import {
   type UpdateHouseholdSettingsState,
-} from "@/components/admin/household-settings-form-state";
+} from "@/components/parent/household-settings-form-state";
 import {
   type UpdateParentSecurityState,
-} from "@/components/admin/parent-security-form-state";
-import { type AdminWorkbenchMutationResult } from "@/components/admin/workbench-types";
+} from "@/components/parent/parent-security-form-state";
+import { type ParentWorkbenchMutationResult } from "@/components/parent/workbench-types";
 
 type CrewWorkspaceModalProps = {
   open: boolean;
@@ -89,10 +89,10 @@ type TaskLibraryWorkspaceModalProps = {
     shortLabel: string;
     icon: string;
     durationMinutes: number;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onDeleteAction: (input: {
     templateId: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
 };
 
 type RoutinePlannerWorkspaceModalProps = {
@@ -104,16 +104,16 @@ type RoutinePlannerWorkspaceModalProps = {
     childProfileId: string;
     period: "morning" | "evening";
     title: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onAssignTaskAction: (input: {
     childProfileId: string;
     period: "morning" | "evening";
     templateId: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onDeleteTaskAction: (input: {
     childProfileId: string;
     routineTaskId: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
 };
 
 type ImportWorkspaceModalProps = {

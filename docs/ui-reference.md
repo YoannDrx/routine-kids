@@ -121,11 +121,11 @@ Component direction:
 - `src/components/board/*`
   - preserve board layout and interaction density
 - `src/components/settings/*`
-  - preserve the settings full-view and absorb parent tooling now living in `src/components/admin/*`
+  - preserve the settings full-view and keep parent tooling in `src/components/parent/*`
 
 Transitional note:
 
-- `src/components/admin/*` and `src/app/admin/*` are implementation scaffolding only.
+- `src/components/parent/*` and `src/app/parent-*.ts` are internal implementation modules, never public routes.
 - They are scheduled to be folded into the settings workspace and removed.
 
 ## Non-Negotiable UX Constraints

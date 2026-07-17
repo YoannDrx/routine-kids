@@ -100,6 +100,11 @@ type ServerCopy = {
     prototypeImportInvalid: string;
     prototypeImportEmpty: string;
     prototypeImported: (profileCount: number, templateCount: number) => string;
+    accountDeleteConfirmationInvalid: string;
+    accountDeleteHouseholdMismatch: string;
+    accountDeleteBillingError: string;
+    accountDeleted: string;
+    accountDeletedCleanupPending: string;
   };
 };
 
@@ -227,6 +232,14 @@ const frCopy: ServerCopy = {
       "Aucune donnee prototype exploitable n'a ete trouvee dans ce snapshot.",
     prototypeImported: (profileCount, templateCount) =>
       `Import termine: ${profileCount} profil(s) et ${templateCount} template(s) synchronises.`,
+    accountDeleteConfirmationInvalid:
+      "Recopie le nom du foyer et DELETE pour confirmer la suppression.",
+    accountDeleteHouseholdMismatch: "Le nom du foyer ne correspond pas.",
+    accountDeleteBillingError:
+      "Impossible d'arreter la facturation. Aucune donnee n'a ete supprimee.",
+    accountDeleted: "Le foyer, le compte parent et ses donnees ont ete supprimes.",
+    accountDeletedCleanupPending:
+      "Le compte est supprime. Le nettoyage des medias doit etre relance par le support.",
   },
 };
 
@@ -354,6 +367,14 @@ const enCopy: ServerCopy = {
       "No usable prototype data was found in this snapshot.",
     prototypeImported: (profileCount, templateCount) =>
       `Import completed: ${profileCount} profile(s) and ${templateCount} template(s) synced.`,
+    accountDeleteConfirmationInvalid:
+      "Enter the household name and DELETE to confirm deletion.",
+    accountDeleteHouseholdMismatch: "The household name does not match.",
+    accountDeleteBillingError:
+      "Billing could not be stopped. No account data was deleted.",
+    accountDeleted: "The household, parent account and its data were deleted.",
+    accountDeletedCleanupPending:
+      "The account was deleted. Media cleanup must be retried by support.",
   },
 };
 

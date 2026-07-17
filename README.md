@@ -11,7 +11,7 @@ RoutineKids est en cours de migration depuis le prototype HTML monolithique vers
 - La reference UI/UX a conserver est dans [`docs/ui-reference.md`](/Users/yoannandrieux/Projets/routine-kids/docs/ui-reference.md).
 - Le plan d'execution zero mock est dans [`docs/zero-mock-plan.md`](/Users/yoannandrieux/Projets/routine-kids/docs/zero-mock-plan.md).
 - La direction produit actuelle ne garde pas de page admin dediee: toute la profondeur parent doit revenir dans l'overlay de parametres.
-- La route produit `/admin` a ete supprimee. Les composants de `src/components/admin` restent seulement comme extraction technique transitoire, le temps de les replier proprement dans `settings`.
+- La route produit `/admin` et les anciens repertoires techniques `admin` ont ete supprimes. Les actions parent vivent dans `src/app/parent-*.ts` et les composants dans `src/components/parent`.
 - La homepage signee-out n'affiche plus de famille prototype: elle garde la board visuelle, mais redirige vers les vrais flows `sign-in`, `sign-up` et `pricing`.
 - L'import prototype depuis `routineKidsData` est maintenant reel depuis les parametres et ecrit dans Prisma/Neon. La limite actuelle reste le scheduler hebdo du HTML, encore aplati sur le modele V1 `matin / soir`.
 - Les sons de board, le CRUD photo enfant, le CRUD photo des missions, la base i18n globale et les principaux retours serveur localises sont maintenant poses, mais la repasse zero-hardcoded complete continue.
@@ -22,6 +22,7 @@ RoutineKids est en cours de migration depuis le prototype HTML monolithique vers
 - Le parcours Stripe test a ete valide avec une vraie Checkout Session de test, webhook signe et idempotent, activation Family Premium, annulation et retour au plan Free. Les fixtures Stripe et la branche Neon de test ont ete supprimees apres verification.
 - Le catalogue Stripe de test conserve un seul produit `RoutineKids Family Premium`, avec une offre mensuelle a 9 EUR et annuelle a 90 EUR. Son visuel de marque est genere par l'application sur `/family-premium-card` afin de rester versionne avec l'identite du produit.
 - La preview publique `https://routine-kids-yoanndrx-yoanndrxs-projects.vercel.app` utilise une branche Neon isolee, un Blob prive et un webhook Stripe de test. Inscription, profil, lecture authentifiee du media, Checkout, rejeu idempotent, annulation et purge QA ont ete verifies a distance. La branche Neon principale et Stripe live restent intacts.
+- L'espace parent propose un export JSON prive `no-store` comprenant les donnees du foyer et les medias Blob disponibles. La suppression renforcee stoppe la facturation, supprime le compte et toutes les donnees en cascade, puis purge les medias prives avec retry.
 
 ## Stack cible
 
@@ -80,7 +81,7 @@ pnpm prototype:serve
 - `src/components/board` : UI enfant et modales de board
 - `src/components/settings` : espace parent cible, plein ecran parametres et overlays
 - `src/components/auth` : auth parent
-- `src/components/admin` : couche transitoire a replier dans `settings`, puis supprimer
+- `src/components/parent` : formulaires et outils parent ouverts dans les overlays de `settings`
 - `src/lib` : donnees de transition, auth, Prisma, themes
 - `prisma/schema.prisma` : modele de donnees de depart
 - `docs/roadmap.md` : audit, decisions et backlog

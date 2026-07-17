@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { z } from "zod";
 
-import { type CreateChildProfileState } from "@/components/admin/create-profile-form-state";
-import { type UpdateChildProfileThemeState } from "@/components/admin/profile-theme-form-state";
-import { type UpdateParentSecurityState } from "@/components/admin/parent-security-form-state";
-import { type UpdateHouseholdSettingsState } from "@/components/admin/household-settings-form-state";
+import { type CreateChildProfileState } from "@/components/parent/create-profile-form-state";
+import { type UpdateChildProfileThemeState } from "@/components/parent/profile-theme-form-state";
+import { type UpdateParentSecurityState } from "@/components/parent/parent-security-form-state";
+import { type UpdateHouseholdSettingsState } from "@/components/parent/household-settings-form-state";
 import { createChildProfileWithDefaults } from "@/lib/child-profile-service";
 import { isDatabaseConfigured } from "@/lib/config";
 import { ensureHouseholdBaseline } from "@/lib/household-bootstrap";

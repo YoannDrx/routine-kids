@@ -2,7 +2,7 @@ import {
   updateChildProfileThemeAction,
   updateHouseholdSettingsAction,
   updateParentSecurityAction,
-} from "@/app/admin/actions";
+} from "@/app/parent-actions";
 import {
   assignBoardTaskTemplateAction,
   assignManyBoardTaskTemplatesAction,
@@ -15,6 +15,7 @@ import {
 } from "@/app/board-actions";
 import {
   activateBoardPremiumAction,
+  deleteRoutineKidsAccountAction,
   importPrototypeSnapshotAction,
   openBillingPortalAction,
   updateBoardSettingsAction,
@@ -85,6 +86,9 @@ export default async function SettingsPage() {
       }
       onActivatePremiumAction={session?.user ? activateBoardPremiumAction : undefined}
       onManageBillingAction={session?.user ? openBillingPortalAction : undefined}
+      onDeleteAccountAction={
+        session?.user ? deleteRoutineKidsAccountAction : undefined
+      }
       parentWorkspace={parentWorkspace ?? undefined}
       onCreateProfileAction={session?.user ? createBoardProfileAction : undefined}
       onUpdateProfileAction={session?.user ? updateBoardProfileAction : undefined}

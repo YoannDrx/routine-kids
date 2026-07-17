@@ -6,7 +6,7 @@ import { useAppMessages } from "@/components/i18n/app-i18n-provider";
 import {
   createChildProfileInitialState,
   type CreateChildProfileState,
-} from "@/components/admin/create-profile-form-state";
+} from "@/components/parent/create-profile-form-state";
 
 type CreateProfileFormProps = {
   action: (

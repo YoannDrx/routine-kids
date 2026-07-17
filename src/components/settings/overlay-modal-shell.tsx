@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
+import { useAppMessages } from "@/components/i18n/app-i18n-provider";
 
 type OverlayModalShellProps = {
   open: boolean;
@@ -22,6 +23,8 @@ export function OverlayModalShell({
   panelClassName,
   showCloseButton = true,
 }: OverlayModalShellProps) {
+  const messages = useAppMessages();
+
   if (!open) {
     return null;
   }
@@ -40,7 +43,7 @@ export function OverlayModalShell({
             type="button"
             onClick={onClose}
             className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/55 transition hover:bg-white/20 hover:text-white"
-            aria-label="Fermer"
+            aria-label={messages.common.close}
           >
             <X className="h-5 w-5" />
           </button>

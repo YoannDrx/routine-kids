@@ -34,6 +34,20 @@ export async function deletePrivateImage(reference: string | null | undefined) {
   await del(pathname);
 }
 
+export async function deletePrivateImages(
+  references: Array<string | null | undefined>,
+) {
+  const pathnames = [...new Set(
+    references
+      .map((reference) => getPrivateMediaPathname(reference))
+      .filter((pathname): pathname is string => Boolean(pathname)),
+  )];
+
+  if (pathnames.length === 0) return;
+
+  await del(pathnames);
+}
+
 export async function deletePrivateImageIfUnreferenced(
   reference: string | null | undefined,
 ) {

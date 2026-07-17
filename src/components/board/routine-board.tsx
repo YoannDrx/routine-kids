@@ -35,11 +35,11 @@ import {
 import { type JourneyState } from "@/lib/journey";
 import { type RoutineKidsSettingsSnapshot } from "@/lib/settings";
 import { type ParentWorkspaceSnapshot } from "@/lib/parent-workspace";
-import { type CreateChildProfileState } from "@/components/admin/create-profile-form-state";
-import { type UpdateChildProfileThemeState } from "@/components/admin/profile-theme-form-state";
-import { type UpdateHouseholdSettingsState } from "@/components/admin/household-settings-form-state";
-import { type UpdateParentSecurityState } from "@/components/admin/parent-security-form-state";
-import { type AdminWorkbenchMutationResult } from "@/components/admin/workbench-types";
+import { type CreateChildProfileState } from "@/components/parent/create-profile-form-state";
+import { type UpdateChildProfileThemeState } from "@/components/parent/profile-theme-form-state";
+import { type UpdateHouseholdSettingsState } from "@/components/parent/household-settings-form-state";
+import { type UpdateParentSecurityState } from "@/components/parent/parent-security-form-state";
+import { type ParentWorkbenchMutationResult } from "@/components/parent/workbench-types";
 
 type BoardMutationResult = {
   status: "success" | "error";
@@ -167,24 +167,24 @@ type RoutineBoardProps = {
     shortLabel: string;
     icon: string;
     durationMinutes: number;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onDeleteTaskTemplateWorkbenchAction?: (input: {
     templateId: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onUpsertRoutineWorkbenchAction?: (input: {
     childProfileId: string;
     period: "morning" | "evening";
     title: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onAssignRoutineTaskWorkbenchAction?: (input: {
     childProfileId: string;
     period: "morning" | "evening";
     templateId: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onDeleteRoutineTaskWorkbenchAction?: (input: {
     childProfileId: string;
     routineTaskId: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
 };
 
 type ConfirmState = {

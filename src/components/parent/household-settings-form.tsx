@@ -6,7 +6,7 @@ import { useAppMessages } from "@/components/i18n/app-i18n-provider";
 import {
   updateHouseholdSettingsInitialState,
   type UpdateHouseholdSettingsState,
-} from "@/components/admin/household-settings-form-state";
+} from "@/components/parent/household-settings-form-state";
 
 type HouseholdSettingsFormProps = {
   action: (

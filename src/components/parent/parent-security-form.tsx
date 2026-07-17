@@ -6,7 +6,7 @@ import { useAppMessages } from "@/components/i18n/app-i18n-provider";
 import {
   type UpdateParentSecurityState,
   updateParentSecurityInitialState,
-} from "@/components/admin/parent-security-form-state";
+} from "@/components/parent/parent-security-form-state";
 
 type ParentSecurityFormProps = {
   action: (

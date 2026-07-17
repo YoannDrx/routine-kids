@@ -186,7 +186,7 @@ Authoritative status:
 - `src/components/board`: child-facing board UI
 - `src/components/settings`: parent settings workspace and modal family
 - `src/components/auth`: parent auth forms
-- `src/components/admin`: temporary extraction bucket to fold back into `settings`
+- `src/components/parent`: parent forms and workbenches mounted by the settings overlay
 - `src/lib`: session, auth, Prisma, themes, seed data, helpers
 - `prisma`: schema and later migrations
 
@@ -294,7 +294,7 @@ Authoritative status:
 - [ ] Fit the settings full-view within the viewport height on iPad landscape
 - [x] Replace row click sound control with a real inline toggle
 - [~] Re-home child profile create/edit/delete, theme, templates, routines, scheduler, import, and logs into settings overlays
-- [ ] Delete `src/app/admin/*` once parity is reached
+- [x] Delete `src/app/admin/*` and move parent actions/components to explicit parent modules
 
 ### Phase 4: Prototype Parity On Board And Modals
 
@@ -324,7 +324,7 @@ Authoritative status:
 - [x] Build prototype `localStorage` import flow
 - [ ] Add device-side cache strategy
 - [ ] Add optimistic completion sync
-- [ ] Add export and backup
+- [x] Add private JSON export/backup, including available private Blob media
 
 ### Phase 6: Premium and hardening
 
@@ -362,7 +362,7 @@ Authoritative status:
 2. Run the full modal E2E matrix at 1024x768 and 1366x1024, including media replacement and deletion through the file picker.
 3. Complete the remaining i18n pass for imported and data-driven labels.
 4. Preserve weekday-specific prototype scheduling fidelity with explicit weekly overrides.
-5. Add export/backup and a documented household deletion path, including Blob cleanup.
+5. Re-run export/account deletion against the isolated preview and verify zero residual rows and private Blob objects.
 6. Audit accessibility, reduced motion and deterministic sound behavior.
 7. Fix the intro-video parity issue in the preserved original prototype without reintroducing it into the production app.
 

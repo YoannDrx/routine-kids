@@ -21,6 +21,12 @@ import {
 } from "@/lib/prototype/import-service";
 import { getServerCopy } from "@/lib/server-copy";
 import {
+  collectHouseholdMediaReferences,
+  deleteRoutineKidsAccountRecord,
+  getAccountDeletionSnapshot,
+} from "@/lib/account-data";
+import { deletePrivateImages } from "@/lib/media-storage";
+import {
   getAppUrl,
   getStripeClient,
   getValidatedFamilyPrice,
@@ -55,6 +61,8 @@ export type SettingsMutationResult = {
   message: string;
   code?: "parent_pin_required" | "parent_pin_not_configured";
   checkoutUrl?: string;
+  deleted?: boolean;
+  cleanupPending?: boolean;
 };
 
 export type PrototypeImportMutationResult = {
@@ -406,4 +414,74 @@ export async function importPrototypeSnapshotAction(input: {
       message: copy.actions.prototypeImportInvalid,
     };
   }
+}
+
+export async function deleteRoutineKidsAccountAction(input: {
+  householdName: string;
+  confirmation: string;
+}): Promise<SettingsMutationResult> {
+  const locale = await getCurrentAppLocale();
+  const copy = getServerCopy(locale);
+  const parsed = z.object({
+    householdName: z.string().trim().min(1).max(60),
+    confirmation: z.literal("DELETE"),
+  }).safeParse(input);
+
+  if (!parsed.success) {
+    return { status: "error", message: copy.actions.accountDeleteConfirmationInvalid };
+  }
+
+  const user = await getRequiredAdmin();
+  const snapshot = await getAccountDeletionSnapshot(user.id);
+
+  if (!snapshot?.household) {
+    return { status: "error", message: copy.actions.householdMissing };
+  }
+
+  if (parsed.data.householdName !== snapshot.household.name) {
+    return { status: "error", message: copy.actions.accountDeleteHouseholdMismatch };
+  }
+
+  try {
+    if (snapshot.stripeCustomerId) {
+      const stripe = getStripeClient();
+      await stripe.customers.del(snapshot.stripeCustomerId);
+    } else if (snapshot.subscription?.stripeSubscriptionId) {
+      const stripe = getStripeClient();
+      await stripe.subscriptions.cancel(snapshot.subscription.stripeSubscriptionId);
+    }
+  } catch {
+    return { status: "error", message: copy.actions.accountDeleteBillingError };
+  }
+
+  const mediaReferences = collectHouseholdMediaReferences(snapshot.household)
+    .map(({ reference }) => reference);
+
+  await deleteRoutineKidsAccountRecord(user.id);
+
+  let cleanupPending = false;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await deletePrivateImages(mediaReferences);
+      cleanupPending = false;
+      break;
+    } catch {
+      cleanupPending = true;
+    }
+  }
+
+  if (cleanupPending) {
+    console.error("routinekids_account_media_cleanup_failed", {
+      mediaCount: mediaReferences.length,
+    });
+  }
+
+  return {
+    status: "success",
+    message: cleanupPending
+      ? copy.actions.accountDeletedCleanupPending
+      : copy.actions.accountDeleted,
+    deleted: true,
+    cleanupPending,
+  };
 }

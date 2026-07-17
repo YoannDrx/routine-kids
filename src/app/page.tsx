@@ -23,14 +23,14 @@ import {
   updateChildProfileThemeAction,
   updateHouseholdSettingsAction,
   updateParentSecurityAction,
-} from "@/app/admin/actions";
+} from "@/app/parent-actions";
 import {
   assignAdminRoutineTaskAction,
   deleteAdminRoutineTaskAction,
   deleteAdminTaskTemplateAction,
   upsertAdminRoutineAction,
   upsertAdminTaskTemplateAction,
-} from "@/app/admin/workbench-actions";
+} from "@/app/parent-workbench-actions";
 
 import { RoutineBoard } from "@/components/board/routine-board";
 import { getCurrentAppMessages } from "@/lib/i18n.server";

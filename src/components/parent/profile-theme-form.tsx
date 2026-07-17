@@ -6,7 +6,7 @@ import { useAppMessages } from "@/components/i18n/app-i18n-provider";
 import {
   updateChildProfileThemeInitialState,
   type UpdateChildProfileThemeState,
-} from "@/components/admin/profile-theme-form-state";
+} from "@/components/parent/profile-theme-form-state";
 
 type ThemeOption = {
   id: string;

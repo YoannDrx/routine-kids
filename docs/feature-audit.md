@@ -190,7 +190,7 @@ Status:
 Notes:
 
 - parent tooling was folded back into settings workspaces
-- internal file names under `src/components/admin` and `src/app/admin/*.ts` still exist as transitional code buckets and action modules, but no product route remains
+- parent code now lives under `src/components/parent` and `src/app/parent-*.ts`; no product route or internal namespace named `admin` remains
 
 ### `/pricing`
 
@@ -293,8 +293,8 @@ Main gaps:
 
 Admin files:
 
-- `src/components/admin/create-profile-form.tsx`
-- `src/app/admin/actions.ts`
+- `src/components/parent/create-profile-form.tsx`
+- `src/app/parent-actions.ts`
 
 Board files:
 
@@ -354,7 +354,7 @@ Main gaps:
 
 Files:
 
-- `src/components/admin/profile-theme-form.tsx`
+- `src/components/parent/profile-theme-form.tsx`
 - `src/lib/theme/packs.ts`
 - `src/lib/board-data.ts`
 
@@ -509,7 +509,7 @@ Remaining caveat:
 Files:
 
 - `src/lib/prototype/import.ts`
-- `src/components/admin/prototype-import-card.tsx`
+- `src/components/parent/prototype-import-card.tsx`
 
 Current state:
 

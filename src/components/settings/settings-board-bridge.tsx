@@ -23,10 +23,10 @@ import {
   TaskLibraryModal,
 } from "@/components/board/task-modals";
 import { SettingsExperience } from "@/components/settings/settings-experience";
-import { type CreateChildProfileState } from "@/components/admin/create-profile-form-state";
-import { type UpdateChildProfileThemeState } from "@/components/admin/profile-theme-form-state";
-import { type UpdateHouseholdSettingsState } from "@/components/admin/household-settings-form-state";
-import { type UpdateParentSecurityState } from "@/components/admin/parent-security-form-state";
+import { type CreateChildProfileState } from "@/components/parent/create-profile-form-state";
+import { type UpdateChildProfileThemeState } from "@/components/parent/profile-theme-form-state";
+import { type UpdateHouseholdSettingsState } from "@/components/parent/household-settings-form-state";
+import { type UpdateParentSecurityState } from "@/components/parent/parent-security-form-state";
 import {
   type BoardMode,
   type BoardProfile,
@@ -59,6 +59,10 @@ type SettingsBoardBridgeProps = {
     interval: "monthly" | "yearly";
   }) => Promise<MutationResult>;
   onManageBillingAction?: () => Promise<MutationResult>;
+  onDeleteAccountAction?: (input: {
+    householdName: string;
+    confirmation: string;
+  }) => Promise<MutationResult & { deleted?: boolean }>;
   onCreateProfileAction?: (input: {
     name: string;
     age: number;
@@ -184,6 +188,7 @@ export function SettingsBoardBridge({
   onImportPrototypeAction,
   onActivatePremiumAction,
   onManageBillingAction,
+  onDeleteAccountAction,
   onCreateProfileAction,
   onUpdateProfileAction,
   onDeleteProfileAction,
@@ -786,6 +791,7 @@ export function SettingsBoardBridge({
         onImportPrototypeAction={onImportPrototypeAction}
         onActivatePremiumAction={onActivatePremiumAction}
         onManageBillingAction={onManageBillingAction}
+        onDeleteAccountAction={onDeleteAccountAction}
         parentWorkspace={parentWorkspace}
         onCreateProfileAction={onCreateProfileFormAction}
         onUpdateHouseholdSettingsFormAction={onUpdateHouseholdSettingsFormAction}

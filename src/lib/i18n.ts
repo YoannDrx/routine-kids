@@ -211,6 +211,21 @@ type AppMessages = {
     soundsDisableAria: string;
     language: string;
     about: string;
+    data: string;
+    dataSubtitle: string;
+    dataTitle: string;
+    dataDescription: string;
+    exportData: string;
+    exportDataHint: string;
+    deleteAccount: string;
+    deleteAccountTitle: string;
+    deleteAccountWarning: string;
+    householdConfirmationLabel: string;
+    householdConfirmationPlaceholder: (name: string) => string;
+    deleteTokenLabel: string;
+    deleteTokenPlaceholder: string;
+    deletePermanently: string;
+    deletingPermanently: string;
     privacy: string;
     support: string;
     chooseLanguage: string;
@@ -652,6 +667,23 @@ const messages: Record<AppLocale, AppMessages> = {
       soundsDisableAria: "Desactiver les sons",
       language: "Langue",
       about: "A propos",
+      data: "Mes donnees",
+      dataSubtitle: "Export et suppression",
+      dataTitle: "Donnees du foyer",
+      dataDescription:
+        "Telecharge une sauvegarde JSON complete avant toute suppression. Les photos privees disponibles sont incluses en base64.",
+      exportData: "Telecharger mes donnees",
+      exportDataHint: "Compte, profils, routines, historique, reglages et medias.",
+      deleteAccount: "Supprimer le foyer et le compte",
+      deleteAccountTitle: "Suppression definitive",
+      deleteAccountWarning:
+        "Cette action arrete l'abonnement, supprime le compte parent, les profils enfant, les routines, l'historique et les photos. Elle est irreversible.",
+      householdConfirmationLabel: "Nom exact du foyer",
+      householdConfirmationPlaceholder: (name) => `Recopie : ${name}`,
+      deleteTokenLabel: "Confirmation finale",
+      deleteTokenPlaceholder: "Tape DELETE",
+      deletePermanently: "Tout supprimer definitivement",
+      deletingPermanently: "Suppression en cours...",
       privacy: "Confidentialite",
       support: "Support",
       chooseLanguage: "Choisir la langue",
@@ -1125,6 +1157,23 @@ const messages: Record<AppLocale, AppMessages> = {
       soundsDisableAria: "Disable sounds",
       language: "Language",
       about: "About",
+      data: "My data",
+      dataSubtitle: "Export and deletion",
+      dataTitle: "Household data",
+      dataDescription:
+        "Download a complete JSON backup before deleting anything. Available private photos are embedded as base64.",
+      exportData: "Download my data",
+      exportDataHint: "Account, profiles, routines, history, settings and media.",
+      deleteAccount: "Delete household and account",
+      deleteAccountTitle: "Permanent deletion",
+      deleteAccountWarning:
+        "This stops the subscription and deletes the parent account, child profiles, routines, history and photos. It cannot be undone.",
+      householdConfirmationLabel: "Exact household name",
+      householdConfirmationPlaceholder: (name) => `Enter: ${name}`,
+      deleteTokenLabel: "Final confirmation",
+      deleteTokenPlaceholder: "Type DELETE",
+      deletePermanently: "Delete everything permanently",
+      deletingPermanently: "Deleting...",
       privacy: "Privacy",
       support: "Support",
       chooseLanguage: "Choose a language",

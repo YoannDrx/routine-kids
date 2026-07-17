@@ -14,11 +14,15 @@ import {
   ChevronRight,
   Clock3,
   Crown,
+  Database,
+  Download,
   Globe,
   HardDrive,
   Info,
   Languages,
   Mail,
+  ShieldAlert,
+  Trash2,
   Users,
   Volume2,
   VolumeX,
@@ -40,11 +44,12 @@ import {
   ThemeWorkspaceModal,
 } from "@/components/settings/parent-workspace-modals";
 import { type ParentWorkspaceSnapshot } from "@/lib/parent-workspace";
-import { type CreateChildProfileState } from "@/components/admin/create-profile-form-state";
-import { type UpdateChildProfileThemeState } from "@/components/admin/profile-theme-form-state";
-import { type UpdateHouseholdSettingsState } from "@/components/admin/household-settings-form-state";
-import { type UpdateParentSecurityState } from "@/components/admin/parent-security-form-state";
-import { type AdminWorkbenchMutationResult } from "@/components/admin/workbench-types";
+import { type CreateChildProfileState } from "@/components/parent/create-profile-form-state";
+import { type UpdateChildProfileThemeState } from "@/components/parent/profile-theme-form-state";
+import { type UpdateHouseholdSettingsState } from "@/components/parent/household-settings-form-state";
+import { type UpdateParentSecurityState } from "@/components/parent/parent-security-form-state";
+import { type ParentWorkbenchMutationResult } from "@/components/parent/workbench-types";
+import { signOut } from "@/lib/auth-client";
 
 type SettingsExperienceProps = {
   householdName?: string;
@@ -84,6 +89,14 @@ type SettingsExperienceProps = {
     message: string;
     checkoutUrl?: string;
   }>;
+  onDeleteAccountAction?: (input: {
+    householdName: string;
+    confirmation: string;
+  }) => Promise<{
+    status: "success" | "error";
+    message: string;
+    deleted?: boolean;
+  }>;
   parentWorkspace?: ParentWorkspaceSnapshot;
   onCreateProfileAction?: (
     state: CreateChildProfileState,
@@ -107,30 +120,31 @@ type SettingsExperienceProps = {
     shortLabel: string;
     icon: string;
     durationMinutes: number;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onDeleteTaskTemplateWorkbenchAction?: (input: {
     templateId: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onUpsertRoutineWorkbenchAction?: (input: {
     childProfileId: string;
     period: "morning" | "evening";
     title: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onAssignRoutineTaskWorkbenchAction?: (input: {
     childProfileId: string;
     period: "morning" | "evening";
     templateId: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onDeleteRoutineTaskWorkbenchAction?: (input: {
     childProfileId: string;
     routineTaskId: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
 };
 
 type SettingsModal =
   | null
   | "activity"
   | "crew"
+  | "data"
   | "household"
   | "import"
   | "language"
@@ -144,6 +158,7 @@ type SettingsModal =
   | "themes";
 
 export function SettingsExperience({
+  householdName,
   open = true,
   initialSettings,
   onCloseAction,
@@ -155,6 +170,7 @@ export function SettingsExperience({
   onImportPrototypeAction,
   onActivatePremiumAction,
   onManageBillingAction,
+  onDeleteAccountAction,
   parentWorkspace,
   onCreateProfileAction,
   onUpdateHouseholdSettingsFormAction,
@@ -182,6 +198,8 @@ export function SettingsExperience({
     },
   );
   const [mutationPending, setMutationPending] = useState(false);
+  const [deleteHouseholdName, setDeleteHouseholdName] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [feedback, setFeedback] = useState<{
     status: "success" | "error";
     message: string;
@@ -328,6 +346,35 @@ export function SettingsExperience({
 
     if (!mutation.success || !mutation.checkoutUrl) return;
     window.location.assign(mutation.checkoutUrl);
+  }
+
+  async function deleteAccount() {
+    if (!onDeleteAccountAction) {
+      setFeedback({ status: "error", message: messages.settings.connectParentSpace });
+      return;
+    }
+
+    setMutationPending(true);
+    setFeedback(null);
+
+    try {
+      const result = await onDeleteAccountAction({
+        householdName: deleteHouseholdName,
+        confirmation: deleteConfirmation,
+      });
+
+      if (result.status === "error" || !result.deleted) {
+        setFeedback(result);
+        return;
+      }
+
+      await signOut();
+      window.location.assign("/");
+    } catch {
+      setFeedback({ status: "error", message: messages.settings.saveError });
+    } finally {
+      setMutationPending(false);
+    }
   }
 
   return (
@@ -531,6 +578,13 @@ export function SettingsExperience({
 
               <div className="overflow-hidden rounded-2xl border border-white/5 bg-white/10">
                 <SettingsRow
+                  icon={<Database className="h-5 w-5" />}
+                  iconClassName="bg-cyan-500/20 text-cyan-300"
+                  title={messages.settings.data}
+                  subtitle={messages.settings.dataSubtitle}
+                  onClick={() => setActiveModal("data")}
+                />
+                <SettingsRow
                   icon={<Info className="h-5 w-5" />}
                   iconClassName="bg-white/10 text-white/60"
                   title={messages.settings.about}
@@ -559,6 +613,94 @@ export function SettingsExperience({
           onClose={() => setFeedback(null)}
         />
       ) : null}
+
+      <OverlayModalShell
+        open={activeModal === "data"}
+        onClose={() => setActiveModal(null)}
+        panelClassName="flex max-h-[90vh] w-full max-w-lg flex-col overflow-y-auto rounded-3xl border border-white/10 p-6"
+      >
+        <div className="mb-5 flex items-start gap-4 pr-10">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cyan-400/15 text-cyan-200">
+            <Database className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold">{messages.settings.dataTitle}</h3>
+            <p className="mt-1 text-sm leading-6 text-white/60">
+              {messages.settings.dataDescription}
+            </p>
+          </div>
+        </div>
+
+        <a
+          href="/api/account/export"
+          download
+          className="flex min-h-14 items-center justify-between rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-4 py-3 text-left transition hover:bg-cyan-300/15"
+        >
+          <span className="flex items-center gap-3">
+            <Download className="h-5 w-5 text-cyan-200" />
+            <span>
+              <span className="block font-semibold">{messages.settings.exportData}</span>
+              <span className="block text-xs text-white/55">{messages.settings.exportDataHint}</span>
+            </span>
+          </span>
+          <ChevronRight className="h-4 w-4 text-white/35" />
+        </a>
+
+        <div className="my-6 border-t border-white/10" />
+
+        <div className="rounded-2xl border border-red-400/25 bg-red-500/10 p-4">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-red-300" />
+            <div>
+              <h4 className="font-bold text-red-100">{messages.settings.deleteAccountTitle}</h4>
+              <p className="mt-1 text-sm leading-6 text-red-100/70">
+                {messages.settings.deleteAccountWarning}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-4">
+            <label className="block text-sm font-semibold text-white/80">
+              {messages.settings.householdConfirmationLabel}
+              <input
+                value={deleteHouseholdName}
+                onChange={(event) => setDeleteHouseholdName(event.target.value)}
+                placeholder={messages.settings.householdConfirmationPlaceholder(
+                  householdName ?? "RoutineKids",
+                )}
+                autoComplete="off"
+                className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-black/25 px-3 text-white outline-none transition focus:border-red-300 focus:ring-2 focus:ring-red-300/25"
+              />
+            </label>
+            <label className="block text-sm font-semibold text-white/80">
+              {messages.settings.deleteTokenLabel}
+              <input
+                value={deleteConfirmation}
+                onChange={(event) => setDeleteConfirmation(event.target.value)}
+                placeholder={messages.settings.deleteTokenPlaceholder}
+                autoComplete="off"
+                spellCheck={false}
+                className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-black/25 px-3 font-mono text-white outline-none transition focus:border-red-300 focus:ring-2 focus:ring-red-300/25"
+              />
+            </label>
+            <button
+              type="button"
+              disabled={
+                mutationPending ||
+                deleteHouseholdName !== (householdName ?? "") ||
+                deleteConfirmation !== "DELETE"
+              }
+              onClick={() => void deleteAccount()}
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Trash2 className="h-4 w-4" />
+              {mutationPending
+                ? messages.settings.deletingPermanently
+                : messages.settings.deletePermanently}
+            </button>
+          </div>
+        </div>
+      </OverlayModalShell>
 
       <OverlayModalShell
         open={activeModal === "language"}

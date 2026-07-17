@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAppMessages } from "@/components/i18n/app-i18n-provider";
 import { ConfirmModal } from "@/components/board/feedback-modals";
 import { TaskIcon } from "@/components/board/task-icon";
-import { type AdminWorkbenchMutationResult } from "@/components/admin/workbench-types";
+import { type ParentWorkbenchMutationResult } from "@/components/parent/workbench-types";
 import { boardTaskIconOptions } from "@/lib/data/board-library";
 import { type TaskIconName } from "@/lib/data/prototype-seed";
 import { cn } from "@/lib/utils";
@@ -29,10 +29,10 @@ type TaskTemplateWorkbenchProps = {
     shortLabel: string;
     icon: string;
     durationMinutes: number;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
   onDeleteAction: (input: {
     templateId: string;
-  }) => Promise<AdminWorkbenchMutationResult>;
+  }) => Promise<ParentWorkbenchMutationResult>;
 };
 
 type TaskTemplateDraft = {

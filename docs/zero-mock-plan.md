@@ -41,7 +41,7 @@ Finish the parent workspace move so the product has no route-based admin surface
 - Keep household settings, parent PIN, theme assignment, task-template CRUD, routine CRUD, prototype import entry, and logs inside the settings workspace.
 - Remove remaining route-era references and stale docs mentioning `/admin` as a live product surface.
 - Revalidate `/` and `/settings` as the only parent-facing product surfaces.
-- Fold temporary extracted `src/components/admin/*` and `src/app/admin/*.ts` modules into `settings` naming once the runtime is stable.
+- Keep the completed parent modules under `src/components/parent/*` and `src/app/parent-*.ts`; no `admin` route or namespace remains.
 
 ### Acceptance Criteria
 

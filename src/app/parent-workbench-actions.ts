@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { RoutinePeriod } from "@prisma/client";
 import { z } from "zod";
 
-import { type AdminWorkbenchMutationResult } from "@/components/admin/workbench-types";
+import { type ParentWorkbenchMutationResult } from "@/components/parent/workbench-types";
 import { ensureHouseholdBaseline } from "@/lib/household-bootstrap";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
 import { deletePrivateImageIfUnreferenced } from "@/lib/media-storage";
@@ -126,7 +126,7 @@ export async function upsertAdminTaskTemplateAction(input: {
   shortLabel: string;
   icon: string;
   durationMinutes: number;
-}): Promise<AdminWorkbenchMutationResult> {
+}): Promise<ParentWorkbenchMutationResult> {
   const locale = await getCurrentAppLocale();
   const copy = getServerCopy(locale);
   const parsed = createTaskTemplateSchema(locale).safeParse(input);
@@ -172,7 +172,7 @@ export async function upsertAdminTaskTemplateAction(input: {
 
 export async function deleteAdminTaskTemplateAction(input: {
   templateId: string;
-}): Promise<AdminWorkbenchMutationResult> {
+}): Promise<ParentWorkbenchMutationResult> {
   const locale = await getCurrentAppLocale();
   const copy = getServerCopy(locale);
   const parsed = createDeleteTaskTemplateSchema(locale).safeParse(input);
@@ -218,7 +218,7 @@ export async function upsertAdminRoutineAction(input: {
   childProfileId: string;
   period: "morning" | "evening";
   title: string;
-}): Promise<AdminWorkbenchMutationResult> {
+}): Promise<ParentWorkbenchMutationResult> {
   const locale = await getCurrentAppLocale();
   const copy = getServerCopy(locale);
   const parsed = createRoutineSchema(locale).safeParse(input);
@@ -262,7 +262,7 @@ export async function assignAdminRoutineTaskAction(input: {
   childProfileId: string;
   period: "morning" | "evening";
   templateId: string;
-}): Promise<AdminWorkbenchMutationResult> {
+}): Promise<ParentWorkbenchMutationResult> {
   const locale = await getCurrentAppLocale();
   const copy = getServerCopy(locale);
   const parsed = createRoutineTaskSchema(locale).safeParse(input);
@@ -324,7 +324,7 @@ export async function assignAdminRoutineTaskAction(input: {
 export async function deleteAdminRoutineTaskAction(input: {
   childProfileId: string;
   routineTaskId: string;
-}): Promise<AdminWorkbenchMutationResult> {
+}): Promise<ParentWorkbenchMutationResult> {
   const locale = await getCurrentAppLocale();
   const copy = getServerCopy(locale);
   const parsed = createDeleteRoutineTaskSchema(locale).safeParse(input);
