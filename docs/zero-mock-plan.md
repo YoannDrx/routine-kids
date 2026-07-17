@@ -231,7 +231,7 @@ Remove fake premium toggles and connect the product to real subscription state.
 - Stripe Checkout is created server-side and never grants access directly.
 - Signed webhooks synchronize customer, subscription, status, period, and cancellation state.
 - Free profile and routine-task limits are enforced server-side on both parent entry paths.
-- Remaining release work is operational: configure test/live Price IDs and webhook endpoints, test the complete Stripe test-mode lifecycle, then audit legacy subscriptions before any live catalog archival.
+- The local Stripe test lifecycle is complete. Remaining release work is to create an isolated Vercel preview, configure its webhook, repeat the smoke test remotely, and audit legacy live subscriptions before any live catalog change.
 
 ## Phase 10: Hardening and Quality
 
@@ -272,14 +272,16 @@ The first development tranche has already started in code:
 - the board library can delete custom templates and assign missions to morning, evening, or both
 - streak and journey progression are now derived from `TaskCompletion` for the live board
 - settings persists locale, sounds, and periods; premium state now comes from Stripe-synchronized subscriptions
-- the major remaining product gaps are localization completeness, historical completion hardening, weekday-specific routine fidelity, and live Stripe operational validation
+- the major remaining product gaps are localization of imported data labels, hosted media storage, modal E2E coverage, and remote preview validation
+- live empty routines no longer fall back to prototype missions
+- completed-day streak snapshots now remain stable when routines change later
+- the Stripe test lifecycle is verified end to end: card Checkout, signed webhook, idempotent replay, Family Premium entitlement, cancellation, and return to Free
 
 ## Immediate Next Coding Targets
 
-1. Finish app-wide i18n, including remaining visible hardcoded strings and data-driven labels.
+1. Finish app-wide i18n, especially data-driven labels imported from older snapshots.
 2. Expand the sound engine beyond the first feedback vocabulary.
-3. Restore the remaining library and scheduler behavior from `index.html`, especially the richer planning model.
-4. Harden historical streak/day-complete snapshots against future routine changes.
-5. Validate Stripe Checkout/webhooks in test mode, then audit legacy live subscriptions before catalog changes.
-6. Add task media flows and remove remaining live task fallbacks when routines are empty or missing.
-7. Preserve weekday-specific prototype scheduler fidelity once weekly overrides exist.
+3. Complete the iPad landscape modal E2E matrix and accessibility pass.
+4. Add hosted task/profile media storage before deployment; current cropped images are persisted as data URLs.
+5. Create a Vercel preview with isolated Neon/Stripe configuration, then repeat the verified local Stripe lifecycle remotely.
+6. Audit any legacy live subscriptions before creating or archiving a live RoutineKids catalog.

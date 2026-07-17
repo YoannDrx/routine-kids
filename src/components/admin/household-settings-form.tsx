@@ -52,7 +52,7 @@ export function HouseholdSettingsForm({
             name="name"
             defaultValue={defaultName}
             className="h-12 rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none transition focus:border-[#69d6ff]"
-            placeholder="Famille Martin"
+            placeholder={messages.forms.householdNamePlaceholder}
           />
           {state.fieldErrors?.name ? (
             <span className="text-sm text-rose-200">{state.fieldErrors.name}</span>
@@ -70,7 +70,7 @@ export function HouseholdSettingsForm({
               {messages.settings.french}
             </option>
             <option value="en" className="bg-[#101223]">
-              English
+              {messages.settings.english}
             </option>
           </select>
           {state.fieldErrors?.locale ? (

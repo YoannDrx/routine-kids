@@ -293,6 +293,7 @@ type AppMessages = {
     householdSettings: string;
     householdNameLanguage: string;
     householdName: string;
+    householdNamePlaceholder: string;
     saveHousehold: string;
     parentSecurity: string;
     parentPinTitle: string;
@@ -367,8 +368,10 @@ type AppMessages = {
     signUpDescription: string;
     signInDescription: string;
     email: string;
+    emailPlaceholder: string;
     password: string;
     parentFirstName: string;
+    parentNamePlaceholder: string;
     passwordPlaceholder: string;
     wait: string;
     createParentAccount: string;
@@ -744,6 +747,7 @@ const messages: Record<AppLocale, AppMessages> = {
       householdSettings: "Reglages du foyer",
       householdNameLanguage: "Nom du foyer et langue",
       householdName: "Nom du foyer",
+      householdNamePlaceholder: "Famille Martin",
       saveHousehold: "Enregistrer le foyer",
       parentSecurity: "Securite parent",
       parentPinTitle: "Code PIN et delai de confiance",
@@ -825,8 +829,10 @@ const messages: Record<AppLocale, AppMessages> = {
       signInDescription:
         "La board enfant reste ludique. Les reglages sensibles vivent ici.",
       email: "Email",
+      emailPlaceholder: "parent@routinekids.app",
       password: "Mot de passe",
       parentFirstName: "Prenom parent",
+      parentNamePlaceholder: "Camille",
       passwordPlaceholder: "Minimum 8 caracteres",
       wait: "Patiente une seconde...",
       createParentAccount: "Creer le compte parent",
@@ -1214,6 +1220,7 @@ const messages: Record<AppLocale, AppMessages> = {
       householdSettings: "Household settings",
       householdNameLanguage: "Household name and language",
       householdName: "Household name",
+      householdNamePlaceholder: "Martin family",
       saveHousehold: "Save household",
       parentSecurity: "Parent security",
       parentPinTitle: "PIN code and trust window",
@@ -1296,8 +1303,10 @@ const messages: Record<AppLocale, AppMessages> = {
       signInDescription:
         "The kid board stays playful. Sensitive settings live here.",
       email: "Email",
+      emailPlaceholder: "parent@routinekids.app",
       password: "Password",
       parentFirstName: "Parent first name",
+      parentNamePlaceholder: "Camille",
       passwordPlaceholder: "Minimum 8 characters",
       wait: "One second...",
       createParentAccount: "Create parent account",

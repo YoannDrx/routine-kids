@@ -15,7 +15,10 @@ import {
 import { getDayKey } from "@/lib/day-key";
 import { ensureHouseholdBaseline } from "@/lib/household-bootstrap";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
-import { deriveJourneyStateFromRoutines } from "@/lib/journey";
+import {
+  deriveJourneyStateFromRoutines,
+  getCompletedDayKeysFromRoutines,
+} from "@/lib/journey";
 import { prisma } from "@/lib/prisma";
 import {
   canAssignTemplatesToPeriods,
@@ -29,13 +32,19 @@ import {
 } from "@/lib/routine-task-service";
 import { getServerCopy } from "@/lib/server-copy";
 import { getRequiredAdmin, getRequiredUser } from "@/lib/session";
-import { deleteTaskTemplate, upsertTaskTemplate } from "@/lib/task-template-service";
+import {
+  deleteTaskTemplate,
+  upsertTaskTemplate,
+} from "@/lib/task-template-service";
 
 function createToggleBoardTaskSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
 
   return z.object({
-    childProfileId: z.string().trim().min(1, copy.validation.childProfileNotFound),
+    childProfileId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.childProfileNotFound),
     taskId: z.string().trim().min(1, copy.validation.routineTaskNotFound),
     dayKey: z.string().trim().min(1, copy.validation.routineTaskNotFound),
     completed: z.boolean(),
@@ -88,7 +97,10 @@ function createUpdateBoardProfileSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
 
   return createBoardProfileSchema(locale).extend({
-    childProfileId: z.string().trim().min(1, copy.validation.childProfileNotFound),
+    childProfileId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.childProfileNotFound),
   });
 }
 
@@ -96,7 +108,10 @@ function createUpdateBoardProfileAvatarSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
 
   return z.object({
-    childProfileId: z.string().trim().min(1, copy.validation.childProfileNotFound),
+    childProfileId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.childProfileNotFound),
     avatar: z
       .string()
       .trim()
@@ -109,7 +124,10 @@ function createUpdateBoardProfilePhotoSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
 
   return z.object({
-    childProfileId: z.string().trim().min(1, copy.validation.childProfileNotFound),
+    childProfileId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.childProfileNotFound),
     photoUrl: z
       .string()
       .trim()
@@ -122,7 +140,10 @@ function createDeleteBoardProfileSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
 
   return z.object({
-    childProfileId: z.string().trim().min(1, copy.validation.childProfileNotFound),
+    childProfileId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.childProfileNotFound),
   });
 }
 
@@ -175,7 +196,10 @@ function createAssignTemplateSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
 
   return z.object({
-    childProfileId: z.string().trim().min(1, copy.validation.childProfileNotFound),
+    childProfileId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.childProfileNotFound),
     templateId: z.string().trim().min(1, copy.validation.templateNotFound),
     period: z.enum(["morning", "evening", "both"]),
     scheduleDays: z.array(z.number().int().min(0).max(6)).optional(),
@@ -186,7 +210,10 @@ function createAssignManyTemplatesSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
 
   return z.object({
-    childProfileId: z.string().trim().min(1, copy.validation.childProfileNotFound),
+    childProfileId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.childProfileNotFound),
     templateIds: z
       .array(z.string().trim().min(1))
       .min(1, copy.validation.chooseMission),
@@ -199,8 +226,14 @@ function createDeleteRoutineTaskSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
 
   return z.object({
-    childProfileId: z.string().trim().min(1, copy.validation.childProfileNotFound),
-    routineTaskId: z.string().trim().min(1, copy.validation.routineTaskNotFound),
+    childProfileId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.childProfileNotFound),
+    routineTaskId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.routineTaskNotFound),
   });
 }
 
@@ -208,8 +241,14 @@ function createDeleteRoutineTaskDaySchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
 
   return z.object({
-    childProfileId: z.string().trim().min(1, copy.validation.childProfileNotFound),
-    routineTaskId: z.string().trim().min(1, copy.validation.routineTaskNotFound),
+    childProfileId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.childProfileNotFound),
+    routineTaskId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.routineTaskNotFound),
     day: z.number().int().min(0).max(6),
   });
 }
@@ -218,7 +257,10 @@ function createReorderRoutineTasksSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
 
   return z.object({
-    childProfileId: z.string().trim().min(1, copy.validation.childProfileNotFound),
+    childProfileId: z
+      .string()
+      .trim()
+      .min(1, copy.validation.childProfileNotFound),
     period: z.enum(["morning", "evening"]),
     orderedTaskIds: z
       .array(z.string().trim().min(1, copy.validation.routineTaskNotFound))
@@ -265,7 +307,9 @@ type BoardAdminAccess =
       error: BoardProfileMutationResult | BoardTaskMutationResult;
     };
 
-async function getRequiredAdminHousehold(locale: "fr" | "en"): Promise<BoardAdminAccess> {
+async function getRequiredAdminHousehold(
+  locale: "fr" | "en",
+): Promise<BoardAdminAccess> {
   const copy = getServerCopy(locale);
   const user = await getRequiredAdmin();
   await ensureHouseholdBaseline({
@@ -332,108 +376,148 @@ export async function toggleBoardTaskAction(input: {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? copy.actions.missionAssignError);
+    throw new Error(
+      parsed.error.issues[0]?.message ?? copy.actions.missionAssignError,
+    );
   }
 
-  const household = await prisma.household.findUnique({
-    where: {
-      ownerUserId: user.id,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!household) {
-    throw new Error(copy.actions.householdMissing);
-  }
-
-  const task = await prisma.routineTask.findFirst({
-    where: {
-      id: parsed.data.taskId,
-      routine: {
-        householdId: household.id,
-        childProfileId: parsed.data.childProfileId,
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!task) {
-    throw new Error(copy.actions.missionDeleteError);
-  }
-
-  if (parsed.data.completed) {
-    await prisma.taskCompletion.upsert({
+  const { profileId, journey } = await prisma.$transaction(async (tx) => {
+    const household = await tx.household.findUnique({
       where: {
-        taskId_childProfileId_dayKey: {
+        ownerUserId: user.id,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!household) {
+      throw new Error(copy.actions.householdMissing);
+    }
+
+    const task = await tx.routineTask.findFirst({
+      where: {
+        id: parsed.data.taskId,
+        routine: {
+          householdId: household.id,
+          childProfileId: parsed.data.childProfileId,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!task) {
+      throw new Error(copy.actions.missionDeleteError);
+    }
+
+    await tx.taskCompletion.updateMany({
+      where: {
+        childProfileId: parsed.data.childProfileId,
+        dayKey: parsed.data.dayKey,
+        streakSnapshot: {
+          not: null,
+        },
+      },
+      data: {
+        streakSnapshot: null,
+      },
+    });
+
+    if (parsed.data.completed) {
+      await tx.taskCompletion.upsert({
+        where: {
+          taskId_childProfileId_dayKey: {
+            taskId: parsed.data.taskId,
+            childProfileId: parsed.data.childProfileId,
+            dayKey: parsed.data.dayKey,
+          },
+        },
+        update: {
+          completedAt: new Date(),
+        },
+        create: {
           taskId: parsed.data.taskId,
           childProfileId: parsed.data.childProfileId,
           dayKey: parsed.data.dayKey,
         },
-      },
-      update: {
-        completedAt: new Date(),
-      },
-      create: {
-        taskId: parsed.data.taskId,
-        childProfileId: parsed.data.childProfileId,
-        dayKey: parsed.data.dayKey,
-      },
-    });
-  } else {
-    await prisma.taskCompletion.deleteMany({
-      where: {
-        taskId: parsed.data.taskId,
-        childProfileId: parsed.data.childProfileId,
-        dayKey: parsed.data.dayKey,
-      },
-    });
-  }
-
-  const profile = await prisma.childProfile.findFirst({
-    where: {
-      id: parsed.data.childProfileId,
-      householdId: household.id,
-    },
-    select: {
-      id: true,
-      routines: {
+      });
+    } else {
+      await tx.taskCompletion.deleteMany({
         where: {
-          isArchived: false,
+          taskId: parsed.data.taskId,
+          childProfileId: parsed.data.childProfileId,
+          dayKey: parsed.data.dayKey,
         },
-        include: {
-          tasks: {
-            include: {
-              completions: {
-                select: {
-                  dayKey: true,
-                  childProfileId: true,
+      });
+    }
+
+    const profile = await tx.childProfile.findFirst({
+      where: {
+        id: parsed.data.childProfileId,
+        householdId: household.id,
+      },
+      select: {
+        id: true,
+        routines: {
+          where: {
+            isArchived: false,
+          },
+          include: {
+            tasks: {
+              include: {
+                completions: {
+                  select: {
+                    dayKey: true,
+                    childProfileId: true,
+                    streakSnapshot: true,
+                  },
                 },
               },
             },
           },
         },
       },
-    },
+    });
+
+    if (!profile) {
+      throw new Error(copy.actions.profileNotInHousehold);
+    }
+
+    const nextJourney = deriveJourneyStateFromRoutines(
+      profile.routines,
+      profile.id,
+      parsed.data.dayKey,
+    );
+    const dayIsComplete = getCompletedDayKeysFromRoutines(
+      profile.routines,
+      profile.id,
+      parsed.data.dayKey,
+    ).includes(parsed.data.dayKey);
+
+    if (dayIsComplete) {
+      await tx.taskCompletion.updateMany({
+        where: {
+          childProfileId: parsed.data.childProfileId,
+          dayKey: parsed.data.dayKey,
+        },
+        data: {
+          streakSnapshot: nextJourney.streak,
+        },
+      });
+    }
+
+    return {
+      profileId: profile.id,
+      journey: nextJourney,
+    };
   });
-
-  if (!profile) {
-    throw new Error(copy.actions.profileNotInHousehold);
-  }
-
-  const journey = deriveJourneyStateFromRoutines(
-    profile.routines,
-    profile.id,
-    parsed.data.dayKey,
-  );
 
   revalidatePath("/");
 
   return {
-    childProfileId: profile.id,
+    childProfileId: profileId,
     streak: journey.streak,
     journey,
   };
@@ -453,7 +537,8 @@ export async function createBoardProfileAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.profileFieldsInvalid,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.profileFieldsInvalid,
     };
   }
 
@@ -512,7 +597,8 @@ export async function updateBoardProfileAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.profileFieldsInvalid,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.profileFieldsInvalid,
     };
   }
 
@@ -555,7 +641,8 @@ export async function updateBoardProfileAvatarAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.profileFieldsInvalid,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.profileFieldsInvalid,
     };
   }
 
@@ -594,7 +681,8 @@ export async function updateBoardProfilePhotoAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.profileFieldsInvalid,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.profileFieldsInvalid,
     };
   }
 
@@ -632,7 +720,8 @@ export async function removeBoardProfilePhotoAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.profilePhotoRemoved,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.profilePhotoRemoved,
     };
   }
 
@@ -669,7 +758,8 @@ export async function deleteBoardProfileAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.profileFieldsInvalid,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.profileFieldsInvalid,
     };
   }
 
@@ -711,7 +801,8 @@ export async function upsertBoardTaskTemplateAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.taskTemplateInvalid,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.taskTemplateInvalid,
     };
   }
 
@@ -755,7 +846,8 @@ export async function deleteBoardTaskTemplateAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.taskTemplateDeleteError,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.taskTemplateDeleteError,
     };
   }
 
@@ -794,7 +886,8 @@ export async function assignBoardTaskTemplateAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.missionAssignError,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.missionAssignError,
     };
   }
 
@@ -849,11 +942,20 @@ export async function assignBoardTaskTemplateAction(input: {
     message:
       parsed.data.period === "both"
         ? createdCount > 0
-          ? copy.actions.missionAddedBoth(firstTask.title, firstTask.profileName)
-          : copy.actions.missionAlreadyPresentBoth(firstTask.title, firstTask.profileName)
+          ? copy.actions.missionAddedBoth(
+              firstTask.title,
+              firstTask.profileName,
+            )
+          : copy.actions.missionAlreadyPresentBoth(
+              firstTask.title,
+              firstTask.profileName,
+            )
         : createdCount > 0
           ? copy.actions.missionAdded(firstTask.title, firstTask.profileName)
-          : copy.actions.missionAlreadyPresent(firstTask.title, firstTask.profileName),
+          : copy.actions.missionAlreadyPresent(
+              firstTask.title,
+              firstTask.profileName,
+            ),
   };
 }
 
@@ -870,7 +972,8 @@ export async function assignManyBoardTaskTemplatesAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.missionAssignError,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.missionAssignError,
     };
   }
 
@@ -939,7 +1042,8 @@ export async function deleteBoardRoutineTaskAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.missionDeleteError,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.missionDeleteError,
     };
   }
 
@@ -978,7 +1082,8 @@ export async function deleteBoardRoutineTaskDayAction(input: {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? copy.actions.missionDeleteError,
+      message:
+        parsed.error.issues[0]?.message ?? copy.actions.missionDeleteError,
     };
   }
 

@@ -17,6 +17,8 @@ RoutineKids est en cours de migration depuis le prototype HTML monolithique vers
 - Les sons de board, le CRUD photo enfant, la base i18n globale et les principaux retours serveur localises sont maintenant poses, mais la repasse zero-hardcoded complete continue.
 - Le faux interrupteur Premium a ete remplace par Stripe Checkout mensuel/annuel, avec webhook signe et synchronisation de l'abonnement. Le test local requiert des cles Stripe de test et les deux Price IDs documentes dans `.env.example`.
 - Les limites du plan gratuit sont controlees cote serveur sur les deux parcours parent, et les affectations multi-missions/matin-soir sont atomiques.
+- Une routine live vide reste vide : aucune mission prototype n'est affichee comme une vraie donnee. Les journees terminees figent leur snapshot de streak afin qu'une future modification de routine ne reecrive pas l'historique.
+- Le parcours Stripe test a ete valide avec une vraie Checkout Session de test, webhook signe et idempotent, activation Family Premium, annulation et retour au plan Free. Les fixtures Stripe et la branche Neon de test ont ete supprimees apres verification.
 
 ## Stack cible
 

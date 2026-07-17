@@ -1,8 +1,4 @@
-import {
-  Prisma,
-  RoutinePeriod,
-  UiTone,
-} from "@prisma/client";
+import { Prisma, RoutinePeriod, UiTone } from "@prisma/client";
 
 import { getDayKey } from "@/lib/day-key";
 import type {
@@ -63,7 +59,9 @@ function getThemeIdForProfile(
   return "space-academy";
 }
 
-function isTaskIconName(value: string | null | undefined): value is TaskIconName {
+function isTaskIconName(
+  value: string | null | undefined,
+): value is TaskIconName {
   return (
     value === "shirt" ||
     value === "sparkles" ||
@@ -113,7 +111,9 @@ function getRoutineForMode(
 }
 
 function getCompletedTaskIdsForRoutine(
-  routine: HouseholdBoardOverview["childProfiles"][number]["routines"][number] | undefined,
+  routine:
+    | HouseholdBoardOverview["childProfiles"][number]["routines"][number]
+    | undefined,
   childProfileId: string,
   dayKey: string,
 ) {
@@ -126,8 +126,7 @@ function getCompletedTaskIdsForRoutine(
       const completion = task.completions
         .filter(
           (entry) =>
-            entry.dayKey === dayKey &&
-            entry.childProfileId === childProfileId,
+            entry.dayKey === dayKey && entry.childProfileId === childProfileId,
         )
         .sort(
           (left, right) =>
@@ -145,16 +144,20 @@ function getCompletedTaskIdsForRoutine(
         },
       ];
     })
-    .sort((left, right) => right.completedAt.getTime() - left.completedAt.getTime())
+    .sort(
+      (left, right) => right.completedAt.getTime() - left.completedAt.getTime(),
+    )
     .map((entry) => entry.taskId);
 }
 
 function mapRoutineTasksToBoardTasks(
-  routine: HouseholdBoardOverview["childProfiles"][number]["routines"][number] | undefined,
+  routine:
+    | HouseholdBoardOverview["childProfiles"][number]["routines"][number]
+    | undefined,
   fallbackTasks: BoardTask[],
 ): BoardTask[] {
   if (!routine || routine.tasks.length === 0) {
-    return fallbackTasks;
+    return [];
   }
 
   return routine.tasks.map((task, index) => {
@@ -165,7 +168,9 @@ function mapRoutineTasksToBoardTasks(
       templateId: task.templateId ?? null,
       label: task.title,
       shortLabel: task.shortLabel ?? task.title,
-      icon: isTaskIconName(task.icon) ? task.icon : fallback?.icon ?? "sparkles",
+      icon: isTaskIconName(task.icon)
+        ? task.icon
+        : (fallback?.icon ?? "sparkles"),
       imageUrl: task.imageUrl ?? null,
       color: task.color ?? null,
       scheduleDays: normalizeBoardTaskScheduleDays(task.scheduleDays),
@@ -194,7 +199,11 @@ export function getBoardProfilesFromHousehold(
       headline: profile.headline ?? prototype.headline,
       streak: 0,
       journey: getJourneyStateFromStreak(0, 0),
-      themeId: getThemeIdForProfile(profile.defaultTheme?.slug, profile.tone, profile.age),
+      themeId: getThemeIdForProfile(
+        profile.defaultTheme?.slug,
+        profile.tone,
+        profile.age,
+      ),
       completedTaskIdsByMode: {
         morning: [],
         evening: [],
@@ -216,7 +225,11 @@ export function getBoardProfilesFromBoardOverview(
     const prototype = getPrototypeProfileForAge(profile.age);
     const morningRoutine = getRoutineForMode(profile.routines, "morning");
     const eveningRoutine = getRoutineForMode(profile.routines, "evening");
-    const journey = deriveJourneyStateFromRoutines(profile.routines, profile.id, dayKey);
+    const journey = deriveJourneyStateFromRoutines(
+      profile.routines,
+      profile.id,
+      dayKey,
+    );
 
     return {
       id: profile.id,
@@ -227,7 +240,11 @@ export function getBoardProfilesFromBoardOverview(
       headline: profile.headline ?? prototype.headline,
       streak: journey.streak,
       journey,
-      themeId: getThemeIdForProfile(profile.defaultTheme?.slug, profile.tone, profile.age),
+      themeId: getThemeIdForProfile(
+        profile.defaultTheme?.slug,
+        profile.tone,
+        profile.age,
+      ),
       completedTaskIdsByMode: {
         morning: getCompletedTaskIdsForRoutine(
           morningRoutine,

@@ -36,6 +36,7 @@ type JourneyRoutineLike = {
     completions: Array<{
       dayKey: string;
       childProfileId: string;
+      streakSnapshot?: number | null;
     }>;
   }>;
 };
@@ -188,7 +189,10 @@ export function getJourneyStateFromStreak(
             100,
             Math.round(
               ((streak - currentPlanet.streakNeeded) /
-                Math.max(1, nextPlanet.streakNeeded - currentPlanet.streakNeeded)) *
+                Math.max(
+                  1,
+                  nextPlanet.streakNeeded - currentPlanet.streakNeeded,
+                )) *
                 100,
             ),
           ),
@@ -205,7 +209,7 @@ export function getJourneyStateFromStreak(
   };
 }
 
-export function deriveJourneyStateFromRoutines(
+export function getCompletedDayKeysFromRoutines(
   routines: JourneyRoutineLike[],
   childProfileId: string,
   todayKey = getDayKey(),
@@ -217,10 +221,11 @@ export function deriveJourneyStateFromRoutines(
     .flatMap((routine) => routine.tasks);
 
   if (routineTasks.length === 0) {
-    return getJourneyStateFromStreak(0, 0);
+    return [];
   }
 
   const completionMap = new Map<string, Set<string>>();
+  const snapshottedCompletedDays = new Set<string>();
 
   for (const task of routineTasks) {
     for (const completion of task.completions) {
@@ -228,9 +233,17 @@ export function deriveJourneyStateFromRoutines(
         continue;
       }
 
-      const completedTasks = completionMap.get(completion.dayKey) ?? new Set<string>();
+      const completedTasks =
+        completionMap.get(completion.dayKey) ?? new Set<string>();
       completedTasks.add(task.id);
       completionMap.set(completion.dayKey, completedTasks);
+
+      if (
+        completion.streakSnapshot !== null &&
+        completion.streakSnapshot !== undefined
+      ) {
+        snapshottedCompletedDays.add(completion.dayKey);
+      }
     }
   }
 
@@ -242,9 +255,15 @@ export function deriveJourneyStateFromRoutines(
 
   const completedDayKeys = [...candidateDayKeys]
     .filter((dayKey) => {
+      if (snapshottedCompletedDays.has(dayKey)) {
+        return true;
+      }
+
       const weekday = getWeekdayFromDayKey(dayKey);
       const activeTaskIds = routineTasks
-        .filter((task) => normalizeScheduleDays(task.scheduleDays).includes(weekday))
+        .filter((task) =>
+          normalizeScheduleDays(task.scheduleDays).includes(weekday),
+        )
         .map((task) => task.id);
 
       if (activeTaskIds.length === 0) {
@@ -256,11 +275,28 @@ export function deriveJourneyStateFromRoutines(
     })
     .sort();
 
+  return completedDayKeys;
+}
+
+export function deriveJourneyStateFromRoutines(
+  routines: JourneyRoutineLike[],
+  childProfileId: string,
+  todayKey = getDayKey(),
+) {
+  const completedDayKeys = getCompletedDayKeysFromRoutines(
+    routines,
+    childProfileId,
+    todayKey,
+  );
+
   const streak = getProfileStreakFromCompletedDays(completedDayKeys, todayKey);
 
   return getJourneyStateFromStreak(streak, completedDayKeys.length);
 }
 
 export function getJourneyPlanetById(planetId: JourneyPlanetId) {
-  return JOURNEY_PLANETS.find((planet) => planet.id === planetId) ?? JOURNEY_PLANETS[0];
+  return (
+    JOURNEY_PLANETS.find((planet) => planet.id === planetId) ??
+    JOURNEY_PLANETS[0]
+  );
 }

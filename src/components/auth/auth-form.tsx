@@ -97,7 +97,7 @@ export function AuthForm({ mode, callbackUrl: rawCallbackUrl }: AuthFormProps) {
             value={name}
             onChange={(event) => setName(event.target.value)}
             className="h-14 rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-white outline-none transition focus:border-[#ff6fb5]"
-            placeholder="Camille"
+            placeholder={messages.auth.parentNamePlaceholder}
           />
         </label>
       ) : null}
@@ -110,7 +110,7 @@ export function AuthForm({ mode, callbackUrl: rawCallbackUrl }: AuthFormProps) {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           className="h-14 rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-white outline-none transition focus:border-[#69d6ff]"
-          placeholder="parent@routinekids.app"
+          placeholder={messages.auth.emailPlaceholder}
         />
       </label>
 
