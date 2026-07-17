@@ -1,6 +1,6 @@
 import "server-only";
 
-import { RoutinePeriod } from "@prisma/client";
+import { type Prisma, RoutinePeriod } from "@prisma/client";
 
 import { getDefaultRoutineSeeds } from "@/lib/default-routines";
 import { prisma } from "@/lib/prisma";
@@ -13,6 +13,8 @@ type EnsureRoutineInput = {
   period: RoutinePeriod;
   locale?: AppLocale;
 };
+
+type RoutineTaskDb = Prisma.TransactionClient | typeof prisma;
 
 const defaultScheduleDays = [0, 1, 2, 3, 4, 5, 6] as const;
 
@@ -46,11 +48,12 @@ function mergeScheduleDays(current: unknown, next?: number[] | null) {
 }
 
 async function ensureOwnedProfile(
+  db: RoutineTaskDb,
   householdId: string,
   childProfileId: string,
   locale: AppLocale = "fr",
 ) {
-  const profile = await prisma.childProfile.findFirst({
+  const profile = await db.childProfile.findFirst({
     where: {
       id: childProfileId,
       householdId,
@@ -69,8 +72,11 @@ async function ensureOwnedProfile(
   return profile;
 }
 
-async function ensureRoutineForProfilePeriod(input: EnsureRoutineInput) {
-  const existingRoutine = await prisma.routine.findFirst({
+async function ensureRoutineForProfilePeriod(
+  db: RoutineTaskDb,
+  input: EnsureRoutineInput,
+) {
+  const existingRoutine = await db.routine.findFirst({
     where: {
       householdId: input.householdId,
       childProfileId: input.childProfileId,
@@ -90,6 +96,7 @@ async function ensureRoutineForProfilePeriod(input: EnsureRoutineInput) {
   }
 
   const profile = await ensureOwnedProfile(
+    db,
     input.householdId,
     input.childProfileId,
     input.locale,
@@ -104,7 +111,7 @@ async function ensureRoutineForProfilePeriod(input: EnsureRoutineInput) {
     throw new Error(getServerCopy(input.locale ?? "fr").actions.routineSaveError);
   }
 
-  const createdRoutine = await prisma.routine.create({
+  const createdRoutine = await db.routine.create({
     data: {
       householdId: input.householdId,
       childProfileId: input.childProfileId,
@@ -122,7 +129,7 @@ async function ensureRoutineForProfilePeriod(input: EnsureRoutineInput) {
   return createdRoutine.id;
 }
 
-export async function assignTaskTemplateToRoutine(input: {
+type AssignTaskTemplateInput = {
   householdId: string;
   actorUserId: string;
   childProfileId: string;
@@ -130,20 +137,26 @@ export async function assignTaskTemplateToRoutine(input: {
   period: RoutinePeriod;
   scheduleDays?: number[];
   locale?: AppLocale;
-}) {
+};
+
+async function assignTaskTemplateToRoutineWithDb(
+  db: RoutineTaskDb,
+  input: AssignTaskTemplateInput,
+) {
   const profile = await ensureOwnedProfile(
+    db,
     input.householdId,
     input.childProfileId,
     input.locale,
   );
-  const routineId = await ensureRoutineForProfilePeriod({
+  const routineId = await ensureRoutineForProfilePeriod(db, {
     householdId: input.householdId,
     childProfileId: input.childProfileId,
     period: input.period,
     locale: input.locale,
   });
 
-  const template = await prisma.taskTemplate.findFirst({
+  const template = await db.taskTemplate.findFirst({
     where: {
       id: input.templateId,
       householdId: input.householdId,
@@ -163,7 +176,7 @@ export async function assignTaskTemplateToRoutine(input: {
     throw new Error(getServerCopy(input.locale ?? "fr").validation.templateNotFound);
   }
 
-  const existingTask = await prisma.routineTask.findFirst({
+  const existingTask = await db.routineTask.findFirst({
     where: {
       routineId,
       templateId: template.id,
@@ -187,7 +200,7 @@ export async function assignTaskTemplateToRoutine(input: {
       || nextScheduleDays.some((day, index) => day !== currentDays[index]);
 
     if (scheduleChanged) {
-      await prisma.routineTask.update({
+      await db.routineTask.update({
         where: {
           id: existingTask.id,
         },
@@ -205,7 +218,7 @@ export async function assignTaskTemplateToRoutine(input: {
     };
   }
 
-  const lastTask = await prisma.routineTask.findFirst({
+  const lastTask = await db.routineTask.findFirst({
     where: {
       routineId,
     },
@@ -217,7 +230,7 @@ export async function assignTaskTemplateToRoutine(input: {
     },
   });
 
-  const createdTask = await prisma.routineTask.create({
+  const createdTask = await db.routineTask.create({
     data: {
       routineId,
       templateId: template.id,
@@ -236,7 +249,7 @@ export async function assignTaskTemplateToRoutine(input: {
     },
   });
 
-  await prisma.adminAuditLog.create({
+  await db.adminAuditLog.create({
     data: {
       householdId: input.householdId,
       actorUserId: input.actorUserId,
@@ -261,6 +274,14 @@ export async function assignTaskTemplateToRoutine(input: {
   };
 }
 
+export async function assignTaskTemplateToRoutine(
+  input: AssignTaskTemplateInput,
+) {
+  return prisma.$transaction((tx) =>
+    assignTaskTemplateToRoutineWithDb(tx, input),
+  );
+}
+
 export async function assignManyTaskTemplatesToRoutine(input: {
   householdId: string;
   actorUserId: string;
@@ -270,23 +291,57 @@ export async function assignManyTaskTemplatesToRoutine(input: {
   scheduleDays?: number[];
   locale?: AppLocale;
 }) {
-  const results = [];
+  return prisma.$transaction(async (tx) => {
+    const results = [];
 
-  for (const templateId of input.templateIds) {
-    results.push(
-      await assignTaskTemplateToRoutine({
-        householdId: input.householdId,
-        actorUserId: input.actorUserId,
-        childProfileId: input.childProfileId,
-        templateId,
-        period: input.period,
-        scheduleDays: input.scheduleDays,
-        locale: input.locale,
-      }),
-    );
-  }
+    for (const templateId of input.templateIds) {
+      results.push(
+        await assignTaskTemplateToRoutineWithDb(tx, {
+          householdId: input.householdId,
+          actorUserId: input.actorUserId,
+          childProfileId: input.childProfileId,
+          templateId,
+          period: input.period,
+          scheduleDays: input.scheduleDays,
+          locale: input.locale,
+        }),
+      );
+    }
 
-  return results;
+    return results;
+  });
+}
+
+export async function assignTaskTemplatesToPeriods(input: {
+  householdId: string;
+  actorUserId: string;
+  childProfileId: string;
+  templateIds: string[];
+  periods: RoutinePeriod[];
+  scheduleDays?: number[];
+  locale?: AppLocale;
+}) {
+  return prisma.$transaction(async (tx) => {
+    const results = [];
+
+    for (const period of input.periods) {
+      for (const templateId of input.templateIds) {
+        results.push(
+          await assignTaskTemplateToRoutineWithDb(tx, {
+            householdId: input.householdId,
+            actorUserId: input.actorUserId,
+            childProfileId: input.childProfileId,
+            templateId,
+            period,
+            scheduleDays: input.scheduleDays,
+            locale: input.locale,
+          }),
+        );
+      }
+    }
+
+    return results;
+  });
 }
 
 export async function upsertProfileRoutine(input: {
@@ -298,11 +353,12 @@ export async function upsertProfileRoutine(input: {
   locale?: AppLocale;
 }) {
   const profile = await ensureOwnedProfile(
+    prisma,
     input.householdId,
     input.childProfileId,
     input.locale,
   );
-  const routineId = await ensureRoutineForProfilePeriod({
+  const routineId = await ensureRoutineForProfilePeriod(prisma, {
     householdId: input.householdId,
     childProfileId: input.childProfileId,
     period: input.period,
@@ -560,6 +616,7 @@ export async function reorderRoutineTasksForProfile(input: {
   const locale = input.locale ?? "fr";
   const copy = getServerCopy(locale);
   const profile = await ensureOwnedProfile(
+    prisma,
     input.householdId,
     input.childProfileId,
     locale,

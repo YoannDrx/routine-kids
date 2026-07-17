@@ -1,5 +1,5 @@
 export type BillingPlan = {
-  id: "free" | "family" | "family-plus";
+  id: "free" | "family-plus";
   monthlyPrice: number;
   yearlyPrice: number;
   limits: {
@@ -15,25 +15,15 @@ export const billingPlans: BillingPlan[] = [
     monthlyPrice: 0,
     yearlyPrice: 0,
     limits: {
-      childProfiles: 2,
+      childProfiles: 1,
       smartPresets: 3,
       auditHistoryDays: 7,
     },
   },
   {
-    id: "family",
+    id: "family-plus",
     monthlyPrice: 9,
     yearlyPrice: 90,
-    limits: {
-      childProfiles: 6,
-      smartPresets: 999,
-      auditHistoryDays: 90,
-    },
-  },
-  {
-    id: "family-plus",
-    monthlyPrice: 17,
-    yearlyPrice: 170,
     limits: {
       childProfiles: 10,
       smartPresets: 999,

@@ -16,6 +16,7 @@ import {
 import {
   activateBoardPremiumAction,
   importPrototypeSnapshotAction,
+  openBillingPortalAction,
   updateBoardSettingsAction,
 } from "@/app/settings-actions";
 import { SettingsBoardBridge } from "@/components/settings/settings-board-bridge";
@@ -83,6 +84,7 @@ export default async function SettingsPage() {
         session?.user ? importPrototypeSnapshotAction : undefined
       }
       onActivatePremiumAction={session?.user ? activateBoardPremiumAction : undefined}
+      onManageBillingAction={session?.user ? openBillingPortalAction : undefined}
       parentWorkspace={parentWorkspace ?? undefined}
       onCreateProfileAction={session?.user ? createBoardProfileAction : undefined}
       onUpdateProfileAction={session?.user ? updateBoardProfileAction : undefined}

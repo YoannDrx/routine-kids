@@ -31,7 +31,7 @@ type ConfirmModalProps = {
 type PremiumModalProps = {
   open: boolean;
   onClose: () => void;
-  onActivate: (plan: "family" | "family_plus") => boolean | Promise<boolean>;
+  onActivate: (interval: "monthly" | "yearly") => boolean | Promise<boolean>;
   message?: string;
 };
 
@@ -162,14 +162,14 @@ export function PremiumModal({
         <PlanButton
           title={messages.feedback.monthly}
           price={messages.settings.monthlyPrice}
-          onClick={() => onActivate("family")}
+          onClick={() => onActivate("monthly")}
         />
         <PlanButton
-          title={messages.feedback.lifetime}
-          price={messages.settings.lifetimePrice}
+          title={messages.feedback.yearly}
+          price={messages.settings.yearlyPrice}
           featured
           featuredLabel={messages.feedback.best}
-          onClick={() => onActivate("family_plus")}
+          onClick={() => onActivate("yearly")}
         />
       </div>
     </OverlayModalShell>

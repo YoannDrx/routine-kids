@@ -8,6 +8,7 @@ import { type AdminWorkbenchMutationResult } from "@/components/admin/workbench-
 import { ensureHouseholdBaseline } from "@/lib/household-bootstrap";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/prisma";
+import { canAssignTemplatesToPeriods } from "@/lib/product-entitlements";
 import {
   assignTaskTemplateToRoutine,
   deleteRoutineTaskFromProfile,
@@ -270,13 +271,30 @@ export async function assignAdminRoutineTaskAction(input: {
 
   try {
     const { user, household } = await getAdminActionContext(locale);
+    const period = getRoutinePeriod(parsed.data.period);
+
+    if (
+      !(await canAssignTemplatesToPeriods({
+        userId: user.id,
+        householdId: household.id,
+        childProfileId: parsed.data.childProfileId,
+        templateIds: [parsed.data.templateId],
+        periods: [period],
+      }))
+    ) {
+      return {
+        status: "error",
+        message: copy.actions.routineTaskLimitReached,
+      };
+    }
+
     const assignedTask = await assignTaskTemplateToRoutine({
       householdId: household.id,
       actorUserId: user.id,
       locale,
       childProfileId: parsed.data.childProfileId,
       templateId: parsed.data.templateId,
-      period: getRoutinePeriod(parsed.data.period),
+      period,
     });
 
     revalidateAdminWorkbench();

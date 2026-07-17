@@ -54,7 +54,6 @@ type SettingsExperienceProps = {
   onOpenProfilesAction?: () => void;
   onOpenLibraryAction?: () => void;
   onOpenSchedulerAction?: () => void;
-  onPremiumChangeAction?: (premium: boolean) => void;
   onSettingsChangeAction?: (settings: RoutineKidsSettingsSnapshot) => void;
   onUpdateSettingsAction?: (input: {
     locale: "fr" | "en";
@@ -74,10 +73,16 @@ type SettingsExperienceProps = {
     message: string;
   }>;
   onActivatePremiumAction?: (input: {
-    plan: "family" | "family_plus";
+    interval: "monthly" | "yearly";
   }) => Promise<{
     status: "success" | "error";
     message: string;
+    checkoutUrl?: string;
+  }>;
+  onManageBillingAction?: () => Promise<{
+    status: "success" | "error";
+    message: string;
+    checkoutUrl?: string;
   }>;
   parentWorkspace?: ParentWorkspaceSnapshot;
   onCreateProfileAction?: (
@@ -145,11 +150,11 @@ export function SettingsExperience({
   onOpenProfilesAction,
   onOpenLibraryAction,
   onOpenSchedulerAction,
-  onPremiumChangeAction,
   onSettingsChangeAction,
   onUpdateSettingsAction,
   onImportPrototypeAction,
   onActivatePremiumAction,
+  onManageBillingAction,
   parentWorkspace,
   onCreateProfileAction,
   onUpdateHouseholdSettingsFormAction,
@@ -202,7 +207,13 @@ export function SettingsExperience({
   };
 
   async function runSettingsMutation(
-    action: (() => Promise<{ status: "success" | "error"; message: string }>) | undefined,
+    action:
+      | (() => Promise<{
+          status: "success" | "error";
+          message: string;
+          checkoutUrl?: string;
+        }>)
+      | undefined,
     fallbackMessage: string,
   ) {
     if (!action) {
@@ -236,6 +247,7 @@ export function SettingsExperience({
       return {
         success: true,
         message: result.message,
+        checkoutUrl: result.checkoutUrl,
       };
     } catch {
       const message = messages.settings.saveError;
@@ -288,10 +300,10 @@ export function SettingsExperience({
     return true;
   }
 
-  async function activatePremium(plan: "family" | "family_plus") {
+  async function activatePremium(interval: "monthly" | "yearly") {
     const mutation = await runSettingsMutation(
       onActivatePremiumAction
-        ? () => onActivatePremiumAction({ plan })
+        ? () => onActivatePremiumAction({ interval })
         : undefined,
       messages.settings.connectToActivatePremium,
     );
@@ -300,14 +312,23 @@ export function SettingsExperience({
       return false;
     }
 
-    setSettings((current) => ({
-      ...current,
-      premiumActive: true,
-    }));
-    onPremiumChangeAction?.(true);
-    setActiveModal(null);
+    if (!mutation.checkoutUrl) {
+      return false;
+    }
+
+    window.location.assign(mutation.checkoutUrl);
     return true;
-  };
+  }
+
+  async function manageBilling() {
+    const mutation = await runSettingsMutation(
+      onManageBillingAction,
+      messages.settings.connectToActivatePremium,
+    );
+
+    if (!mutation.success || !mutation.checkoutUrl) return;
+    window.location.assign(mutation.checkoutUrl);
+  }
 
   return (
     <>
@@ -328,7 +349,7 @@ export function SettingsExperience({
           <div className="grid min-h-0 flex-1 gap-8 lg:grid-cols-2">
             <div className="flex flex-col gap-6">
               {settings.premiumActive ? (
-                <div className="relative flex items-center justify-between overflow-hidden rounded-2xl border border-amber-300/30 bg-gradient-to-r from-gray-800 to-gray-900 p-4">
+                <div className="relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-amber-300/30 bg-gradient-to-r from-gray-800 to-gray-900 p-4">
                   <div className="absolute right-[-20px] top-[-20px] h-20 w-20 rounded-full bg-amber-300/10 blur-xl" />
                   <div className="z-10 flex items-center gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-300/20 text-amber-300">
@@ -339,6 +360,14 @@ export function SettingsExperience({
                       <p className="text-xs text-white/60">{messages.settings.premiumActiveSubtitle}</p>
                     </div>
                   </div>
+                  <button
+                    type="button"
+                    disabled={mutationPending}
+                    onClick={() => void manageBilling()}
+                    className="relative z-10 rounded-full border border-amber-200/30 bg-amber-300/15 px-4 py-2 text-xs font-semibold text-amber-100 transition hover:bg-amber-300/25 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {messages.settings.manageSubscription}
+                  </button>
                 </div>
               ) : (
                 <button
@@ -598,14 +627,14 @@ export function SettingsExperience({
           <PremiumPlan
             title={messages.feedback.monthly}
             price={messages.settings.monthlyPrice}
-            onClick={() => activatePremium("family")}
+            onClick={() => activatePremium("monthly")}
           />
           <PremiumPlan
-            title={messages.feedback.lifetime}
-            price={messages.settings.lifetimePrice}
+            title={messages.feedback.yearly}
+            price={messages.settings.yearlyPrice}
             featured
             featuredLabel={messages.feedback.best}
-            onClick={() => activatePremium("family_plus")}
+            onClick={() => activatePremium("yearly")}
           />
         </div>
       </OverlayModalShell>

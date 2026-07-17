@@ -1,6 +1,5 @@
 "use server";
 
-import { BillingPlan } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { z } from "zod";
@@ -13,7 +12,7 @@ import {
 } from "@/lib/household";
 import { prisma } from "@/lib/prisma";
 import { getRequiredAdmin } from "@/lib/session";
-import { isSupportedLocale } from "@/lib/settings";
+import { isPremiumSubscription, isSupportedLocale } from "@/lib/settings";
 import { localeCookieName } from "@/lib/i18n";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
 import {
@@ -21,6 +20,12 @@ import {
   type PrototypeImportSummary,
 } from "@/lib/prototype/import-service";
 import { getServerCopy } from "@/lib/server-copy";
+import {
+  getAppUrl,
+  getStripeClient,
+  getValidatedFamilyPrice,
+  type FamilyBillingInterval,
+} from "@/lib/stripe-billing";
 
 function createBoardSettingsSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
@@ -42,13 +47,14 @@ function createBoardSettingsSchema(locale: "fr" | "en") {
 }
 
 const premiumPlanSchema = z.object({
-  plan: z.enum(["family", "family_plus"]),
+  interval: z.enum(["monthly", "yearly"]),
 });
 
 export type SettingsMutationResult = {
   status: "success" | "error";
   message: string;
   code?: "parent_pin_required" | "parent_pin_not_configured";
+  checkoutUrl?: string;
 };
 
 export type PrototypeImportMutationResult = {
@@ -125,23 +131,24 @@ export async function updateBoardSettingsAction(input: {
     };
   }
 
-  await prisma.household.update({
-    where: {
-      id: household.id,
-    },
-    data: normalized.data,
-  });
-
-  await prisma.adminAuditLog.create({
-    data: {
-      householdId: household.id,
-      actorUserId: user.id,
-      action: "HOUSEHOLD_APP_SETTINGS_UPDATED",
-      targetType: "Household",
-      targetId: household.id,
-      metadata: normalized.data,
-    },
-  });
+  await prisma.$transaction([
+    prisma.household.update({
+      where: {
+        id: household.id,
+      },
+      data: normalized.data,
+    }),
+    prisma.adminAuditLog.create({
+      data: {
+        householdId: household.id,
+        actorUserId: user.id,
+        action: "HOUSEHOLD_APP_SETTINGS_UPDATED",
+        targetType: "Household",
+        targetId: household.id,
+        metadata: normalized.data,
+      },
+    }),
+  ]);
 
   const cookieStore = await cookies();
   cookieStore.set(localeCookieName, normalized.data.locale, {
@@ -159,7 +166,7 @@ export async function updateBoardSettingsAction(input: {
 }
 
 export async function activateBoardPremiumAction(input: {
-  plan: "family" | "family_plus";
+  interval: FamilyBillingInterval;
 }): Promise<SettingsMutationResult> {
   const locale = await getCurrentAppLocale();
   const copy = getServerCopy(locale);
@@ -196,43 +203,124 @@ export async function activateBoardPremiumAction(input: {
     };
   }
 
-  const nextPlan =
-    parsed.data.plan === "family" ? BillingPlan.FAMILY : BillingPlan.FAMILY_PLUS;
+  try {
+    const stripe = getStripeClient();
+    const appUrl = getAppUrl();
+    const price = await getValidatedFamilyPrice(parsed.data.interval);
 
-  await prisma.subscription.update({
-    where: {
-      referenceId: user.id,
-    },
-    data: {
-      plan: nextPlan,
-      status: "ACTIVE",
-    },
-  });
+    if (
+      isPremiumSubscription(subscription.plan, subscription.status) &&
+      subscription.stripeCustomerId
+    ) {
+      const portal = await stripe.billingPortal.sessions.create({
+        customer: subscription.stripeCustomerId,
+        return_url: `${appUrl}/settings?billing=portal-return`,
+      });
 
-  await prisma.adminAuditLog.create({
-    data: {
-      householdId: household.id,
-      actorUserId: user.id,
-      action: "SUBSCRIPTION_PLAN_UPDATED",
-      targetType: "Subscription",
-      targetId: user.id,
+      return {
+        status: "success",
+        message: copy.actions.premiumMonthlyActivated,
+        checkoutUrl: portal.url,
+      };
+    }
+
+    const checkout = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      client_reference_id: user.id,
+      customer: subscription.stripeCustomerId ?? undefined,
+      customer_email: subscription.stripeCustomerId ? undefined : user.email,
+      line_items: [
+        {
+          price: price.id,
+          quantity: 1,
+        },
+      ],
+      allow_promotion_codes: true,
+      success_url: `${appUrl}/settings?billing=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/settings?billing=cancelled`,
       metadata: {
-        previousPlan: subscription.plan,
-        nextPlan,
-        source: "settings-board",
+        userId: user.id,
+        householdId: household.id,
+        billingInterval: parsed.data.interval,
       },
-    },
-  });
+      subscription_data: {
+        metadata: {
+          userId: user.id,
+          householdId: household.id,
+        },
+      },
+    });
 
-  revalidateSettingsSurfaces();
+    if (!checkout.url) {
+      throw new Error("Stripe Checkout did not return a redirect URL.");
+    }
 
-  return {
-    status: "success",
-    message:
-      nextPlan === BillingPlan.FAMILY_PLUS
-        ? copy.actions.premiumLifetimeActivated
-        : copy.actions.premiumMonthlyActivated,
-  };
+    await prisma.adminAuditLog.create({
+      data: {
+        householdId: household.id,
+        actorUserId: user.id,
+        action: "STRIPE_CHECKOUT_CREATED",
+        targetType: "Subscription",
+        targetId: user.id,
+        metadata: {
+          checkoutSessionId: checkout.id,
+          billingInterval: parsed.data.interval,
+          previousPlan: subscription.plan,
+        },
+      },
+    });
+
+    return {
+      status: "success",
+      message: copy.actions.premiumMonthlyActivated,
+      checkoutUrl: checkout.url,
+    };
+  } catch {
+    return {
+      status: "error",
+      message: copy.actions.premiumLoadError,
+    };
+  }
+}
+
+export async function openBillingPortalAction(): Promise<SettingsMutationResult> {
+  const locale = await getCurrentAppLocale();
+  const copy = getServerCopy(locale);
+
+  if (!isDatabaseConfigured()) {
+    return {
+      status: "error",
+      message: copy.actions.dbNotConfiguredPremium,
+    };
+  }
+
+  const user = await getRequiredAdmin();
+  const subscription = await getOwnerSubscription(user.id);
+
+  if (!subscription?.stripeCustomerId) {
+    return {
+      status: "error",
+      message: copy.actions.premiumLoadError,
+    };
+  }
+
+  try {
+    const portal = await getStripeClient().billingPortal.sessions.create({
+      customer: subscription.stripeCustomerId,
+      return_url: `${getAppUrl()}/settings?billing=portal-return`,
+    });
+
+    return {
+      status: "success",
+      message: copy.actions.premiumMonthlyActivated,
+      checkoutUrl: portal.url,
+    };
+  } catch {
+    return {
+      status: "error",
+      message: copy.actions.premiumLoadError,
+    };
+  }
 }
 
 export async function importPrototypeSnapshotAction(input: {

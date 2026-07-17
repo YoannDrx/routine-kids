@@ -14,6 +14,7 @@ import {
 import {
   activateBoardPremiumAction as activateBoardSubscriptionAction,
   importPrototypeSnapshotAction,
+  openBillingPortalAction,
   updateBoardSettingsAction as updateBoardAppSettingsAction,
 } from "@/app/settings-actions";
 import { Rocket } from "lucide-react";
@@ -142,6 +143,9 @@ export default async function Home() {
         }
         onActivatePremiumAction={
           session?.user ? activateBoardSubscriptionAction : undefined
+        }
+        onManageBillingAction={
+          session?.user ? openBillingPortalAction : undefined
         }
         parentWorkspace={parentWorkspace ?? undefined}
         onCreateProfileFormAction={session?.user ? createChildProfileAction : undefined}

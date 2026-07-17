@@ -138,9 +138,13 @@ export async function getOwnerSubscription(ownerUserId: string) {
     select: {
       plan: true,
       status: true,
+      stripeCustomerId: true,
+      stripeSubscriptionId: true,
     },
   }) as Promise<{
     plan: BillingPlan;
     status: SubscriptionStatus | null;
+    stripeCustomerId: string | null;
+    stripeSubscriptionId: string | null;
   } | null>;
 }

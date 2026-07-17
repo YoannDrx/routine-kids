@@ -146,7 +146,7 @@ type AppMessages = {
     unlimitedProfiles: string;
     unlimitedTasks: string;
     monthly: string;
-    lifetime: string;
+    yearly: string;
     best: string;
     profileLimitMessage: string;
     taskLimitMessage: string;
@@ -185,6 +185,7 @@ type AppMessages = {
     title: string;
     premiumActive: string;
     premiumActiveSubtitle: string;
+    manageSubscription: string;
     premiumUpsell: string;
     premiumUpsellSubtitle: string;
     management: string;
@@ -219,7 +220,7 @@ type AppMessages = {
     aboutTagline: string;
     aboutVersion: string;
     monthlyPrice: string;
-    lifetimePrice: string;
+    yearlyPrice: string;
     parentCodeActive: (minutes: number) => string;
     themePackCount: (count: number) => string;
     privacyTitle: string;
@@ -579,8 +580,8 @@ const messages: Record<AppLocale, AppMessages> = {
       unlimitedProfiles: "Profils illimites",
       unlimitedTasks: "Taches illimitees",
       monthly: "Mensuel",
-      lifetime: "A vie",
-      best: "Best",
+      yearly: "Annuel",
+      best: "2 mois offerts",
       profileLimitMessage:
         "Desole cadet, il faut etre Capitaine pour agrandir l'equipage !",
       taskLimitMessage:
@@ -622,6 +623,7 @@ const messages: Record<AppLocale, AppMessages> = {
       title: "Parametres",
       premiumActive: "Statut : Capitaine",
       premiumActiveSubtitle: "Version Premium active",
+      manageSubscription: "Gérer l'abonnement",
       premiumUpsell: "Passer Premium",
       premiumUpsellSubtitle: "Debloquez l'illimite !",
       management: "Gestion",
@@ -655,8 +657,8 @@ const messages: Record<AppLocale, AppMessages> = {
       languageDescription: "Francais / English",
       aboutTagline: "Pensé par des parents pour des parents et leurs enfants.",
       aboutVersion: "RoutineKids v1.1",
-      monthlyPrice: "1,99€",
-      lifetimePrice: "24,99€",
+      monthlyPrice: "9€/mois",
+      yearlyPrice: "90€/an",
       parentCodeActive: (minutes) => `Actif · ${minutes} min`,
       themePackCount: (count) => `${count} packs`,
       privacyTitle: "Politique de Confidentialite",
@@ -666,13 +668,13 @@ const messages: Record<AppLocale, AppMessages> = {
         "Chez RoutineKids, la securite et la confidentialite de vos enfants sont notre priorite absolue. Cette politique detaille comment nous traitons les donnees.",
       privacyDataTitle: "Collecte des donnees",
       privacyDataBody:
-        "RoutineKids est une application fonctionnant localement. Nous ne collectons, ne stockons et ne transmettons aucune donnee personnelle (noms, photos, taches) vers des serveurs externes.",
+        "RoutineKids stocke les profils, photos et routines du foyer dans une base securisee afin de synchroniser l'experience entre vos appareils.",
       privacyLocalTitle: "Stockage local",
       privacyLocalBody:
-        "Toutes les informations creees dans l'application (profils, photos, historique) sont stockees uniquement dans la memoire de votre appareil. Si vous supprimez l'application, ces donnees sont effacees.",
+        "Les preferences temporaires peuvent rester sur l'appareil. Les donnees du foyer sont conservees sur nos serveurs jusqu'a leur suppression par le parent.",
       privacyThirdPartyTitle: "Partage a des tiers",
       privacyThirdPartyBody:
-        "Nous ne partageons aucune information avec des entreprises tierces, des annonceurs ou des partenaires commerciaux.",
+        "Les prestataires techniques strictement necessaires a l'hebergement et au paiement traitent uniquement les donnees requises pour leur service.",
       privacyTechnicalTitle: "Donnees techniques (Apple/Google)",
       privacyTechnicalBody:
         "Apple ou Google peuvent collecter des donnees techniques anonymes (rapports de plantage, statistiques d'installation) conformement a leurs propres politiques de confidentialite, independantes de RoutineKids.",
@@ -840,7 +842,7 @@ const messages: Record<AppLocale, AppMessages> = {
       eyebrow: "Pricing",
       title: "Une grille simple pour les familles",
       description:
-        "Le premium sortira plus tard, mais la structure de plan est deja posee pour eviter un modele improvise au dernier moment.",
+        "Commencez gratuitement, puis passez a Family Premium avec un paiement securise mensuel ou annuel.",
       backToBoard: "Retour a la board",
       createParentAccount: "Creer un compte parent",
       openPlans: "Voir les formules",
@@ -854,7 +856,7 @@ const messages: Record<AppLocale, AppMessages> = {
           description:
             "Ideal pour valider la board avec un seul foyer et une petite bibliotheque de taches.",
           features: [
-            "2 profils enfants",
+            "1 profil enfant",
             "Board matin et soir",
             "Un theme visuel par defaut",
             "Historique simple",
@@ -873,10 +875,11 @@ const messages: Record<AppLocale, AppMessages> = {
           ],
         },
         familyPlus: {
-          name: "Family Plus",
-          description: "Pour les foyers plus larges et les packs visuels premium.",
+          name: "Family Premium",
+          description:
+            "Pour les foyers qui veulent davantage de profils, de missions et de personnalisation.",
           features: [
-            "Jusqu'a 10 profils enfants",
+            "Profils et missions sans limite applicative",
             "Packs de themes premium",
             "Historique etendu",
             "Acces prioritaire aux futures automatisations",
@@ -1046,8 +1049,8 @@ const messages: Record<AppLocale, AppMessages> = {
       unlimitedProfiles: "Unlimited Profiles",
       unlimitedTasks: "Unlimited Tasks",
       monthly: "Monthly",
-      lifetime: "Lifetime",
-      best: "Best",
+      yearly: "Yearly",
+      best: "2 months free",
       profileLimitMessage:
         "Sorry cadet, you need to be Captain to expand the crew!",
       taskLimitMessage:
@@ -1090,6 +1093,7 @@ const messages: Record<AppLocale, AppMessages> = {
       title: "Settings",
       premiumActive: "Status: Captain",
       premiumActiveSubtitle: "Premium version active",
+      manageSubscription: "Manage subscription",
       premiumUpsell: "Go Premium",
       premiumUpsellSubtitle: "Unlock the unlimited tier!",
       management: "Manage",
@@ -1123,8 +1127,8 @@ const messages: Record<AppLocale, AppMessages> = {
       languageDescription: "French / English",
       aboutTagline: "Designed by parents for parents and children.",
       aboutVersion: "RoutineKids v1.1",
-      monthlyPrice: "$1.99",
-      lifetimePrice: "$24.99",
+      monthlyPrice: "€9/month",
+      yearlyPrice: "€90/year",
       parentCodeActive: (minutes) => `Active · ${minutes} min`,
       themePackCount: (count) => `${count} packs`,
       privacyTitle: "Privacy Policy",
@@ -1134,13 +1138,13 @@ const messages: Record<AppLocale, AppMessages> = {
         "At RoutineKids, the safety and privacy of your children are our top priority. This policy details how we handle data.",
       privacyDataTitle: "Data Collection",
       privacyDataBody:
-        "RoutineKids is a locally functioning application. We do not collect, store, or transmit any personal data (names, photos, tasks) to external servers.",
+        "RoutineKids stores household profiles, photos, and routines in a secured database so the experience can stay synchronized across devices.",
       privacyLocalTitle: "Local Storage",
       privacyLocalBody:
-        "All information created within the app (profiles, photos, history) is stored solely on your device's local memory. If you delete the application, this data is erased.",
+        "Temporary preferences may remain on the device. Household data is retained on our servers until a parent deletes it.",
       privacyThirdPartyTitle: "Third-Party Sharing",
       privacyThirdPartyBody:
-        "We do not share any information with third-party companies, advertisers, or commercial partners.",
+        "Technical providers strictly required for hosting and payments process only the data necessary to provide their service.",
       privacyTechnicalTitle: "Technical Data (Apple/Google)",
       privacyTechnicalBody:
         "Apple or Google may collect anonymous technical data (crash reports, installation statistics) in accordance with their own privacy policies, which are independent of RoutineKids.",
@@ -1309,7 +1313,7 @@ const messages: Record<AppLocale, AppMessages> = {
       eyebrow: "Pricing",
       title: "A simple plan grid for families",
       description:
-        "Premium will ship later, but the plan structure is already in place so pricing is not improvised at the last minute.",
+        "Start free, then upgrade to Family Premium with secure monthly or yearly billing.",
       backToBoard: "Back to board",
       createParentAccount: "Create a parent account",
       openPlans: "View plans",
@@ -1323,7 +1327,7 @@ const messages: Record<AppLocale, AppMessages> = {
           description:
             "Ideal to validate the board with one family and a small task library.",
           features: [
-            "2 child profiles",
+            "1 child profile",
             "Morning and evening board",
             "One default visual theme",
             "Basic history",
@@ -1342,10 +1346,11 @@ const messages: Record<AppLocale, AppMessages> = {
           ],
         },
         familyPlus: {
-          name: "Family Plus",
-          description: "For larger households and premium visual packs.",
+          name: "Family Premium",
+          description:
+            "For households that need more profiles, missions, and personalization.",
           features: [
-            "Up to 10 child profiles",
+            "No application limit on profiles or missions",
             "Premium theme packs",
             "Extended history",
             "Priority access to future automations",

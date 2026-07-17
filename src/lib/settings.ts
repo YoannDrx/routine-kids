@@ -31,5 +31,8 @@ export function isPremiumSubscription(
     return false;
   }
 
-  return status == null || status === SubscriptionStatus.ACTIVE || status === SubscriptionStatus.TRIALING;
+  return (
+    status === SubscriptionStatus.ACTIVE ||
+    status === SubscriptionStatus.TRIALING
+  );
 }

@@ -22,6 +22,7 @@ import {
   verifyParentPin,
 } from "@/lib/parent-security";
 import { prisma } from "@/lib/prisma";
+import { canCreateChildProfile } from "@/lib/product-entitlements";
 import { getRequiredAdmin } from "@/lib/session";
 import { localeCookieName } from "@/lib/i18n";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
@@ -171,6 +172,18 @@ export async function createChildProfileAction(
     return {
       status: "error",
       message: copy.actions.noHouseholdAttached,
+    };
+  }
+
+  if (
+    !(await canCreateChildProfile({
+      userId: user.id,
+      householdId: household.id,
+    }))
+  ) {
+    return {
+      status: "error",
+      message: copy.actions.profileLimitReached,
     };
   }
 

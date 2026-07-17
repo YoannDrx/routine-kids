@@ -34,14 +34,12 @@ export default async function PricingPage() {
         </div>
       </header>
 
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="mx-auto grid w-full max-w-4xl gap-4 md:grid-cols-2">
         {billingPlans.map((plan) => {
           const copy =
             plan.id === "free"
               ? messages.pricing.plans.free
-              : plan.id === "family"
-                ? messages.pricing.plans.family
-                : messages.pricing.plans.familyPlus;
+              : messages.pricing.plans.familyPlus;
 
           return (
             <article
@@ -51,22 +49,24 @@ export default async function PricingPage() {
               <div className="flex items-center justify-between gap-3">
                 <h2 className="font-display text-3xl text-white">{copy.name}</h2>
               <span className="rounded-full border border-white/10 bg-white/6 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/60">
-                {plan.monthlyPrice}€/mois
+                {plan.monthlyPrice}€/mois · {plan.yearlyPrice}€/an
               </span>
               </div>
               <p className="mt-3 text-sm leading-6 text-white/65">
                 {copy.description}
               </p>
-              <div className="mt-5 rounded-[24px] border border-white/10 bg-black/15 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-                  {messages.pricing.limits}
-                </p>
-                <ul className="mt-3 flex flex-col gap-2 text-sm text-white/72">
-                  <li>{messages.pricing.childProfiles(plan.limits.childProfiles)}</li>
-                  <li>{messages.pricing.smartPresets(plan.limits.smartPresets)}</li>
-                  <li>{messages.pricing.auditDays(plan.limits.auditHistoryDays)}</li>
-                </ul>
-              </div>
+              {plan.id === "free" ? (
+                <div className="mt-5 rounded-[24px] border border-white/10 bg-black/15 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
+                    {messages.pricing.limits}
+                  </p>
+                  <ul className="mt-3 flex flex-col gap-2 text-sm text-white/72">
+                    <li>{messages.pricing.childProfiles(plan.limits.childProfiles)}</li>
+                    <li>{messages.pricing.smartPresets(plan.limits.smartPresets)}</li>
+                    <li>{messages.pricing.auditDays(plan.limits.auditHistoryDays)}</li>
+                  </ul>
+                </div>
+              ) : null}
               <ul className="mt-5 flex flex-col gap-2 text-sm text-white/72">
                 {copy.features.map((feature) => (
                   <li
@@ -77,6 +77,18 @@ export default async function PricingPage() {
                   </li>
                 ))}
               </ul>
+              <Link
+                href={
+                  plan.id === "free"
+                    ? "/sign-up?callbackUrl=/settings"
+                    : "/settings"
+                }
+                className="mt-5 block rounded-full bg-white px-4 py-3 text-center text-sm font-semibold text-slate-950"
+              >
+                {plan.id === "free"
+                  ? messages.pricing.createParentAccount
+                  : messages.pricing.openPlans}
+              </Link>
             </article>
           );
         })}

@@ -225,6 +225,14 @@ Remove fake premium toggles and connect the product to real subscription state.
 - Premium-only affordances are enforced server-side.
 - Board and settings no longer fake premium activation.
 
+### Status
+
+- Implemented in code with a single Family Premium product and monthly/yearly Price IDs.
+- Stripe Checkout is created server-side and never grants access directly.
+- Signed webhooks synchronize customer, subscription, status, period, and cancellation state.
+- Free profile and routine-task limits are enforced server-side on both parent entry paths.
+- Remaining release work is operational: configure test/live Price IDs and webhook endpoints, test the complete Stripe test-mode lifecycle, then audit legacy subscriptions before any live catalog archival.
+
 ## Phase 10: Hardening and Quality
 
 ### Goal
@@ -263,8 +271,8 @@ The first development tranche has already started in code:
 - the main server mutation and validation messages are localized on board, settings, security, and workbench flows
 - the board library can delete custom templates and assign missions to morning, evening, or both
 - streak and journey progression are now derived from `TaskCompletion` for the live board
-- settings persists locale, sounds, periods, and internal premium state
-- the major remaining product gaps are localization completeness, Stripe entitlements, historical completion hardening, and weekday-specific routine fidelity
+- settings persists locale, sounds, and periods; premium state now comes from Stripe-synchronized subscriptions
+- the major remaining product gaps are localization completeness, historical completion hardening, weekday-specific routine fidelity, and live Stripe operational validation
 
 ## Immediate Next Coding Targets
 
@@ -272,6 +280,6 @@ The first development tranche has already started in code:
 2. Expand the sound engine beyond the first feedback vocabulary.
 3. Restore the remaining library and scheduler behavior from `index.html`, especially the richer planning model.
 4. Harden historical streak/day-complete snapshots against future routine changes.
-5. Replace internal premium toggles with Stripe-backed entitlements.
+5. Validate Stripe Checkout/webhooks in test mode, then audit legacy live subscriptions before catalog changes.
 6. Add task media flows and remove remaining live task fallbacks when routines are empty or missing.
 7. Preserve weekday-specific prototype scheduler fidelity once weekly overrides exist.

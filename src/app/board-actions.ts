@@ -18,8 +18,11 @@ import { getCurrentAppLocale } from "@/lib/i18n.server";
 import { deriveJourneyStateFromRoutines } from "@/lib/journey";
 import { prisma } from "@/lib/prisma";
 import {
-  assignManyTaskTemplatesToRoutine,
-  assignTaskTemplateToRoutine,
+  canAssignTemplatesToPeriods,
+  canCreateChildProfile,
+} from "@/lib/product-entitlements";
+import {
+  assignTaskTemplatesToPeriods,
   deleteRoutineTaskFromProfile,
   reorderRoutineTasksForProfile,
   removeRoutineTaskDayFromProfile,
@@ -462,6 +465,18 @@ export async function createBoardProfileAction(input: {
 
   const { user, household } = access;
 
+  if (
+    !(await canCreateChildProfile({
+      userId: user.id,
+      householdId: household.id,
+    }))
+  ) {
+    return {
+      status: "error",
+      message: copy.actions.profileLimitReached,
+    };
+  }
+
   const profile = await createChildProfileWithDefaults({
     householdId: household.id,
     actorUserId: user.id,
@@ -791,21 +806,31 @@ export async function assignBoardTaskTemplateAction(input: {
 
   const { user, household } = access;
   const periods = getRoutinePeriods(parsed.data.period);
-  const assignedTasks = [];
 
-  for (const period of periods) {
-    assignedTasks.push(
-      await assignTaskTemplateToRoutine({
-        householdId: household.id,
-        actorUserId: user.id,
-        childProfileId: parsed.data.childProfileId,
-        templateId: parsed.data.templateId,
-        period,
-        scheduleDays: parsed.data.scheduleDays,
-        locale: household.locale,
-      }),
-    );
+  if (
+    !(await canAssignTemplatesToPeriods({
+      userId: user.id,
+      householdId: household.id,
+      childProfileId: parsed.data.childProfileId,
+      templateIds: [parsed.data.templateId],
+      periods: [...periods],
+    }))
+  ) {
+    return {
+      status: "error",
+      message: copy.actions.routineTaskLimitReached,
+    };
   }
+
+  const assignedTasks = await assignTaskTemplatesToPeriods({
+    householdId: household.id,
+    actorUserId: user.id,
+    childProfileId: parsed.data.childProfileId,
+    templateIds: [parsed.data.templateId],
+    periods: [...periods],
+    scheduleDays: parsed.data.scheduleDays,
+    locale: household.locale,
+  });
 
   revalidateBoardSurfaces();
 
@@ -857,21 +882,31 @@ export async function assignManyBoardTaskTemplatesAction(input: {
 
   const { user, household } = access;
   const periods = getRoutinePeriods(parsed.data.period);
-  const assignedTasks = [];
 
-  for (const period of periods) {
-    assignedTasks.push(
-      ...(await assignManyTaskTemplatesToRoutine({
-        householdId: household.id,
-        actorUserId: user.id,
-        childProfileId: parsed.data.childProfileId,
-        templateIds: parsed.data.templateIds,
-        period,
-        scheduleDays: parsed.data.scheduleDays,
-        locale: household.locale,
-      })),
-    );
+  if (
+    !(await canAssignTemplatesToPeriods({
+      userId: user.id,
+      householdId: household.id,
+      childProfileId: parsed.data.childProfileId,
+      templateIds: parsed.data.templateIds,
+      periods: [...periods],
+    }))
+  ) {
+    return {
+      status: "error",
+      message: copy.actions.routineTaskLimitReached,
+    };
   }
+
+  const assignedTasks = await assignTaskTemplatesToPeriods({
+    householdId: household.id,
+    actorUserId: user.id,
+    childProfileId: parsed.data.childProfileId,
+    templateIds: parsed.data.templateIds,
+    periods: [...periods],
+    scheduleDays: parsed.data.scheduleDays,
+    locale: household.locale,
+  });
 
   revalidateBoardSurfaces();
 

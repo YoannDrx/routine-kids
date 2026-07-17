@@ -56,8 +56,9 @@ type SettingsBoardBridgeProps = {
     message: string;
   }>;
   onActivatePremiumAction?: (input: {
-    plan: "family" | "family_plus";
+    interval: "monthly" | "yearly";
   }) => Promise<MutationResult>;
+  onManageBillingAction?: () => Promise<MutationResult>;
   onCreateProfileAction?: (input: {
     name: string;
     age: number;
@@ -127,6 +128,7 @@ type MutationResult = {
   status: "success" | "error";
   message: string;
   profileId?: string;
+  checkoutUrl?: string;
 };
 
 type ConfirmState = {
@@ -181,6 +183,7 @@ export function SettingsBoardBridge({
   onUpdateSettingsAction,
   onImportPrototypeAction,
   onActivatePremiumAction,
+  onManageBillingAction,
   onCreateProfileAction,
   onUpdateProfileAction,
   onDeleteProfileAction,
@@ -240,7 +243,7 @@ export function SettingsBoardBridge({
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [premiumReason, setPremiumReason] = useState<string | null>(null);
-  const [premiumIntent, setPremiumIntent] = useState<PremiumIntent>(null);
+  const [, setPremiumIntent] = useState<PremiumIntent>(null);
   const [autoAssignOfferOpen, setAutoAssignOfferOpen] = useState(false);
   const [autoAssignConfirmOpen, setAutoAssignConfirmOpen] = useState(false);
   const [autoAssignProfileId, setAutoAssignProfileId] = useState<string | null>(
@@ -755,7 +758,6 @@ export function SettingsBoardBridge({
       <SettingsExperience
         householdName={householdName}
         initialSettings={settingsSnapshot}
-        onPremiumChangeAction={setPremiumActive}
         onSettingsChangeAction={setBoardSettings}
         onOpenProfilesAction={
           canOpenBoardManagement
@@ -783,6 +785,7 @@ export function SettingsBoardBridge({
         onUpdateSettingsAction={onUpdateSettingsAction}
         onImportPrototypeAction={onImportPrototypeAction}
         onActivatePremiumAction={onActivatePremiumAction}
+        onManageBillingAction={onManageBillingAction}
         parentWorkspace={parentWorkspace}
         onCreateProfileAction={onCreateProfileFormAction}
         onUpdateHouseholdSettingsFormAction={onUpdateHouseholdSettingsFormAction}
@@ -1102,35 +1105,25 @@ export function SettingsBoardBridge({
             setPremiumIntent(null);
           }}
           message={premiumReason ?? undefined}
-          onActivate={async (plan) => {
+          onActivate={async (interval) => {
             if (!onActivatePremiumAction) {
               setAlertMessage(messages.board.connectToActivatePremium);
               return false;
             }
 
-            const result = await onActivatePremiumAction({ plan });
+            const result = await onActivatePremiumAction({ interval });
 
             if (result.status === "error") {
               setAlertMessage(result.message);
               return false;
             }
 
-            const nextPremiumIntent = premiumIntent;
-            setPremiumActive(true);
-            setPremiumOpen(false);
-            setPremiumReason(null);
-            setPremiumIntent(null);
-
-            if (nextPremiumIntent?.type === "auto-assign") {
-              openAutoAssignConfirm(nextPremiumIntent.profileId, {
-                bypassPremium: true,
-              });
-              router.refresh();
-              return true;
+            if (!result.checkoutUrl) {
+              setAlertMessage(messages.settings.saveError);
+              return false;
             }
 
-            showSuccess(messages.board.successTitle, result.message);
-            router.refresh();
+            window.location.assign(result.checkoutUrl);
             return true;
           }}
         />

@@ -46,6 +46,7 @@ type BoardMutationResult = {
   message: string;
   profileId?: string;
   code?: "parent_pin_required" | "parent_pin_not_configured" | "invalid_pin";
+  checkoutUrl?: string;
 };
 
 type BoardToggleResult = {
@@ -140,8 +141,9 @@ type RoutineBoardProps = {
     message: string;
   }>;
   onActivatePremiumAction?: (input: {
-    plan: "family" | "family_plus";
+    interval: "monthly" | "yearly";
   }) => Promise<BoardMutationResult>;
+  onManageBillingAction?: () => Promise<BoardMutationResult>;
   parentWorkspace?: ParentWorkspaceSnapshot;
   onCreateProfileFormAction?: (
     state: CreateChildProfileState,
@@ -360,6 +362,7 @@ export function RoutineBoard({
   onUpdateSettingsAction,
   onImportPrototypeAction,
   onActivatePremiumAction,
+  onManageBillingAction,
   parentWorkspace,
   onCreateProfileFormAction,
   onUpdateHouseholdSettingsFormAction,
@@ -400,7 +403,7 @@ export function RoutineBoard({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [premiumReason, setPremiumReason] = useState<string | null>(null);
-  const [premiumIntent, setPremiumIntent] = useState<PremiumIntent>(null);
+  const [, setPremiumIntent] = useState<PremiumIntent>(null);
   const [journeyOpen, setJourneyOpen] = useState(false);
   const [profileManagerOpen, setProfileManagerOpen] = useState(false);
   const [schedulerOpen, setSchedulerOpen] = useState(false);
@@ -1617,7 +1620,6 @@ export function RoutineBoard({
               : undefined
           }
           onCloseAction={() => setSettingsOpen(false)}
-          onPremiumChangeAction={setPremiumActive}
           onSettingsChangeAction={setBoardSettings}
           onOpenProfilesAction={() => setProfileManagerOpen(true)}
           onOpenLibraryAction={() =>
@@ -1629,6 +1631,7 @@ export function RoutineBoard({
           onUpdateSettingsAction={onUpdateSettingsAction}
           onImportPrototypeAction={onImportPrototypeAction}
           onActivatePremiumAction={onActivatePremiumAction}
+          onManageBillingAction={onManageBillingAction}
           parentWorkspace={parentWorkspace}
           onCreateProfileAction={onCreateProfileFormAction}
           onUpdateHouseholdSettingsFormAction={onUpdateHouseholdSettingsFormAction}
@@ -1651,35 +1654,25 @@ export function RoutineBoard({
             setPremiumIntent(null);
           }}
           message={premiumReason ?? undefined}
-          onActivate={async (plan) => {
+          onActivate={async (interval) => {
             if (!onActivatePremiumAction) {
               setAlertMessage(messages.board.connectToActivatePremium);
               return false;
             }
 
-            const result = await onActivatePremiumAction({ plan });
+            const result = await onActivatePremiumAction({ interval });
 
             if (result.status === "error") {
               setAlertMessage(result.message);
               return false;
             }
 
-            const nextPremiumIntent = premiumIntent;
-            setPremiumActive(true);
-            setPremiumOpen(false);
-            setPremiumReason(null);
-            setPremiumIntent(null);
-
-            if (nextPremiumIntent?.type === "auto-assign") {
-              openAutoAssignConfirm(nextPremiumIntent.profileId, {
-                bypassPremium: true,
-              });
-              router.refresh();
-              return true;
+            if (!result.checkoutUrl) {
+              setAlertMessage(messages.board.saveError);
+              return false;
             }
 
-            showSuccess(messages.board.successTitle, result.message);
-            router.refresh();
+            window.location.assign(result.checkoutUrl);
             return true;
           }}
         />

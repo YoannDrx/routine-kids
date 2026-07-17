@@ -46,6 +46,7 @@ type ServerCopy = {
     themeAssigned: (profileName: string, themeName: string) => string;
     themeAuto: (profileName: string) => string;
     profileFieldsInvalid: string;
+    profileLimitReached: string;
     profileAdded: (name: string) => string;
     profileUpdated: (name: string) => string;
     profileAvatarUpdated: string;
@@ -85,6 +86,7 @@ type ServerCopy = {
     routineUpdated: (profileName: string, title: string) => string;
     routineTasksReordered: (profileName: string) => string;
     missionAssignError: string;
+    routineTaskLimitReached: string;
     missionAdded: (title: string, profileName: string) => string;
     missionAddedBoth: (title: string, profileName: string) => string;
     missionAlreadyPresent: (title: string, profileName: string) => string;
@@ -153,6 +155,8 @@ const frCopy: ServerCopy = {
       `${profileName} utilise maintenant ${themeName}.`,
     themeAuto: (profileName) => `${profileName} revient au theme automatique.`,
     profileFieldsInvalid: "Le profil contient des champs invalides.",
+    profileLimitReached:
+      "Le plan gratuit permet un profil enfant. Passez a Family Premium pour agrandir l'equipage.",
     profileAdded: (name) => `${name} a ete ajoute au foyer.`,
     profileUpdated: (name) => `${name} a ete mis a jour.`,
     profileAvatarUpdated: "Avatar mis a jour.",
@@ -197,6 +201,8 @@ const frCopy: ServerCopy = {
     routineTasksReordered: (profileName) =>
       `L'ordre des missions de ${profileName} a ete mis a jour.`,
     missionAssignError: "Impossible d'ajouter cette mission a la routine.",
+    routineTaskLimitReached:
+      "Le plan gratuit permet quatre missions par routine. Passez a Family Premium pour en ajouter davantage.",
     missionAdded: (title, profileName) =>
       `${title} a ete ajoutee a la routine de ${profileName}.`,
     missionAddedBoth: (title, profileName) =>
@@ -276,6 +282,8 @@ const enCopy: ServerCopy = {
       `${profileName} now uses ${themeName}.`,
     themeAuto: (profileName) => `${profileName} is back on automatic theme mode.`,
     profileFieldsInvalid: "Profile fields are invalid.",
+    profileLimitReached:
+      "The free plan includes one child profile. Upgrade to Family Premium to grow the crew.",
     profileAdded: (name) => `${name} was added to the household.`,
     profileUpdated: (name) => `${name} was updated.`,
     profileAvatarUpdated: "Avatar updated.",
@@ -320,6 +328,8 @@ const enCopy: ServerCopy = {
     routineTasksReordered: (profileName) =>
       `${profileName}'s mission order has been updated.`,
     missionAssignError: "Unable to add this mission to the routine.",
+    routineTaskLimitReached:
+      "The free plan includes four missions per routine. Upgrade to Family Premium to add more.",
     missionAdded: (title, profileName) =>
       `${title} was added to ${profileName}'s routine.`,
     missionAddedBoth: (title, profileName) =>
