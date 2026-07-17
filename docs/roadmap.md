@@ -41,7 +41,8 @@ Authoritative status:
 - task photo upload, crop, replace, and delete are real from the task library
 - new child and task images use private Vercel Blob storage behind a household-authorized media route; legacy data URLs remain readable during migration
 - app-wide i18n foundation is real and the main server mutation/validation messages are localized, but the final zero-hardcoded pass is still in progress across all visible copy and data labels
-- Stripe billing and server-side plan enforcement are real in test mode; remaining release work is remote preview validation, modal E2E depth, complete i18n and the documented weekday scheduling compromise
+- Stripe billing and server-side plan enforcement are real in test mode; the remote signup, private-media, billing and account-deletion lifecycles have been replayed successfully. Remaining release work is modal E2E depth, complete i18n and the documented weekday scheduling compromise
+- private household export and destructive account deletion are live from settings, with billing cancellation, database cascade and retried private-media cleanup
 - the dedicated `/admin` route has been deleted from the runtime
 - the detailed button-by-button breakdown now lives in [`docs/feature-audit.md`](/Users/yoannandrieux/Projets/routine-kids/docs/feature-audit.md)
 
@@ -309,8 +310,8 @@ Authoritative status:
 - [x] Replace board-local scheduler apply flow with real routine/task writes
 - [x] Persist board settings and internal premium state in DB
 - [x] Replace board-local parental gate with persisted parent security
-- [~] Remove remaining `/admin` affordances from board and settings flows
-- [ ] Rebuild real sound and celebrations from the prototype sound engine
+- [x] Remove remaining `/admin` affordances from board and settings flows
+- [~] Rebuild real sound and celebrations from the prototype sound engine
 - [x] Reintroduce photo upload, crop, replace, and delete for child profiles
 - [x] Reintroduce task photo + crop in V1 scope
 - [~] Restore missing library behaviors from `index.html`
@@ -362,7 +363,7 @@ Authoritative status:
 2. Run the full modal E2E matrix at 1024x768 and 1366x1024, including media replacement and deletion through the file picker.
 3. Complete the remaining i18n pass for imported and data-driven labels.
 4. Preserve weekday-specific prototype scheduling fidelity with explicit weekly overrides.
-5. Re-run export/account deletion against the isolated preview and verify zero residual rows and private Blob objects.
+5. Add a private-media fixture to the remote destructive-account scenario, then verify the referenced Blob is no longer readable after deletion.
 6. Audit accessibility, reduced motion and deterministic sound behavior.
 7. Fix the intro-video parity issue in the preserved original prototype without reintroducing it into the production app.
 

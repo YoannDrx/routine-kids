@@ -588,10 +588,10 @@ These gaps are the main reasons the app still feels incomplete relative to `inde
 
 1. Completed-day streak snapshots are immutable, but long-range journey QA still needs broader fixtures.
 2. The live prototype import does not yet preserve weekday-specific scheduler overrides from the old HTML model.
-3. Billing is verified locally in Stripe test mode and still needs remote-preview validation.
+3. Billing is verified locally and on the isolated Stripe test preview; live-mode activation still requires a catalog and subscription audit.
 4. The task library/editor flow is still simplified relative to the original `global-library-modal`, `task-editor-modal`, and `assign-period-modal`, even though `both` assignment and delete-from-library are now back.
 5. The app still contains visible hardcoded strings and some non-localized data-driven labels.
-6. Task photo/media flows are live with private storage and still need hosted E2E coverage.
+6. Private-media authorization is verified remotely; the complete hosted file-picker replace/delete matrix still needs automation.
 
 ## Action Matrix
 
@@ -735,14 +735,12 @@ The list below tracks the distinct user-visible actions in the current app.
 
 ## Zero-Mock Gaps
 
-The project is not yet release-complete because of six structural gaps:
+The project is not yet release-complete because of four structural gaps:
 
-1. Stripe and private media need remote-preview E2E validation.
-2. Some user-facing copy and imported data-driven labels are not localized yet.
-3. Transitional internal `admin` file buckets still need to be folded into `settings`.
-4. Modal, accessibility and exact iPad viewport coverage remain incomplete.
-5. Household export/deletion must include private Blob lifecycle handling.
-6. Prototype import still compresses old weekday-specific scheduling into the current V1 routine model until weekly overrides exist.
+1. Some user-facing copy and imported data-driven labels are not localized yet.
+2. Modal, accessibility and exact iPad viewport coverage remain incomplete.
+3. The remote destructive-account scenario still needs a private-media fixture to prove Blob removal after deletion.
+4. Prototype import still compresses old weekday-specific scheduling into the current V1 routine model until weekly overrides exist.
 
 ## Zero-Mock Implementation Plan
 
@@ -797,7 +795,7 @@ The project is not yet release-complete because of six structural gaps:
 
 - Stripe Checkout and signed idempotent webhooks synchronize `Subscription`.
 - Server-side feature gates are active and local premium toggles are removed.
-- Remote preview and live-catalog audits remain release gates.
+- Remote preview billing is verified; the live-catalog audit remains a release gate.
 
 ### Phase I: Hardening
 
@@ -808,9 +806,7 @@ The project is not yet release-complete because of six structural gaps:
 
 ## Immediate Engineering Priorities
 
-1. Create an isolated Vercel preview with Neon, Stripe test mode and private Blob.
-2. Add exact 1024x768 and 1366x1024 modal E2E coverage.
-3. Finish i18n for imported/data-driven labels and complete the accessibility pass.
-4. Add household export and deletion, including private Blob cleanup.
-5. Preserve weekday-specific prototype scheduling data with weekly overrides.
-6. Fold the remaining transitional `admin` implementation buckets into settings.
+1. Add exact 1024x768 and 1366x1024 modal E2E coverage.
+2. Finish i18n for imported/data-driven labels and complete the accessibility pass.
+3. Replay destructive account deletion with a private-media fixture and assert that its Blob URL is revoked.
+4. Preserve weekday-specific prototype scheduling data with weekly overrides.
