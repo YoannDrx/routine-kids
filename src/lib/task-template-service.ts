@@ -31,6 +31,7 @@ async function ensureOwnedTemplate(
       id: true,
       title: true,
       isBuiltIn: true,
+      imageUrl: true,
     },
   });
 
@@ -51,17 +52,62 @@ export async function upsertTaskTemplate(
       input.locale,
     );
 
-    const updatedTemplate = await prisma.taskTemplate.update({
-      where: {
-        id: existingTemplate.id,
-      },
+    const updatedTemplate = await prisma.$transaction(async (tx) => {
+      const updated = await tx.taskTemplate.update({
+        where: {
+          id: existingTemplate.id,
+        },
+        data: {
+          title: input.title,
+          shortLabel: input.shortLabel,
+          icon: input.icon,
+          imageUrl: input.imageUrl ?? null,
+          color: input.color ?? null,
+          durationMinutes: input.durationMinutes,
+        },
+        select: {
+          id: true,
+          title: true,
+        },
+      });
+
+      await tx.adminAuditLog.create({
+        data: {
+          householdId: input.householdId,
+          actorUserId: input.actorUserId,
+          action: "TASK_TEMPLATE_UPDATED",
+          targetType: "TaskTemplate",
+          targetId: updated.id,
+          metadata: {
+            previousTitle: existingTemplate.title,
+            title: updated.title,
+          },
+        },
+      });
+
+      return updated;
+    });
+
+    return {
+      id: updatedTemplate.id,
+      title: updatedTemplate.title,
+      created: false,
+      previousImageUrl: existingTemplate.imageUrl,
+    };
+  }
+
+  const createdTemplate = await prisma.$transaction(async (tx) => {
+    const created = await tx.taskTemplate.create({
       data: {
+        householdId: input.householdId,
         title: input.title,
         shortLabel: input.shortLabel,
         icon: input.icon,
         imageUrl: input.imageUrl ?? null,
         color: input.color ?? null,
         durationMinutes: input.durationMinutes,
+        autoAssignEnabled: true,
+        isBuiltIn: false,
       },
       select: {
         id: true,
@@ -69,62 +115,27 @@ export async function upsertTaskTemplate(
       },
     });
 
-    await prisma.adminAuditLog.create({
+    await tx.adminAuditLog.create({
       data: {
         householdId: input.householdId,
         actorUserId: input.actorUserId,
-        action: "TASK_TEMPLATE_UPDATED",
+        action: "TASK_TEMPLATE_CREATED",
         targetType: "TaskTemplate",
-        targetId: updatedTemplate.id,
+        targetId: created.id,
         metadata: {
-          previousTitle: existingTemplate.title,
-          title: updatedTemplate.title,
+          title: created.title,
         },
       },
     });
 
-    return {
-      id: updatedTemplate.id,
-      title: updatedTemplate.title,
-      created: false,
-    };
-  }
-
-  const createdTemplate = await prisma.taskTemplate.create({
-    data: {
-      householdId: input.householdId,
-      title: input.title,
-      shortLabel: input.shortLabel,
-      icon: input.icon,
-      imageUrl: input.imageUrl ?? null,
-      color: input.color ?? null,
-      durationMinutes: input.durationMinutes,
-      autoAssignEnabled: true,
-      isBuiltIn: false,
-    },
-    select: {
-      id: true,
-      title: true,
-    },
-  });
-
-  await prisma.adminAuditLog.create({
-    data: {
-      householdId: input.householdId,
-      actorUserId: input.actorUserId,
-      action: "TASK_TEMPLATE_CREATED",
-      targetType: "TaskTemplate",
-      targetId: createdTemplate.id,
-      metadata: {
-        title: createdTemplate.title,
-      },
-    },
+    return created;
   });
 
   return {
     id: createdTemplate.id,
     title: createdTemplate.title,
     created: true,
+    previousImageUrl: null,
   };
 }
 
@@ -167,5 +178,6 @@ export async function deleteTaskTemplate(input: {
   return {
     id: template.id,
     title: template.title,
+    previousImageUrl: template.imageUrl,
   };
 }

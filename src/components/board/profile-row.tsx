@@ -17,6 +17,7 @@ import type {
   BoardProfile,
   BoardTask,
 } from "@/lib/data/prototype-seed";
+import { resolveMediaUrl } from "@/lib/private-media";
 import { cn } from "@/lib/utils";
 
 type ProfileRowProps = {
@@ -270,7 +271,7 @@ function TaskTile({
           {task.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={task.imageUrl}
+              src={resolveMediaUrl(task.imageUrl) ?? task.imageUrl}
               alt=""
               className="board-task-visual h-12 w-12 rounded-lg object-cover"
             />

@@ -275,7 +275,10 @@ export async function updateChildProfileDetails(
       },
     });
 
-    return updatedProfile;
+    return {
+      ...updatedProfile,
+      previousPhotoUrl: existingProfile.photoUrl,
+    };
   });
 }
 
@@ -319,7 +322,10 @@ export async function updateChildProfileAvatar(
       },
     });
 
-    return updatedProfile;
+    return {
+      ...updatedProfile,
+      previousPhotoUrl: existingProfile.photoUrl,
+    };
   });
 }
 
@@ -362,7 +368,10 @@ export async function updateChildProfilePhoto(
       },
     });
 
-    return updatedProfile;
+    return {
+      ...updatedProfile,
+      previousPhotoUrl: existingProfile.photoUrl,
+    };
   });
 }
 
@@ -403,7 +412,10 @@ export async function removeChildProfilePhoto(
       },
     });
 
-    return updatedProfile;
+    return {
+      ...updatedProfile,
+      previousPhotoUrl: existingProfile.photoUrl,
+    };
   });
 }
 
@@ -417,6 +429,18 @@ export async function deleteChildProfileCascade(
       input.childProfileId,
       input.locale,
     );
+
+    const previousTaskImages = await tx.routineTask.findMany({
+      where: {
+        routine: {
+          householdId: input.householdId,
+          childProfileId: existingProfile.id,
+        },
+        imageUrl: { not: null },
+      },
+      distinct: ["imageUrl"],
+      select: { imageUrl: true },
+    });
 
     await tx.adminAuditLog.create({
       data: {
@@ -465,6 +489,10 @@ export async function deleteChildProfileCascade(
     return {
       id: existingProfile.id,
       name: existingProfile.name,
+      previousPhotoUrl: existingProfile.photoUrl,
+      previousTaskImageUrls: previousTaskImages.flatMap(({ imageUrl }) =>
+        imageUrl ? [imageUrl] : [],
+      ),
     };
   });
 }

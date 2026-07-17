@@ -16,6 +16,12 @@ import { getDayKey } from "@/lib/day-key";
 import { ensureHouseholdBaseline } from "@/lib/household-bootstrap";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
 import {
+  deletePrivateImage,
+  deletePrivateImageIfUnreferenced,
+  normalizeExistingMediaReference,
+  persistPrivateImage,
+} from "@/lib/media-storage";
+import {
   deriveJourneyStateFromRoutines,
   getCompletedDayKeysFromRoutines,
 } from "@/lib/journey";
@@ -36,6 +42,65 @@ import {
   deleteTaskTemplate,
   upsertTaskTemplate,
 } from "@/lib/task-template-service";
+
+type PreparedMedia = {
+  reference: string | null;
+  uploaded: boolean;
+};
+
+async function preparePrivateMedia(input: {
+  value: string | null;
+  householdId: string;
+  category: "profiles" | "tasks";
+}): Promise<PreparedMedia> {
+  const normalized = normalizeExistingMediaReference(
+    input.value,
+    input.householdId,
+  );
+
+  if (!normalized?.startsWith("data:image/")) {
+    return { reference: normalized, uploaded: false };
+  }
+
+  return {
+    reference: await persistPrivateImage({
+      dataUrl: normalized,
+      householdId: input.householdId,
+      category: input.category,
+    }),
+    uploaded: true,
+  };
+}
+
+async function rollbackPreparedMedia(media: PreparedMedia) {
+  if (!media.uploaded) return;
+  await deletePrivateImage(media.reference).catch(() => undefined);
+}
+
+async function purgeReplacedMedia(
+  previousReference: string | null | undefined,
+  nextReference: string | null | undefined,
+) {
+  if (!previousReference || previousReference === nextReference) return;
+  await deletePrivateImageIfUnreferenced(previousReference).catch(
+    () => undefined,
+  );
+}
+
+function createMediaField(locale: "fr" | "en") {
+  const copy = getServerCopy(locale);
+
+  return z
+    .string()
+    .trim()
+    .max(1_500_000, copy.validation.photoTooLarge)
+    .refine(
+      (value) =>
+        value.startsWith("data:image/") ||
+        value.startsWith("rk-media:households/"),
+      copy.validation.photoInvalid,
+    );
+}
 
 function createToggleBoardTaskSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
@@ -72,11 +137,7 @@ function createBoardProfileSchema(locale: "fr" | "en") {
       .max(16, copy.validation.avatarInvalid),
     photoUrl: z
       .union([
-        z
-          .string()
-          .trim()
-          .startsWith("data:image/", copy.validation.photoInvalid)
-          .max(1_500_000, copy.validation.photoTooLarge),
+        createMediaField(locale),
         z.literal(""),
         z.null(),
         z.undefined(),
@@ -128,11 +189,7 @@ function createUpdateBoardProfilePhotoSchema(locale: "fr" | "en") {
       .string()
       .trim()
       .min(1, copy.validation.childProfileNotFound),
-    photoUrl: z
-      .string()
-      .trim()
-      .startsWith("data:image/", copy.validation.photoInvalid)
-      .max(1_500_000, copy.validation.photoTooLarge),
+    photoUrl: createMediaField(locale),
   });
 }
 
@@ -151,11 +208,7 @@ function createTaskTemplateSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
   const photoField = z
     .union([
-      z
-        .string()
-        .trim()
-        .startsWith("data:image/", copy.validation.photoInvalid)
-        .max(1_500_000, copy.validation.photoTooLarge),
+      createMediaField(locale),
       z.literal(""),
       z.null(),
       z.undefined(),
@@ -562,16 +615,28 @@ export async function createBoardProfileAction(input: {
     };
   }
 
-  const profile = await createChildProfileWithDefaults({
+  const preparedPhoto = await preparePrivateMedia({
+    value: parsed.data.photoUrl,
     householdId: household.id,
-    actorUserId: user.id,
-    name: parsed.data.name,
-    age: parsed.data.age,
-    avatar: parsed.data.avatar,
-    photoUrl: parsed.data.photoUrl,
-    headline: parsed.data.headline || null,
-    locale: household.locale,
+    category: "profiles",
   });
+
+  let profile;
+  try {
+    profile = await createChildProfileWithDefaults({
+      householdId: household.id,
+      actorUserId: user.id,
+      name: parsed.data.name,
+      age: parsed.data.age,
+      avatar: parsed.data.avatar,
+      photoUrl: preparedPhoto.reference,
+      headline: parsed.data.headline || null,
+      locale: household.locale,
+    });
+  } catch (error) {
+    await rollbackPreparedMedia(preparedPhoto);
+    throw error;
+  }
 
   revalidateBoardSurfaces();
 
@@ -610,17 +675,34 @@ export async function updateBoardProfileAction(input: {
 
   const { user, household } = access;
 
-  await updateChildProfileDetails({
+  const preparedPhoto = await preparePrivateMedia({
+    value: parsed.data.photoUrl,
     householdId: household.id,
-    actorUserId: user.id,
-    childProfileId: parsed.data.childProfileId,
-    name: parsed.data.name,
-    age: parsed.data.age,
-    avatar: parsed.data.avatar,
-    photoUrl: parsed.data.photoUrl,
-    headline: parsed.data.headline || null,
-    locale: household.locale,
+    category: "profiles",
   });
+
+  let updatedProfile;
+  try {
+    updatedProfile = await updateChildProfileDetails({
+      householdId: household.id,
+      actorUserId: user.id,
+      childProfileId: parsed.data.childProfileId,
+      name: parsed.data.name,
+      age: parsed.data.age,
+      avatar: parsed.data.avatar,
+      photoUrl: preparedPhoto.reference,
+      headline: parsed.data.headline || null,
+      locale: household.locale,
+    });
+  } catch (error) {
+    await rollbackPreparedMedia(preparedPhoto);
+    throw error;
+  }
+
+  await purgeReplacedMedia(
+    updatedProfile.previousPhotoUrl,
+    preparedPhoto.reference,
+  );
 
   revalidateBoardSurfaces();
 
@@ -654,13 +736,15 @@ export async function updateBoardProfileAvatarAction(input: {
 
   const { user, household } = access;
 
-  await updateChildProfileAvatar({
+  const updatedProfile = await updateChildProfileAvatar({
     householdId: household.id,
     actorUserId: user.id,
     childProfileId: parsed.data.childProfileId,
     avatar: parsed.data.avatar,
     locale: household.locale,
   });
+
+  await purgeReplacedMedia(updatedProfile.previousPhotoUrl, null);
 
   revalidateBoardSurfaces();
 
@@ -694,13 +778,30 @@ export async function updateBoardProfilePhotoAction(input: {
 
   const { user, household } = access;
 
-  await updateChildProfilePhoto({
+  const preparedPhoto = await preparePrivateMedia({
+    value: parsed.data.photoUrl,
     householdId: household.id,
-    actorUserId: user.id,
-    childProfileId: parsed.data.childProfileId,
-    photoUrl: parsed.data.photoUrl,
-    locale: household.locale,
+    category: "profiles",
   });
+
+  let updatedProfile;
+  try {
+    updatedProfile = await updateChildProfilePhoto({
+      householdId: household.id,
+      actorUserId: user.id,
+      childProfileId: parsed.data.childProfileId,
+      photoUrl: preparedPhoto.reference ?? "",
+      locale: household.locale,
+    });
+  } catch (error) {
+    await rollbackPreparedMedia(preparedPhoto);
+    throw error;
+  }
+
+  await purgeReplacedMedia(
+    updatedProfile.previousPhotoUrl,
+    preparedPhoto.reference,
+  );
 
   revalidateBoardSurfaces();
 
@@ -733,12 +834,14 @@ export async function removeBoardProfilePhotoAction(input: {
 
   const { user, household } = access;
 
-  await removeChildProfilePhoto({
+  const updatedProfile = await removeChildProfilePhoto({
     householdId: household.id,
     actorUserId: user.id,
     childProfileId: parsed.data.childProfileId,
     locale: household.locale,
   });
+
+  await purgeReplacedMedia(updatedProfile.previousPhotoUrl, null);
 
   revalidateBoardSurfaces();
 
@@ -777,6 +880,13 @@ export async function deleteBoardProfileAction(input: {
     locale: household.locale,
   });
 
+  await purgeReplacedMedia(deletedProfile.previousPhotoUrl, null);
+  await Promise.all(
+    deletedProfile.previousTaskImageUrls.map((reference) =>
+      purgeReplacedMedia(reference, null),
+    ),
+  );
+
   revalidateBoardSurfaces();
 
   return {
@@ -813,18 +923,35 @@ export async function upsertBoardTaskTemplateAction(input: {
   }
 
   const { user, household } = access;
-  const template = await upsertTaskTemplate({
+  const preparedImage = await preparePrivateMedia({
+    value: parsed.data.imageUrl ?? null,
     householdId: household.id,
-    actorUserId: user.id,
-    locale: household.locale,
-    templateId: parsed.data.templateId,
-    title: parsed.data.title,
-    shortLabel: parsed.data.shortLabel,
-    icon: parsed.data.icon,
-    imageUrl: parsed.data.imageUrl,
-    color: parsed.data.color || null,
-    durationMinutes: parsed.data.durationMinutes,
+    category: "tasks",
   });
+
+  let template;
+  try {
+    template = await upsertTaskTemplate({
+      householdId: household.id,
+      actorUserId: user.id,
+      locale: household.locale,
+      templateId: parsed.data.templateId,
+      title: parsed.data.title,
+      shortLabel: parsed.data.shortLabel,
+      icon: parsed.data.icon,
+      imageUrl: preparedImage.reference,
+      color: parsed.data.color || null,
+      durationMinutes: parsed.data.durationMinutes,
+    });
+  } catch (error) {
+    await rollbackPreparedMedia(preparedImage);
+    throw error;
+  }
+
+  await purgeReplacedMedia(
+    template.previousImageUrl,
+    preparedImage.reference,
+  );
 
   revalidateBoardSurfaces();
 
@@ -864,6 +991,8 @@ export async function deleteBoardTaskTemplateAction(input: {
     templateId: parsed.data.templateId,
     locale: household.locale,
   });
+
+  await purgeReplacedMedia(deletedTemplate.previousImageUrl, null);
 
   revalidateBoardSurfaces();
 
@@ -1061,6 +1190,8 @@ export async function deleteBoardRoutineTaskAction(input: {
     routineTaskId: parsed.data.routineTaskId,
     locale: household.locale,
   });
+
+  await purgeReplacedMedia(deletedTask.previousImageUrl, null);
 
   revalidateBoardSurfaces();
 

@@ -133,7 +133,7 @@ Main gaps against product direction:
 - the settings shell still needs a final compact pass to guarantee no viewport overflow on every landscape breakpoint
 - visible copy has moved heavily to i18n, but some user-facing strings and data-driven labels still need translation coverage
 - the live prototype import currently flattens old weekday-specific scheduler data into the V1 morning/evening routine model
-- billing still uses internal entitlement toggles, not Stripe
+- Stripe Checkout, signed webhooks and server-side entitlement limits are live in test mode; remote preview validation and live-catalog audit remain
 
 ### `/sign-in`
 
@@ -200,13 +200,14 @@ Purpose:
 
 Current status:
 
-- `STATIC`
+- `LIVE_STRIPE_TEST`
 
 Notes:
 
-- no Stripe wiring
-- no subscription read
-- no entitlement enforcement
+- Checkout Sessions are created server-side for the monthly and yearly Family Premium prices
+- signed, idempotent webhooks synchronize the `Subscription` row
+- profile and assignment limits read the synchronized entitlement on the server
+- live-mode catalog changes remain blocked until active subscriptions are audited
 
 ### `/api/auth/*`
 
@@ -463,7 +464,7 @@ Current state:
 
 - child avatar emoji: `LIVE_DB`
 - child photo upload: `LIVE_DB`
-- task photo upload: `PLACEHOLDER`
+- task photo upload: `LIVE_DB`
 
 What works:
 
@@ -471,11 +472,16 @@ What works:
 - the prototype already defines upload and cropper flows for tasks and child profiles
 - `ChildProfile.photoUrl` now exists in Prisma
 - board profile flows can upload, crop, replace, and remove a child photo
+- board task flows can upload, crop, replace, and remove a task photo
+- new images are written to private Vercel Blob storage and represented in Prisma by an opaque `rk-media:` reference
+- `/api/media/*` requires an authenticated household owner and streams only a path belonging to that household
+- replacing or deleting a profile/task removes its previous private Blob after the database transaction succeeds
 
 Main gaps:
 
-- there is no live storage strategy yet
-- there is no task photo flow in the live library/editor
+- legacy imported data URLs remain readable and migrate when edited; a bulk migration is deliberately deferred until an isolated production-safe job exists
+- household deletion/export must explicitly include private Blob lifecycle handling
+- the hosted read/write lifecycle still needs remote preview E2E coverage
 
 ### Journey and Streaks
 
@@ -580,12 +586,12 @@ What is missing:
 
 These gaps are the main reasons the app still feels incomplete relative to `index.html`:
 
-1. Historical streak accuracy still needs immutable day snapshots when routines evolve over time.
+1. Completed-day streak snapshots are immutable, but long-range journey QA still needs broader fixtures.
 2. The live prototype import does not yet preserve weekday-specific scheduler overrides from the old HTML model.
-3. Billing still uses internal entitlement toggles instead of Stripe.
+3. Billing is verified locally in Stripe test mode and still needs remote-preview validation.
 4. The task library/editor flow is still simplified relative to the original `global-library-modal`, `task-editor-modal`, and `assign-period-modal`, even though `both` assignment and delete-from-library are now back.
 5. The app still contains visible hardcoded strings and some non-localized data-driven labels.
-6. Task photo/media flows still do not exist in the live library/editor.
+6. Task photo/media flows are live with private storage and still need hosted E2E coverage.
 
 ## Action Matrix
 
@@ -729,15 +735,14 @@ The list below tracks the distinct user-visible actions in the current app.
 
 ## Zero-Mock Gaps
 
-The project is not yet zero-mock because of seven structural gaps:
+The project is not yet release-complete because of six structural gaps:
 
-1. Pricing and premium entitlements are not connected to Stripe or enforced server-side.
-2. The board still falls back to prototype task visuals when live routines are empty or missing.
-3. Task media flows are still placeholders.
-4. Some user-facing copy and many mutation/validation messages are not localized yet.
-5. Transitional internal `admin` file buckets still need to be folded into `settings`.
-6. Historical streak reconstruction still needs a dedicated immutable snapshot strategy for perfect long-term accuracy when routines change.
-7. Prototype import still compresses old weekday-specific scheduling into the current V1 routine model until weekly overrides exist.
+1. Stripe and private media need remote-preview E2E validation.
+2. Some user-facing copy and imported data-driven labels are not localized yet.
+3. Transitional internal `admin` file buckets still need to be folded into `settings`.
+4. Modal, accessibility and exact iPad viewport coverage remain incomplete.
+5. Household export/deletion must include private Blob lifecycle handling.
+6. Prototype import still compresses old weekday-specific scheduling into the current V1 routine model until weekly overrides exist.
 
 ## Zero-Mock Implementation Plan
 
@@ -747,17 +752,15 @@ The project is not yet zero-mock because of seven structural gaps:
 - Keep the settings full-view within one landscape viewport.
 - Remove remaining route-era references and outdated documentation.
 
-### Phase B: Finish child profile CRUD
+### Phase B: Finish child profile CRUD — complete
 
-- Add DB-backed reorder action.
-- Add photo upload, crop, replace, and delete.
-- Keep the current iOS-like modals, but remove the remaining placeholder actions.
+- DB-backed profile CRUD, photo upload/crop/replace/delete and private storage are live.
 
 ### Phase C: Finish routine and task CRUD
 
 - Fold the existing workbench capabilities into settings overlays.
 - Add DB-backed reorder for `RoutineTask`.
-- Reintroduce task color and task photo support if retained in V1.
+- Keep task color and private task-photo support covered by integration/E2E tests.
 - Remove remaining prototype task fallbacks when a live routine is empty.
 
 ### Phase D: Finish scheduler
@@ -790,12 +793,11 @@ The project is not yet zero-mock because of seven structural gaps:
 - Keep mapping prototype completion history into `TaskCompletion` where feasible.
 - Keep writing import audit logs.
 
-### Phase H: Billing and entitlements
+### Phase H: Billing and entitlements — test-mode complete
 
-- Connect Stripe.
-- Sync Stripe events into `Subscription`.
-- Add server-side feature gates.
-- Remove local premium toggles.
+- Stripe Checkout and signed idempotent webhooks synchronize `Subscription`.
+- Server-side feature gates are active and local premium toggles are removed.
+- Remote preview and live-catalog audits remain release gates.
 
 ### Phase I: Hardening
 
@@ -806,12 +808,9 @@ The project is not yet zero-mock because of seven structural gaps:
 
 ## Immediate Engineering Priorities
 
-1. Move the temporary `/admin` workbench into settings and remove route-based fallbacks.
-2. Add full app i18n and remove hardcoded front-end strings.
-3. Add a real sound engine and board celebration sounds.
-4. Implement child photo CRUD and cropper parity.
-5. Restore missing library and scheduler behavior from `index.html`.
-6. Harden streak/day-complete history against future routine changes.
-7. Replace the remaining live board task fallbacks with empty or true DB-backed states.
-8. Preserve weekday-specific prototype scheduling data once weekly overrides exist.
-9. Connect billing and entitlement enforcement to Stripe.
+1. Create an isolated Vercel preview with Neon, Stripe test mode and private Blob.
+2. Add exact 1024x768 and 1366x1024 modal E2E coverage.
+3. Finish i18n for imported/data-driven labels and complete the accessibility pass.
+4. Add household export and deletion, including private Blob cleanup.
+5. Preserve weekday-specific prototype scheduling data with weekly overrides.
+6. Fold the remaining transitional `admin` implementation buckets into settings.

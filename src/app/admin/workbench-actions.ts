@@ -7,6 +7,7 @@ import { z } from "zod";
 import { type AdminWorkbenchMutationResult } from "@/components/admin/workbench-types";
 import { ensureHouseholdBaseline } from "@/lib/household-bootstrap";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
+import { deletePrivateImageIfUnreferenced } from "@/lib/media-storage";
 import { prisma } from "@/lib/prisma";
 import { canAssignTemplatesToPeriods } from "@/lib/product-entitlements";
 import {
@@ -192,6 +193,10 @@ export async function deleteAdminTaskTemplateAction(input: {
       templateId: parsed.data.templateId,
     });
 
+    await deletePrivateImageIfUnreferenced(
+      deletedTemplate.previousImageUrl,
+    ).catch(() => undefined);
+
     revalidateAdminWorkbench();
 
     return {
@@ -340,6 +345,10 @@ export async function deleteAdminRoutineTaskAction(input: {
       childProfileId: parsed.data.childProfileId,
       routineTaskId: parsed.data.routineTaskId,
     });
+
+    await deletePrivateImageIfUnreferenced(
+      deletedTask.previousImageUrl,
+    ).catch(() => undefined);
 
     revalidateAdminWorkbench();
 

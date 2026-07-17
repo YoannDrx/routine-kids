@@ -272,7 +272,8 @@ The first development tranche has already started in code:
 - the board library can delete custom templates and assign missions to morning, evening, or both
 - streak and journey progression are now derived from `TaskCompletion` for the live board
 - settings persists locale, sounds, and periods; premium state now comes from Stripe-synchronized subscriptions
-- the major remaining product gaps are localization of imported data labels, hosted media storage, modal E2E coverage, and remote preview validation
+- private Vercel Blob storage is live for new profile and task images, with session and household authorization on reads and cleanup on replace/delete
+- the major remaining product gaps are localization of imported data labels, modal E2E coverage, household export/deletion cleanup, and remote preview validation
 - live empty routines no longer fall back to prototype missions
 - completed-day streak snapshots now remain stable when routines change later
 - the Stripe test lifecycle is verified end to end: card Checkout, signed webhook, idempotent replay, Family Premium entitlement, cancellation, and return to Free
@@ -282,6 +283,6 @@ The first development tranche has already started in code:
 1. Finish app-wide i18n, especially data-driven labels imported from older snapshots.
 2. Expand the sound engine beyond the first feedback vocabulary.
 3. Complete the iPad landscape modal E2E matrix and accessibility pass.
-4. Add hosted task/profile media storage before deployment; current cropped images are persisted as data URLs.
-5. Create a Vercel preview with isolated Neon/Stripe configuration, then repeat the verified local Stripe lifecycle remotely.
+4. Create a Vercel preview with isolated Neon/Stripe/Blob configuration, then repeat the verified local Stripe and media lifecycle remotely.
+5. Add household export/deletion coverage, including deletion of every referenced private Blob.
 6. Audit any legacy live subscriptions before creating or archiving a live RoutineKids catalog.

@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
+import { resolveMediaUrl } from "@/lib/private-media";
 
 type ProfileAvatarProps = {
   avatar: string;
@@ -20,9 +21,11 @@ export function ProfileAvatar({
   emojiClassName,
 }: ProfileAvatarProps) {
   if (photoUrl) {
+    const src = resolveMediaUrl(photoUrl);
+
     return (
       <Image
-        src={photoUrl}
+        src={src ?? photoUrl}
         alt={alt}
         width={160}
         height={160}

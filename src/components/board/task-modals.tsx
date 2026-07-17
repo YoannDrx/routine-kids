@@ -18,6 +18,7 @@ import {
   resolveBoardTaskColor,
 } from "@/lib/data/board-library";
 import type { BoardMode, BoardProfile, BoardTask, TaskIconName } from "@/lib/data/prototype-seed";
+import { resolveMediaUrl } from "@/lib/private-media";
 import { cn } from "@/lib/utils";
 
 const maxTaskImageBytes = 25 * 1024 * 1024;
@@ -193,7 +194,7 @@ export function TaskLibraryModal({
               >
                 {task.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={task.imageUrl} alt="" className="h-full w-full object-cover" />
+                  <img src={resolveMediaUrl(task.imageUrl) ?? task.imageUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
                   <TaskIcon icon={task.icon} className="h-4 w-4" />
                 )}
@@ -501,7 +502,7 @@ export function SchedulerModal({
                                       >
                                         {task.imageUrl ? (
                                           // eslint-disable-next-line @next/next/no-img-element
-                                          <img src={task.imageUrl} alt="" className="h-full w-full object-cover" />
+                                          <img src={resolveMediaUrl(task.imageUrl) ?? task.imageUrl} alt="" className="h-full w-full object-cover" />
                                         ) : (
                                           <TaskIcon icon={task.icon} className="h-4 w-4" />
                                         )}
@@ -588,7 +589,7 @@ export function SchedulerModal({
                               >
                                 {task.imageUrl ? (
                                   // eslint-disable-next-line @next/next/no-img-element
-                                  <img src={task.imageUrl} alt="" className="h-full w-full object-cover" />
+                                  <img src={resolveMediaUrl(task.imageUrl) ?? task.imageUrl} alt="" className="h-full w-full object-cover" />
                                 ) : (
                                   <TaskIcon icon={task.icon} className="h-3.5 w-3.5" />
                                 )}
@@ -893,7 +894,7 @@ export function AutoAssignConfirmModal({
                 >
                   {task.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={task.imageUrl} alt="" className="h-full w-full object-cover" />
+                    <img src={resolveMediaUrl(task.imageUrl) ?? task.imageUrl} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <TaskIcon icon={task.icon} className="h-4 w-4" />
                   )}
@@ -1001,7 +1002,7 @@ function AssignPeriodModal({
           >
             {task?.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={task.imageUrl} alt="" className="h-full w-full object-cover" />
+              <img src={resolveMediaUrl(task.imageUrl) ?? task.imageUrl} alt="" className="h-full w-full object-cover" />
             ) : task ? (
               <TaskIcon icon={task.icon} className="h-7 w-7" />
             ) : null}
@@ -1147,7 +1148,7 @@ function TaskEditorModal({
                 >
                   {imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+                    <img src={resolveMediaUrl(imageUrl) ?? imageUrl} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <TaskIcon icon={icon} className="h-11 w-11 text-white" />
                   )}

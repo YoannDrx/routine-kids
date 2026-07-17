@@ -1,6 +1,6 @@
 # RoutineKids Roadmap
 
-Last updated: March 13, 2026
+Last updated: July 17, 2026
 
 ## Mission
 
@@ -38,8 +38,10 @@ Authoritative status:
 - board sound playback is real and driven by persisted settings
 - board library parity improved: assign-period supports morning, evening, and both, and custom templates can be deleted from the board editor
 - child photo upload, crop, replace, and delete are real from board profile flows
+- task photo upload, crop, replace, and delete are real from the task library
+- new child and task images use private Vercel Blob storage behind a household-authorized media route; legacy data URLs remain readable during migration
 - app-wide i18n foundation is real and the main server mutation/validation messages are localized, but the final zero-hardcoded pass is still in progress across all visible copy and data labels
-- the app is still not zero-mock because billing enforcement, some live fallback rendering, and some prototype-to-V1 data-model compromises still contain prototypes or placeholders
+- Stripe billing and server-side plan enforcement are real in test mode; remaining release work is remote preview validation, modal E2E depth, complete i18n and the documented weekday scheduling compromise
 - the dedicated `/admin` route has been deleted from the runtime
 - the detailed button-by-button breakdown now lives in [`docs/feature-audit.md`](/Users/yoannandrieux/Projets/routine-kids/docs/feature-audit.md)
 
@@ -310,7 +312,7 @@ Authoritative status:
 - [~] Remove remaining `/admin` affordances from board and settings flows
 - [ ] Rebuild real sound and celebrations from the prototype sound engine
 - [x] Reintroduce photo upload, crop, replace, and delete for child profiles
-- [ ] Reintroduce task photo + crop if retained in V1 scope
+- [x] Reintroduce task photo + crop in V1 scope
 - [~] Restore missing library behaviors from `index.html`
 - [~] Add streak persistence
 - [~] Rebuild journey progression from DB
@@ -326,9 +328,9 @@ Authoritative status:
 
 ### Phase 6: Premium and hardening
 
-- [ ] Wire billing plans
-- [ ] Add premium limits server-side
-- [ ] Add tests for auth, board and settings-overlay flows
+- [x] Wire billing plans in Stripe test mode
+- [x] Add premium limits server-side
+- [~] Add tests for auth, board and settings-overlay flows
 - [ ] Audit accessibility
 - [ ] Audit performance
 
@@ -356,21 +358,18 @@ Authoritative status:
 
 ## Immediate Next Steps
 
-1. Collapse the temporary `/admin` workbench into the settings full-view and remove every route fallback to `/admin`.
-2. Restructure the settings full-view so it fits one landscape viewport without scroll.
-3. Add a shared i18n layer and migrate every front-end string through translation keys.
-4. Rebuild the sound engine and wire completion, celebration, and interaction sounds behind the persisted sound toggle.
-5. Implement real child photo CRUD with upload, crop, replace, and delete.
-6. Restore full library and scheduler behavior parity from `index.html`.
-7. Add streak computation and journey progression from `TaskCompletion`.
-8. Preserve weekday-specific prototype scheduling fidelity once weekly overrides exist.
-9. Replace internal premium activation with real billing enforcement on top of `Subscription`.
-10. Fix the intro-video parity issue in the preserved original prototype.
+1. Create an isolated Vercel preview with its own Neon branch, private Blob store and Stripe test webhook.
+2. Run the full modal E2E matrix at 1024x768 and 1366x1024, including media replacement and deletion.
+3. Complete the remaining i18n pass for imported and data-driven labels.
+4. Preserve weekday-specific prototype scheduling fidelity with explicit weekly overrides.
+5. Add export/backup and a documented household deletion path, including Blob cleanup.
+6. Audit accessibility, reduced motion and deterministic sound behavior.
+7. Fix the intro-video parity issue in the preserved original prototype without reintroducing it into the production app.
 
 ## Open Questions
 
-- Final hosting target for media uploads: object storage vs DB-backed URLs.
-- Whether billing enters the first public release or ships right after the private beta.
+- Retention duration and backup policy for private family media.
+- Whether billing exits test mode for the private beta or ships immediately after validation.
 - Exact strategy for intro video in the new app:
   - onboarding-only
   - theme-driven cinematic

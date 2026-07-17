@@ -436,6 +436,7 @@ export async function deleteRoutineTaskFromProfile(input: {
       id: true,
       title: true,
       routineId: true,
+      imageUrl: true,
     },
   });
 
@@ -491,6 +492,7 @@ export async function deleteRoutineTaskFromProfile(input: {
   return {
     id: task.id,
     title: task.title,
+    previousImageUrl: task.imageUrl,
   };
 }
 
