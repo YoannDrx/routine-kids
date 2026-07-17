@@ -65,6 +65,7 @@ Important:
 
 - Si tu modifies `.env.local`, redemarre `pnpm dev`.
 - Sinon Prisma / Better Auth peuvent rester charges avec un ancien environnement.
+- L'application ne lit jamais `.env.local` elle-meme : Next.js le charge en local et Vercel injecte les variables par environnement. Le fichier n'entre donc pas dans les artefacts deployes.
 
 ## Lancer le prototype d'origine
 
