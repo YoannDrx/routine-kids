@@ -1,7 +1,14 @@
 import { execFileSync } from "node:child_process";
 
 const expectedRepository = "YoannDrx/routine-kids";
-const expectedRemote = "git@github.com:YoannDrx/routine-kids.git";
+
+function getGitHubRepository(remoteUrl) {
+  const match = remoteUrl.match(
+    /^(?:git@github\.com:|https:\/\/github\.com\/|ssh:\/\/git@github\.com\/)([^/]+\/[^/]+?)(?:\.git)?$/,
+  );
+
+  return match?.[1] ?? null;
+}
 
 function runGit(...args) {
   return execFileSync("git", args, {
@@ -24,8 +31,13 @@ if (remotes.length !== 1 || remotes[0] !== "origin") {
 const fetchUrl = runGit("remote", "get-url", "origin");
 const pushUrl = runGit("remote", "get-url", "--push", "origin");
 
-if (fetchUrl !== expectedRemote || pushUrl !== expectedRemote) {
-  fail(`origin must fetch and push only to ${expectedRemote}`);
+if (
+  getGitHubRepository(fetchUrl) !== expectedRepository ||
+  getGitHubRepository(pushUrl) !== expectedRepository
+) {
+  fail(
+    `origin must fetch and push only to ${expectedRepository} over GitHub SSH or HTTPS`,
+  );
 }
 
 if (
