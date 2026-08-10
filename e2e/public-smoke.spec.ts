@@ -4,11 +4,11 @@ test("signed-out family board exposes real account entry points", async ({ page 
   await page.goto("/");
 
   await expect(page).toHaveTitle(/RoutineKids/);
-  await page.getByRole("button", { name: /ajouter un astronaute|add astronaut/i }).click();
+  await page.getByRole("link", { name: /ajouter un astronaute|add astronaut/i }).click();
   await expect(page).toHaveURL(/\/sign-up\?callbackUrl=/);
 
   await page.goto("/");
-  await page.getByRole("button", { name: /parametres parent|parent settings/i }).click();
+  await page.getByRole("link", { name: /parametres parent|parent settings/i }).click();
   await expect(page).toHaveURL(/\/sign-in\?callbackUrl=/);
   await expect(page.locator("body")).not.toContainText("admin");
 

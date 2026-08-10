@@ -1202,21 +1202,24 @@ export function RoutineBoard({
                 />
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  if (!hasAuthenticatedParent) {
-                    navigateTo(signInHref);
-                    return;
-                  }
-
-                  openParentalGate({ type: "settings" });
-                }}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/10"
-                aria-label={messages.board.settingsLabel}
-              >
-                <Settings2 className="h-4 w-4" />
-              </button>
+              {!hasAuthenticatedParent ? (
+                <a
+                  href={signInHref}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/10"
+                  aria-label={messages.board.settingsLabel}
+                >
+                  <Settings2 className="h-4 w-4" />
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => openParentalGate({ type: "settings" })}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/10"
+                  aria-label={messages.board.settingsLabel}
+                >
+                  <Settings2 className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </header>
 
@@ -1582,28 +1585,31 @@ export function RoutineBoard({
               })}
 
               <div className="px-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!hasAuthenticatedParent) {
-                      navigateTo(signUpHref);
-                      return;
-                    }
+                {!hasAuthenticatedParent ? (
+                  <a
+                    href={signUpHref}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/5 px-4 py-3 text-xs font-bold text-white/48 transition hover:bg-white/10 hover:text-white/84"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>{messages.board.addAstronaut}</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!premiumActive && localProfiles.length >= 1) {
+                        openPremiumUpsell(messages.feedback.profileLimitMessage);
+                        return;
+                      }
 
-                    if (!premiumActive && localProfiles.length >= 1) {
-                      openPremiumUpsell(messages.feedback.profileLimitMessage);
-                      return;
-                    }
-
-                    setProfileEditorState({ mode: "create" });
-                  }}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/5 px-4 py-3 text-xs font-bold text-white/48 transition hover:bg-white/10 hover:text-white/84"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>
-                    {messages.board.addAstronaut}
-                  </span>
-                </button>
+                      setProfileEditorState({ mode: "create" });
+                    }}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/5 px-4 py-3 text-xs font-bold text-white/48 transition hover:bg-white/10 hover:text-white/84"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>{messages.board.addAstronaut}</span>
+                  </button>
+                )}
               </div>
             </div>
           </main>

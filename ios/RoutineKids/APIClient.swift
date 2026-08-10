@@ -58,8 +58,12 @@ actor APIClient {
     }
 
     func signOut() async throws {
+        defer {
+            HTTPCookieStorage.shared.cookies(for: baseURL)?.forEach(
+                HTTPCookieStorage.shared.deleteCookie
+            )
+        }
         _ = try await send(path: "/api/auth/sign-out", method: "POST", body: EmptyRequest()) as EmptyResponse
-        HTTPCookieStorage.shared.cookies?.forEach(HTTPCookieStorage.shared.deleteCookie)
     }
 
     func loadHousehold() async throws -> HouseholdEnvelope {
@@ -123,6 +127,10 @@ actor APIClient {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        if !["GET", "HEAD", "OPTIONS"].contains(method.uppercased()),
+           let origin = Self.origin(for: baseURL) {
+            request.setValue(origin, forHTTPHeaderField: "Origin")
+        }
         if let body {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try encoder.encode(body)
@@ -138,6 +146,15 @@ actor APIClient {
             return EmptyResponse() as! Response
         }
         return try decoder.decode(Response.self, from: data)
+    }
+
+    static func origin(for url: URL) -> String? {
+        guard let scheme = url.scheme, let host = url.host else { return nil }
+        var components = URLComponents()
+        components.scheme = scheme
+        components.host = host
+        components.port = url.port
+        return components.url?.absoluteString
     }
 }
 

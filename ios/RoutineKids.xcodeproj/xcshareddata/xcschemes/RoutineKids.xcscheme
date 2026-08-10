@@ -76,6 +76,9 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
       </CommandLineArguments>
+      <StoreKitConfigurationFileReference
+         identifier = "../../StoreKit/RoutineKids.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

@@ -28,14 +28,16 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev --port 3010",
+    command: "pnpm build && pnpm start --port 3010",
     url: "http://127.0.0.1:3010",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
     env: {
       ...process.env,
       NEXT_PUBLIC_APP_URL: "http://127.0.0.1:3010",
       BETTER_AUTH_URL: "http://127.0.0.1:3010",
+      RESEND_API_KEY: process.env.RESEND_API_KEY ?? "re_e2e_build_only",
+      EMAIL_FROM: process.env.EMAIL_FROM ?? "RoutineKids <e2e@example.com>",
     },
   },
 });

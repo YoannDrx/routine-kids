@@ -1,4 +1,6 @@
 name: RoutineKids
+fileGroups:
+  - StoreKit
 options:
   bundleIdPrefix: com.yoannandrieux
   deploymentTarget:
@@ -7,9 +9,10 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "3"
     CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: G9WFV7HNV6
     ROUTINEKIDS_API_BASE_URL: https://routine-kids.vercel.app
     APPLE_MONTHLY_PRODUCT_ID: com.yoannandrieux.routinekids.familyplus.monthly
     APPLE_YEARLY_PRODUCT_ID: com.yoannandrieux.routinekids.familyplus.yearly
@@ -25,6 +28,7 @@ targets:
         CFBundleDisplayName: RoutineKids
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        ITSAppUsesNonExemptEncryption: false
         LSApplicationCategoryType: public.app-category.education
         NSPhotoLibraryUsageDescription: RoutineKids utilise une photo choisie par le parent pour personnaliser le profil enfant.
         UIApplicationSupportsIndirectInputEvents: true
@@ -48,6 +52,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     scheme:
+      storeKitConfiguration: StoreKit/RoutineKids.storekit
       testTargets:
         - RoutineKidsTests
   RoutineKidsTests:

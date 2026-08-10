@@ -10,9 +10,10 @@ Date : 10 août 2026
 - Catégorie principale : `Éducation`
 - Catégorie secondaire proposée : `Style de vie`
 - Bundle ID : `com.yoannandrieux.routinekids`
-- Version : `1.0.0`
-- Build initial : `1`
+- Version : `1.0`
+- Build de soumission : `3` (le build 1 a révélé le canal alpha de l’icône ; le build 3 ajoute la correction finale du cycle de session iOS)
 - SKU proposé : `routinekids-ios-1`
+- Identifiant Apple : `6800070456`
 - URL support : `https://routine-kids.vercel.app/support`
 - URL confidentialité : `https://routine-kids.vercel.app/privacy`
 - Conditions : `https://routine-kids.vercel.app/terms`
@@ -99,21 +100,19 @@ App Store Connect après configuration définitive de chaque SDK.
   6–8 ou 9–11. Le modèle autorise 2–12 ans mais l'App Store demande un segment principal.
 - N'utiliser que des comptes et enfants fictifs dans les captures.
 
-## Captures proposées
+## Captures chargées
 
-Préparer en français et anglais, iPhone et iPad, aux plus hautes résolutions demandées
-par Media Manager :
+Les captures utilisent uniquement des profils fictifs et sont chargées dans le Media
+Manager. Apple les réutilise pour toutes les langues et tailles sélectionnées :
 
-1. « Chaque matin devient une mission » — board matin avec deux profils fictifs.
-2. « Une routine claire, enfant par enfant » — missions personnalisées.
-3. « Avancez ensemble dans le voyage spatial » — progression.
-4. « Le parent garde le contrôle » — gate puis réglages.
-5. « Retrouvez la famille sur tous vos appareils » — synchronisation.
-6. « Aucune publicité. Vos données restent privées. » — promesse confidentialité.
+1. mission du matin ;
+2. deux profils fictifs ;
+3. routine du soir ;
+4. vérification parentale ;
+5. réglages parents.
 
-Apple permet de fournir seulement les captures de la plus haute résolution d'une même
-UI puis de les redimensionner automatiquement. Vérifier les tailles affichées dans le
-Media Manager au moment de l'upload.
+Formats validés : 1284×2778 pour l’iPhone 6,5 pouces et 2064×2752 pour l’iPad
+12,9/13 pouces.
 
 ## Notes App Review proposées
 
@@ -132,23 +131,25 @@ not committed to Git.
 ## Checklist de soumission
 
 - [ ] Apple Developer Program actif et contrats Paid Apps acceptés.
-- [ ] App créée dans App Store Connect avec Bundle ID exact.
-- [ ] Certificats/profils de signature et équipe Xcode sélectionnés.
+- [x] App créée dans App Store Connect avec Bundle ID exact (`6800070456`).
+- [x] Équipe Xcode `G9WFV7HNV6` sélectionnée dans la source XcodeGen.
 - [ ] Alias public déployé ; support, confidentialité et conditions accessibles sans login.
 - [x] Inscription, réinitialisation du mot de passe et suppression complète du compte disponibles dans l'app native.
-- [ ] Produits mensuel/annuel créés, localisés, tarifés et disponibles.
-- [ ] Capture de review et notes ajoutées pour chaque abonnement.
+- [x] Produits mensuel/annuel créés, localisés FR/EN, tarifés et disponibles dans 175 territoires.
+- [x] Capture de review et notes spécifiques ajoutées pour chaque abonnement.
 - [ ] URL App Store Server Notifications V2 configurée.
-- [ ] Secrets Apple configurés côté serveur.
+- [x] Racines de confiance Apple, identifiants d'app et identifiants produits configurés côté serveur.
 - [ ] Tests achat, restauration, renouvellement, expiration, révocation et remboursement.
 - [x] Restauration filtrée par `appAccountToken` et entitlements serveur alignés sur les états actifs.
-- [ ] Manifeste de confidentialité inspecté dans l'archive Xcode.
-- [ ] Questionnaire App Privacy publié.
-- [ ] Questionnaire d'âge complété et choix Kids explicitement validé.
-- [ ] Captures fictives FR/EN iPhone/iPad chargées.
-- [ ] Compte de démo fonctionnel et données fictives stables.
-- [ ] Build distribué et validé via TestFlight interne.
-- [ ] Premier groupe d'abonnement ajouté à la même soumission que la version 1.0.
+- [x] Manifeste de confidentialité inspecté dans l'archive Xcode et accepté au téléversement.
+- [x] Questionnaire App Privacy publié : 8 types, fonctionnalité de l'app, aucun tracking.
+- [x] Questionnaire d'âge complété : classification calculée 4+, remplacement non applicable (pas de classement Kids irréversible).
+- [x] Captures fictives iPhone/iPad chargées et dimensions acceptées par Apple.
+- [x] Compte de démo fonctionnel, vérifié et données fictives stables.
+- [x] Build 1.0 (2) téléversé et traité par Apple, état « Prêt à soumettre » dans TestFlight.
+- [x] Build 3 téléversé dans App Store Connect.
+- [ ] Build 3 traité par Apple, installé et validé via TestFlight interne.
+- [x] Les deux abonnements sont ajoutés au même brouillon de vérification ; la version 1.0 sera jointe après l'upload du build 3.
 
 ## Sources Apple officielles
 
