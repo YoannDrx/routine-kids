@@ -13,6 +13,13 @@ export function assertProductionEmailConfiguration() {
     return;
   }
 
+  // Vercel Preview builds intentionally run with NODE_ENV=production but do not
+  // receive Production-only delivery credentials. Keep the hard gate for the
+  // actual Production deployment and for local production verification.
+  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
+    return;
+  }
+
   if (!isTransactionalEmailConfigured()) {
     throw new Error(
       "RESEND_API_KEY and EMAIL_FROM must be configured in production.",
