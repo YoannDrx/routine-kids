@@ -102,7 +102,7 @@ démontrer la valeur premium.
 | FAIT | Groupe Family Plus | Groupe `22300397`, localisations FR/EN |
 | FAIT | IAP mensuel | `com.yoannandrieux.routinekids.familyplus.monthly`, 4,99 EUR, 175 territoires |
 | FAIT | IAP annuel | `com.yoannandrieux.routinekids.familyplus.yearly`, 39,99 EUR, 175 territoires |
-| PRÊT | Notifications serveur V2 | URL `/api/billing/apple-notifications`, environnement production |
+| FAIT | Notifications serveur V2 | URL `/api/billing/apple-notifications` enregistrée pour production et Sandbox ; livraison à tester après déploiement |
 | PARTIEL | Configuration Apple serveur | App ID numérique `6800070456` disponible ; validation JWS basée sur les racines Apple, le bundle et les produits |
 | FAIT | Capture de review IAP | Paywall StoreKit local capturé et joint aux produits mensuel et annuel |
 | FAIT | Notes de review IAP | Parcours StoreKit 2, restauration, gestion et gate parent documentés sur chaque produit et dans les notes de version |

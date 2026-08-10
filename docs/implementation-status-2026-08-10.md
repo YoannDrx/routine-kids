@@ -101,7 +101,7 @@ dans le cache HTTP du navigateur. Le natif possède une file hors ligne mieux is
 ### P0 — lancement
 
 1. Finaliser la validation SMS, la clé restreinte et le webhook Stripe live.
-2. Déployer Vercel, exécuter les smoke tests publics et renseigner les notifications Apple V2.
+2. Déployer Vercel, exécuter les smoke tests publics et tester la livraison des notifications Apple V2.
 3. Accepter l'invitation interne, tester StoreKit Sandbox puis valider le build 3 sur appareil.
 4. Faire accepter Paid Apps et compléter fiscalité/banque par le titulaire du compte.
 5. Faire relire les textes légaux et confirmer l'adresse de support.

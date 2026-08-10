@@ -138,7 +138,7 @@ not committed to Git.
 - [x] Inscription, réinitialisation du mot de passe et suppression complète du compte disponibles dans l'app native.
 - [x] Produits mensuel/annuel créés, localisés FR/EN, tarifés et disponibles dans 175 territoires.
 - [x] Capture de review et notes spécifiques ajoutées pour chaque abonnement.
-- [ ] URL App Store Server Notifications V2 configurée.
+- [x] URL App Store Server Notifications V2 configurée pour production et Sandbox.
 - [x] Racines de confiance Apple, identifiants d'app et identifiants produits configurés côté serveur.
 - [ ] Tests achat, restauration, renouvellement, expiration, révocation et remboursement.
 - [x] Restauration filtrée par `appAccountToken` et entitlements serveur alignés sur les états actifs.

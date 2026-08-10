@@ -72,7 +72,7 @@ recette sur un appareil.
 ## Gates externes restants
 
 1. Validation SMS Stripe, clé live restreinte, endpoint webhook et secret de signature.
-2. Déploiement Vercel de production, smoke tests publics et notifications serveur Apple V2.
+2. Déploiement Vercel de production, smoke tests publics et test de livraison des notifications Apple V2.
 3. Acceptation de l'invitation interne et recette Sandbox/TestFlight sur appareil.
 4. Contrat Paid Apps, fiscalité et coordonnées bancaires complétés par le titulaire.
 5. Relecture juridique finale des pages confidentialité et conditions.
