@@ -172,6 +172,9 @@ type AppMessages = {
     missingPin: string;
     pinLabel: string;
     pinPlaceholder: string;
+    accountPasswordDescription: string;
+    accountPasswordLabel: string;
+    accountPasswordPlaceholder: string;
     verify: string;
     verifying: string;
     openSettings: string;
@@ -227,7 +230,9 @@ type AppMessages = {
     deletePermanently: string;
     deletingPermanently: string;
     privacy: string;
+    terms: string;
     support: string;
+    subscriptionDisclosure: string;
     chooseLanguage: string;
     french: string;
     english: string;
@@ -372,6 +377,9 @@ type AppMessages = {
     completions: string;
     language: string;
     localPremium: string;
+    legacyPremiumIgnored: string;
+    importConfirmationLabel: string;
+    importConfirmationPlaceholder: string;
     active: string;
     inactive: string;
     signOut: string;
@@ -397,6 +405,24 @@ type AppMessages = {
     connectNow: string;
     signupError: string;
     signinError: string;
+    forgotPassword: string;
+    forgotPasswordTitle: string;
+    forgotPasswordDescription: string;
+    sendResetLink: string;
+    resetLinkSent: string;
+    resetPasswordTitle: string;
+    resetPasswordDescription: string;
+    newPassword: string;
+    confirmPassword: string;
+    resetPassword: string;
+    passwordResetSuccess: string;
+    passwordMismatch: string;
+    invalidResetLink: string;
+    checkEmailTitle: string;
+    checkEmailDescription: string;
+    resendVerification: string;
+    verificationSent: string;
+    backToSignIn: string;
   };
   pricing: {
     eyebrow: string;
@@ -407,8 +433,7 @@ type AppMessages = {
     openPlans: string;
     limits: string;
     childProfiles: (count: number) => string;
-    smartPresets: (count: number) => string;
-    auditDays: (count: number) => string;
+    tasksPerRoutine: (count: number) => string;
     plans: {
       free: {
         name: string;
@@ -594,12 +619,13 @@ const messages: Record<AppLocale, AppMessages> = {
     },
     feedback: {
       premiumTitle: "Devenez Capitaine !",
-      premiumMessage: "Profils illimites, taches illimitees et plus.",
-      unlimitedProfiles: "Profils illimites",
-      unlimitedTasks: "Taches illimitees",
+      premiumMessage:
+        "Plus de profils, plus de missions et la synchronisation familiale.",
+      unlimitedProfiles: "Jusqu'a 6 profils enfants",
+      unlimitedTasks: "Jusqu'a 20 missions par routine",
       monthly: "Mensuel",
       yearly: "Annuel",
-      best: "2 mois offerts",
+      best: "Environ 4 mois offerts",
       profileLimitMessage:
         "Desole cadet, il faut etre Capitaine pour agrandir l'equipage !",
       taskLimitMessage:
@@ -628,6 +654,10 @@ const messages: Record<AppLocale, AppMessages> = {
       missingPin: "Definis-en un depuis les parametres parent avant d'utiliser cette action.",
       pinLabel: "Code parent",
       pinPlaceholder: "1234",
+      accountPasswordDescription:
+        "Aucun code parent n'est encore defini. Confirme ton mot de passe de compte pour ouvrir les reglages et en creer un.",
+      accountPasswordLabel: "Mot de passe du compte",
+      accountPasswordPlaceholder: "Ton mot de passe",
       verify: "Valider",
       verifying: "Verification...",
       openSettings: "Ouvrir les parametres",
@@ -643,7 +673,7 @@ const messages: Record<AppLocale, AppMessages> = {
       premiumActiveSubtitle: "Version Premium active",
       manageSubscription: "Gérer l'abonnement",
       premiumUpsell: "Passer Premium",
-      premiumUpsellSubtitle: "Debloquez l'illimite !",
+      premiumUpsellSubtitle: "Passez a Family Plus",
       management: "Gestion",
       parents: "Parents",
       app: "Application",
@@ -685,20 +715,23 @@ const messages: Record<AppLocale, AppMessages> = {
       deletePermanently: "Tout supprimer definitivement",
       deletingPermanently: "Suppression en cours...",
       privacy: "Confidentialite",
+      terms: "Conditions",
       support: "Support",
+      subscriptionDisclosure:
+        "Abonnement renouvele automatiquement jusqu'a resiliation. Le prix et la periode sont confirmes avant paiement.",
       chooseLanguage: "Choisir la langue",
       french: "Francais",
       english: "English",
       languageDescription: "Francais / English",
       aboutTagline: "Pensé par des parents pour des parents et leurs enfants.",
-      aboutVersion: "RoutineKids v1.1",
-      monthlyPrice: "9€/mois",
-      yearlyPrice: "90€/an",
+      aboutVersion: "RoutineKids v1.0",
+      monthlyPrice: "4,99€/mois",
+      yearlyPrice: "39,99€/an",
       parentCodeActive: (minutes) => `Actif · ${minutes} min`,
       themePackCount: (count) => `${count} packs`,
       privacyTitle: "Politique de Confidentialite",
       closeDocument: "Fermer le document",
-      privacyUpdated: "Derniere mise a jour : 24 Novembre 2025",
+      privacyUpdated: "Derniere mise a jour : 10 aout 2026",
       privacyIntro:
         "Chez RoutineKids, la securite et la confidentialite de vos enfants sont notre priorite absolue. Cette politique detaille comment nous traitons les donnees.",
       privacyDataTitle: "Collecte des donnees",
@@ -715,7 +748,7 @@ const messages: Record<AppLocale, AppMessages> = {
         "Apple ou Google peuvent collecter des donnees techniques anonymes (rapports de plantage, statistiques d'installation) conformement a leurs propres politiques de confidentialite, independantes de RoutineKids.",
       privacyContactTitle: "Contact",
       privacyContactBody: "Pour toute question legale :",
-      copyright: "© 2025 RoutineKids",
+      copyright: "© 2026 RoutineKids",
       connectParentSpace: "Connecte-toi pour ouvrir l'espace parent.",
       saveError: "Une erreur est survenue pendant la sauvegarde.",
       connectToSave: "Connecte-toi pour enregistrer ces reglages.",
@@ -849,6 +882,9 @@ const messages: Record<AppLocale, AppMessages> = {
       completions: "Completions",
       language: "Langue",
       localPremium: "Premium local",
+      legacyPremiumIgnored: "ignore (non fiable)",
+      importConfirmationLabel: "Confirmation destructive",
+      importConfirmationPlaceholder: "Tape IMPORTER",
       active: "actif",
       inactive: "inactif",
       signOut: "Se deconnecter",
@@ -875,6 +911,29 @@ const messages: Record<AppLocale, AppMessages> = {
       connectNow: "Se connecter",
       signupError: "Impossible de creer le compte.",
       signinError: "Connexion impossible.",
+      forgotPassword: "Mot de passe oublie ?",
+      forgotPasswordTitle: "Retrouver mon compte",
+      forgotPasswordDescription:
+        "Saisissez votre adresse. Si un compte existe, vous recevrez un lien securise.",
+      sendResetLink: "Envoyer le lien",
+      resetLinkSent:
+        "Si cette adresse correspond a un compte, le lien vient d'etre envoye.",
+      resetPasswordTitle: "Nouveau mot de passe",
+      resetPasswordDescription:
+        "Choisissez un mot de passe unique d'au moins 8 caracteres.",
+      newPassword: "Nouveau mot de passe",
+      confirmPassword: "Confirmer le mot de passe",
+      resetPassword: "Enregistrer le mot de passe",
+      passwordResetSuccess:
+        "Votre mot de passe a ete modifie. Vous pouvez vous reconnecter.",
+      passwordMismatch: "Les deux mots de passe ne correspondent pas.",
+      invalidResetLink: "Ce lien est invalide ou a expire.",
+      checkEmailTitle: "Confirmez votre adresse",
+      checkEmailDescription:
+        "Un lien de confirmation a ete envoye. Ouvrez-le sur cet appareil pour activer le compte.",
+      resendVerification: "Renvoyer l'email",
+      verificationSent: "Un nouvel email de confirmation a ete envoye.",
+      backToSignIn: "Retour a la connexion",
     },
     pricing: {
       eyebrow: "Pricing",
@@ -886,8 +945,7 @@ const messages: Record<AppLocale, AppMessages> = {
       openPlans: "Voir les formules",
       limits: "Limites clefs",
       childProfiles: (count) => `${count} profils enfants`,
-      smartPresets: (count) => `${count} presets intelligents`,
-      auditDays: (count) => `${count} jours de logs`,
+      tasksPerRoutine: (count) => `${count} missions par routine`,
       plans: {
         free: {
           name: "Free",
@@ -906,7 +964,7 @@ const messages: Record<AppLocale, AppMessages> = {
             "Le plan principal pour les foyers actifs qui veulent toute la planification et les presets.",
           features: [
             "Jusqu'a 6 profils enfants",
-            "Routines et templates illimites",
+            "Routines matin et soir personnalisables",
             "Presets par age",
             "Journal parent",
             "Themes par tranche d'age",
@@ -915,13 +973,13 @@ const messages: Record<AppLocale, AppMessages> = {
         familyPlus: {
           name: "Family Premium",
           description:
-            "Pour les foyers qui veulent davantage de profils, de missions et de personnalisation.",
+            "Pour les foyers qui veulent synchroniser davantage de profils et de missions, sans publicite.",
           features: [
-            "Profils et missions sans limite applicative",
-            "Packs de themes premium",
-            "Historique etendu",
-            "Acces prioritaire aux futures automatisations",
-            "Fonctions avancees de recompense",
+            "Jusqu'a 6 profils enfants",
+            "Jusqu'a 20 missions par routine",
+            "Synchronisation du foyer sur plusieurs appareils",
+            "Historique familial et export prive",
+            "Aucune publicite ni suivi publicitaire",
           ],
         },
       },
@@ -1083,12 +1141,13 @@ const messages: Record<AppLocale, AppMessages> = {
     },
     feedback: {
       premiumTitle: "Become Captain!",
-      premiumMessage: "Unlimited profiles, unlimited tasks, and more.",
-      unlimitedProfiles: "Unlimited Profiles",
-      unlimitedTasks: "Unlimited Tasks",
+      premiumMessage:
+        "More profiles, more tasks, and household synchronization.",
+      unlimitedProfiles: "Up to 6 child profiles",
+      unlimitedTasks: "Up to 20 tasks per routine",
       monthly: "Monthly",
       yearly: "Yearly",
-      best: "2 months free",
+      best: "About 4 months free",
       profileLimitMessage:
         "Sorry cadet, you need to be Captain to expand the crew!",
       taskLimitMessage:
@@ -1118,6 +1177,10 @@ const messages: Record<AppLocale, AppMessages> = {
         "Set one up from parent settings before using this action.",
       pinLabel: "Parent code",
       pinPlaceholder: "1234",
+      accountPasswordDescription:
+        "No parent code is configured yet. Confirm your account password to open settings and create one.",
+      accountPasswordLabel: "Account password",
+      accountPasswordPlaceholder: "Your password",
       verify: "Validate",
       verifying: "Verifying...",
       openSettings: "Open settings",
@@ -1133,7 +1196,7 @@ const messages: Record<AppLocale, AppMessages> = {
       premiumActiveSubtitle: "Premium version active",
       manageSubscription: "Manage subscription",
       premiumUpsell: "Go Premium",
-      premiumUpsellSubtitle: "Unlock the unlimited tier!",
+      premiumUpsellSubtitle: "Upgrade to Family Plus",
       management: "Manage",
       parents: "Parents",
       app: "App",
@@ -1175,20 +1238,23 @@ const messages: Record<AppLocale, AppMessages> = {
       deletePermanently: "Delete everything permanently",
       deletingPermanently: "Deleting...",
       privacy: "Privacy",
+      terms: "Terms",
       support: "Support",
+      subscriptionDisclosure:
+        "Subscription renews automatically until cancelled. Price and billing period are confirmed before payment.",
       chooseLanguage: "Choose a language",
       french: "French",
       english: "English",
       languageDescription: "French / English",
       aboutTagline: "Designed by parents for parents and children.",
-      aboutVersion: "RoutineKids v1.1",
-      monthlyPrice: "€9/month",
-      yearlyPrice: "€90/year",
+      aboutVersion: "RoutineKids v1.0",
+      monthlyPrice: "€4.99/month",
+      yearlyPrice: "€39.99/year",
       parentCodeActive: (minutes) => `Active · ${minutes} min`,
       themePackCount: (count) => `${count} packs`,
       privacyTitle: "Privacy Policy",
       closeDocument: "Close Document",
-      privacyUpdated: "Last updated: November 24, 2025",
+      privacyUpdated: "Last updated: August 10, 2026",
       privacyIntro:
         "At RoutineKids, the safety and privacy of your children are our top priority. This policy details how we handle data.",
       privacyDataTitle: "Data Collection",
@@ -1205,7 +1271,7 @@ const messages: Record<AppLocale, AppMessages> = {
         "Apple or Google may collect anonymous technical data (crash reports, installation statistics) in accordance with their own privacy policies, which are independent of RoutineKids.",
       privacyContactTitle: "Contact",
       privacyContactBody: "For legal questions:",
-      copyright: "© 2025 RoutineKids",
+      copyright: "© 2026 RoutineKids",
       connectParentSpace: "Sign in to open the parent space.",
       saveError: "Something went wrong while saving.",
       connectToSave: "Sign in to save these settings.",
@@ -1339,6 +1405,9 @@ const messages: Record<AppLocale, AppMessages> = {
       completions: "Completions",
       language: "Language",
       localPremium: "Local premium",
+      legacyPremiumIgnored: "ignored (untrusted)",
+      importConfirmationLabel: "Destructive confirmation",
+      importConfirmationPlaceholder: "Type IMPORTER",
       active: "active",
       inactive: "inactive",
       signOut: "Sign out",
@@ -1366,6 +1435,29 @@ const messages: Record<AppLocale, AppMessages> = {
       connectNow: "Sign in",
       signupError: "Unable to create the account.",
       signinError: "Unable to sign in.",
+      forgotPassword: "Forgot your password?",
+      forgotPasswordTitle: "Recover my account",
+      forgotPasswordDescription:
+        "Enter your address. If an account exists, you will receive a secure link.",
+      sendResetLink: "Send reset link",
+      resetLinkSent:
+        "If this address matches an account, the link has just been sent.",
+      resetPasswordTitle: "New password",
+      resetPasswordDescription:
+        "Choose a unique password with at least 8 characters.",
+      newPassword: "New password",
+      confirmPassword: "Confirm password",
+      resetPassword: "Save password",
+      passwordResetSuccess:
+        "Your password has been updated. You can now sign in.",
+      passwordMismatch: "The two passwords do not match.",
+      invalidResetLink: "This link is invalid or has expired.",
+      checkEmailTitle: "Confirm your address",
+      checkEmailDescription:
+        "A confirmation link has been sent. Open it on this device to activate the account.",
+      resendVerification: "Resend email",
+      verificationSent: "A new confirmation email has been sent.",
+      backToSignIn: "Back to sign in",
     },
     pricing: {
       eyebrow: "Pricing",
@@ -1377,8 +1469,7 @@ const messages: Record<AppLocale, AppMessages> = {
       openPlans: "View plans",
       limits: "Key limits",
       childProfiles: (count) => `${count} child profiles`,
-      smartPresets: (count) => `${count} smart presets`,
-      auditDays: (count) => `${count} days of logs`,
+      tasksPerRoutine: (count) => `${count} tasks per routine`,
       plans: {
         free: {
           name: "Free",
@@ -1397,7 +1488,7 @@ const messages: Record<AppLocale, AppMessages> = {
             "The main plan for active households that want full scheduling and presets.",
           features: [
             "Up to 6 child profiles",
-            "Unlimited routines and task templates",
+            "Customizable morning and evening routines",
             "Age-based presets",
             "Parent audit log",
             "Theme packs by age band",
@@ -1406,13 +1497,13 @@ const messages: Record<AppLocale, AppMessages> = {
         familyPlus: {
           name: "Family Premium",
           description:
-            "For households that need more profiles, missions, and personalization.",
+            "For households that want to sync more profiles and tasks, with no advertising.",
           features: [
-            "No application limit on profiles or missions",
-            "Premium theme packs",
-            "Extended history",
-            "Priority access to future automations",
-            "Advanced reward features",
+            "Up to 6 child profiles",
+            "Up to 20 tasks per routine",
+            "Household sync across multiple devices",
+            "Family history and private export",
+            "No ads or advertising tracking",
           ],
         },
       },

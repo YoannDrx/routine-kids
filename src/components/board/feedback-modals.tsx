@@ -172,6 +172,17 @@ export function PremiumModal({
           onClick={() => onActivate("yearly")}
         />
       </div>
+      <p className="mt-4 text-center text-xs leading-5 text-white/50">
+        {messages.settings.subscriptionDisclosure}
+      </p>
+      <div className="mt-2 flex justify-center gap-4 text-xs">
+        <a className="text-cyan-200 underline" href="/privacy">
+          {messages.settings.privacy}
+        </a>
+        <a className="text-cyan-200 underline" href="/terms">
+          {messages.settings.terms}
+        </a>
+      </div>
     </OverlayModalShell>
   );
 }

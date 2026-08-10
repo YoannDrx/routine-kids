@@ -136,6 +136,7 @@ type RoutineBoardProps = {
   }) => Promise<BoardMutationResult>;
   onImportPrototypeAction?: (input: {
     snapshot: string;
+    confirmation: string;
   }) => Promise<{
     status: "success" | "error";
     message: string;
@@ -451,12 +452,13 @@ export function RoutineBoard({
   const sounds = useRoutineSounds(boardSettings.soundsEnabled);
 
   useEffect(() => {
-    setNow(new Date());
     const interval = window.setInterval(() => setNow(new Date()), 60_000);
     return () => window.clearInterval(interval);
   }, []);
 
   useEffect(() => {
+    // Reconcile the optimistic board with the authoritative RSC payload.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalProfiles(profiles);
     setCompletedByProfile(createCompletedState(profiles));
     setCompletedOrderByProfile(createCompletedOrderState(profiles));
@@ -476,6 +478,8 @@ export function RoutineBoard({
   }, [dayCelebration]);
 
   useEffect(() => {
+    // Billing changes arrive through a refreshed server payload.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPremiumActive(settings?.premiumActive ?? false);
   }, [settings?.premiumActive]);
 
@@ -484,6 +488,8 @@ export function RoutineBoard({
       return;
     }
 
+    // Persisted settings can change outside this component.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBoardSettings(settings);
   }, [settings]);
 
@@ -531,6 +537,8 @@ export function RoutineBoard({
     }
 
     if (detectedMode !== lastDetectedMode) {
+      // Clock changes are an external signal; keep the displayed period aligned.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLastDetectedMode(detectedMode);
       setMode(detectedMode);
       setModeOverrideActive(false);
@@ -2045,6 +2053,7 @@ export function RoutineBoard({
         <ParentalGateModal
           key={gatePurpose?.type ?? "parental-gate"}
           open
+          pinConfigured={Boolean(parentWorkspace?.parentSecurity.pinConfigured)}
           onClose={() => {
             setParentalGateOpen(false);
             setGatePurpose(null);

@@ -11,6 +11,11 @@ export const freePlanLimits = {
   tasksPerRoutine: 4,
 } as const;
 
+export const familyPlanLimits = {
+  childProfiles: 6,
+  tasksPerRoutine: 20,
+} as const;
+
 export async function getProductEntitlement(userId: string) {
   const subscription = await getOwnerSubscription(userId);
 
@@ -27,10 +32,7 @@ export async function canCreateChildProfile(params: {
   householdId: string;
 }) {
   const entitlement = await getProductEntitlement(params.userId);
-
-  if (entitlement.isPremium) {
-    return true;
-  }
+  const limits = entitlement.isPremium ? familyPlanLimits : freePlanLimits;
 
   const profileCount = await prisma.childProfile.count({
     where: {
@@ -38,7 +40,7 @@ export async function canCreateChildProfile(params: {
     },
   });
 
-  return profileCount < freePlanLimits.childProfiles;
+  return profileCount < limits.childProfiles;
 }
 
 export async function canAssignTemplatesToPeriods(params: {
@@ -49,10 +51,7 @@ export async function canAssignTemplatesToPeriods(params: {
   periods: RoutinePeriod[];
 }) {
   const entitlement = await getProductEntitlement(params.userId);
-
-  if (entitlement.isPremium) {
-    return true;
-  }
+  const limits = entitlement.isPremium ? familyPlanLimits : freePlanLimits;
 
   const uniqueTemplateIds = [...new Set(params.templateIds)];
   const routines = await prisma.routine.findMany({
@@ -82,7 +81,7 @@ export async function canAssignTemplatesToPeriods(params: {
     ).length;
 
     return (
-      routine.tasks.length + newTemplateCount <= freePlanLimits.tasksPerRoutine
+      routine.tasks.length + newTemplateCount <= limits.tasksPerRoutine
     );
   });
 }

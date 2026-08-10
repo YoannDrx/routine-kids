@@ -9,6 +9,7 @@ import { ensureHouseholdBaseline } from "@/lib/household-bootstrap";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
 import { deletePrivateImageIfUnreferenced } from "@/lib/media-storage";
 import { prisma } from "@/lib/prisma";
+import { getParentStepUpStatus } from "@/lib/parent-security";
 import { canAssignTemplatesToPeriods } from "@/lib/product-entitlements";
 import {
   assignTaskTemplateToRoutine,
@@ -91,6 +92,11 @@ async function getAdminActionContext(locale: "fr" | "en") {
     userId: user.id,
     userName: user.name,
   });
+  const parentAccess = await getParentStepUpStatus(user.id);
+
+  if (!parentAccess.ok) {
+    throw new Error(parentAccess.message);
+  }
 
   const household = await prisma.household.findUnique({
     where: {

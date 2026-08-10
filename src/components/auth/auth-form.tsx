@@ -11,9 +11,14 @@ import { authClient } from "@/lib/auth-client";
 type AuthFormProps = {
   mode: "sign-in" | "sign-up";
   callbackUrl?: string;
+  requireEmailVerification?: boolean;
 };
 
-export function AuthForm({ mode, callbackUrl: rawCallbackUrl }: AuthFormProps) {
+export function AuthForm({
+  mode,
+  callbackUrl: rawCallbackUrl,
+  requireEmailVerification = false,
+}: AuthFormProps) {
   const messages = useAppMessages();
   const router = useRouter();
   const callbackUrlParam = rawCallbackUrl ?? "/settings";
@@ -45,6 +50,13 @@ export function AuthForm({ mode, callbackUrl: rawCallbackUrl }: AuthFormProps) {
 
         if (result.error) {
           setError(result.error.message ?? messages.auth.signupError);
+          return;
+        }
+
+        if (requireEmailVerification) {
+          router.push(
+            `/check-email?email=${encodeURIComponent(email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`,
+          );
           return;
         }
       } else {
@@ -157,6 +169,15 @@ export function AuthForm({ mode, callbackUrl: rawCallbackUrl }: AuthFormProps) {
           {isSignup ? messages.auth.connectNow : messages.auth.createAccount}
         </Link>
       </p>
+
+      {!isSignup ? (
+        <Link
+          href="/forgot-password"
+          className="text-sm font-semibold text-[#8fd8ff] underline decoration-[#8fd8ff]/50 underline-offset-4"
+        >
+          {messages.auth.forgotPassword}
+        </Link>
+      ) : null}
     </form>
   );
 }

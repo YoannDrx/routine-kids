@@ -3,7 +3,6 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -30,10 +29,6 @@ export function AppI18nProvider({
   children: ReactNode;
 }) {
   const [locale, setLocale] = useState<AppLocale>(initialLocale);
-
-  useEffect(() => {
-    setLocale(initialLocale);
-  }, [initialLocale]);
 
   const value = useMemo(
     () => ({

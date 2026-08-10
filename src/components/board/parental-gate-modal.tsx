@@ -1,8 +1,9 @@
 "use client";
 
 import { Shield } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState, useTransition } from "react";
 
+import { validateParentPinAction } from "@/app/security-actions";
 import { useAppMessages } from "@/components/i18n/app-i18n-provider";
 import { OverlayModalShell } from "@/components/settings/overlay-modal-shell";
 
@@ -10,29 +11,19 @@ type ParentalGateModalProps = {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  pinConfigured: boolean;
 };
-
-function createMathChallenge() {
-  return {
-    left: Math.floor(Math.random() * 12) + 2,
-    right: Math.floor(Math.random() * 12) + 1,
-  };
-}
 
 export function ParentalGateModal({
   open,
   onClose,
   onSuccess,
+  pinConfigured,
 }: ParentalGateModalProps) {
   const messages = useAppMessages();
-  const [answer, setAnswer] = useState("");
+  const [credential, setCredential] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [challenge] = useState(createMathChallenge);
-
-  const expectedAnswer = useMemo(
-    () => challenge.left + challenge.right,
-    [challenge.left, challenge.right],
-  );
+  const [pending, startTransition] = useTransition();
 
   return (
     <OverlayModalShell
@@ -42,40 +33,58 @@ export function ParentalGateModal({
     >
       <Shield className="mx-auto mb-4 h-10 w-10 text-pink-300" />
       <h3 className="mb-2 text-xl font-bold">{messages.gate.title}</h3>
-      <p className="mb-6 text-sm text-white/50">
-        {messages.gate.questionPrefix}{" "}
-        <span className="font-bold text-white">
-          {challenge.left} + {challenge.right}
-        </span>{" "}
-        ?
+      <p className="mb-6 text-sm text-white/60">
+        {pinConfigured
+          ? messages.gate.description
+          : messages.gate.accountPasswordDescription}
       </p>
+      <label htmlFor="parent-gate-credential" className="mb-2 block text-left text-sm font-semibold text-white/75">
+        {pinConfigured
+          ? messages.gate.pinLabel
+          : messages.gate.accountPasswordLabel}
+      </label>
       <input
-        type="text"
-        value={answer}
+        id="parent-gate-credential"
+        type="password"
+        value={credential}
         onChange={(event) => {
-          setAnswer(event.target.value.replace(/\D/g, ""));
+          setCredential(
+            pinConfigured
+              ? event.target.value.replace(/\D/g, "").slice(0, 4)
+              : event.target.value,
+          );
           setError(null);
         }}
-        inputMode="numeric"
-        pattern="[0-9]*"
+        inputMode={pinConfigured ? "numeric" : "text"}
+        pattern={pinConfigured ? "[0-9]*" : undefined}
         autoComplete="off"
-        placeholder={messages.gate.answerPlaceholder}
+        autoFocus
+        placeholder={
+          pinConfigured
+            ? messages.gate.pinPlaceholder
+            : messages.gate.accountPasswordPlaceholder
+        }
         className="mb-4 w-full rounded-xl border border-white/10 bg-[#120d2b] p-4 text-center text-xl font-bold outline-none focus:ring-2 focus:ring-pink-300"
       />
       {error ? <p className="mb-4 text-sm text-rose-200">{error}</p> : null}
       <button
         type="button"
+        disabled={pending || credential.length === 0}
         onClick={() => {
-          if (Number(answer) !== expectedAnswer) {
-            setError(messages.gate.wrongAnswer);
-            return;
-          }
+          startTransition(async () => {
+            const result = await validateParentPinAction({ credential });
 
-          onSuccess();
+            if (result.status === "error") {
+              setError(result.message || messages.gate.genericError);
+              return;
+            }
+
+            onSuccess();
+          });
         }}
-        className="w-full rounded-xl bg-[linear-gradient(90deg,#ec4899,#f97316)] py-3 font-bold text-white"
+        className="w-full rounded-xl bg-[linear-gradient(90deg,#ec4899,#f97316)] py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {messages.gate.verify}
+        {pending ? messages.gate.verifying : messages.gate.verify}
       </button>
     </OverlayModalShell>
   );

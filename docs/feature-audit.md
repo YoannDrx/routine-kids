@@ -1,5 +1,9 @@
 # RoutineKids Feature Audit
 
+> Archive de l'audit initial. L'état fonctionnel à jour et les pourcentages de
+> préparation production sont dans
+> [`implementation-status-2026-08-10.md`](implementation-status-2026-08-10.md).
+
 Last updated: March 13, 2026
 
 ## Goal

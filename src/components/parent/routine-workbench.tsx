@@ -125,10 +125,14 @@ export function RoutineWorkbench({
   } | null>(null);
 
   useEffect(() => {
+    // Reset editable drafts after an authoritative server refresh.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTitleByKey(createTitleState(profiles));
   }, [profiles]);
 
   useEffect(() => {
+    // Keep task selectors aligned with newly persisted templates.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTemplateByKey(createTemplateSelectionState(profiles, templates));
   }, [profiles, templates]);
 

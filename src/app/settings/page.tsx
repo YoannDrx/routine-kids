@@ -21,6 +21,8 @@ import {
   updateBoardSettingsAction,
 } from "@/app/settings-actions";
 import { SettingsBoardBridge } from "@/components/settings/settings-board-bridge";
+import { SettingsAccessGate } from "@/components/settings/settings-access-gate";
+import { redirect } from "next/navigation";
 import { isDatabaseConfigured } from "@/lib/config";
 import { getBoardProfilesFromBoardOverview } from "@/lib/board-data";
 import { getBoardLibraryTasksFromHousehold } from "@/lib/data/board-library";
@@ -36,32 +38,35 @@ import {
 } from "@/lib/settings";
 import { getSession } from "@/lib/session";
 import { getParentWorkspaceSnapshot } from "@/lib/parent-workspace";
+import { getParentSecuritySummary } from "@/lib/parent-security";
 
 export default async function SettingsPage() {
   const databaseReady = isDatabaseConfigured();
   const session = databaseReady ? await getSession() : null;
 
-  if (session?.user) {
-    await ensureHouseholdBaseline({
-      userId: session.user.id,
-      userName: session.user.name,
-    });
+  if (!session?.user) {
+    redirect("/sign-in?callbackUrl=/settings");
   }
 
-  const household = session?.user ? await getHouseholdOverview(session.user.id) : null;
-  const boardHousehold = session?.user
-    ? await getHouseholdBoardOverview(session.user.id)
-    : null;
-  const subscription = session?.user ? await getOwnerSubscription(session.user.id) : null;
-  const parentWorkspace = session?.user
-    ? await getParentWorkspaceSnapshot(session.user.id)
-    : null;
-  const boardProfiles = session?.user
-    ? getBoardProfilesFromBoardOverview(boardHousehold)
-    : [];
-  const libraryTasks = session?.user
-    ? getBoardLibraryTasksFromHousehold(boardHousehold)
-    : [];
+  await ensureHouseholdBaseline({
+    userId: session.user.id,
+    userName: session.user.name,
+  });
+
+  const parentSecurity = await getParentSecuritySummary(session.user.id);
+
+  if (!parentSecurity.stepUpActive) {
+    return <SettingsAccessGate pinConfigured={parentSecurity.pinConfigured} />;
+  }
+
+  const [household, boardHousehold, subscription, parentWorkspace] = await Promise.all([
+    getHouseholdOverview(session.user.id),
+    getHouseholdBoardOverview(session.user.id),
+    getOwnerSubscription(session.user.id),
+    getParentWorkspaceSnapshot(session.user.id),
+  ]);
+  const boardProfiles = getBoardProfilesFromBoardOverview(boardHousehold);
+  const libraryTasks = getBoardLibraryTasksFromHousehold(boardHousehold);
   const settings = household
     ? {
         locale: isSupportedLocale(household.locale) ? household.locale : "fr",

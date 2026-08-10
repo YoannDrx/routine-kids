@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { Fredoka, Nunito } from "next/font/google";
 
 import { AppI18nProvider } from "@/components/i18n/app-i18n-provider";
+import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { localeCookieName, normalizeAppLocale } from "@/lib/i18n";
 
 import "./globals.css";
@@ -28,9 +29,22 @@ export const metadata: Metadata = {
     template: "%s | RoutineKids",
   },
   description:
-    "RoutineKids transforme le prototype board enfant en une vraie application familiale iPad-first, avec espace parent et base Neon dediee.",
+    "Des routines visuelles et positives pour aider les enfants à gagner en autonomie, avec un espace parent sécurisé.",
   applicationName: "RoutineKids",
+  category: "education",
   metadataBase: new URL(baseUrl),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "RoutineKids",
+    description:
+      "Des routines visuelles et positives pour aider les enfants à gagner en autonomie.",
+    locale: "fr_FR",
+    siteName: "RoutineKids",
+    type: "website",
+    url: "/",
+  },
   appleWebApp: {
     capable: true,
     title: "RoutineKids",
@@ -41,8 +55,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: "#120d2b",
 };
 
@@ -62,6 +74,7 @@ export default async function RootLayout({
       >
         <AppI18nProvider initialLocale={locale}>
           {children}
+          <ServiceWorkerRegistration />
         </AppI18nProvider>
       </body>
     </html>

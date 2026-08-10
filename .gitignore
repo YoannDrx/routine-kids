@@ -13,3 +13,9 @@ coverage
 .env.production.local
 .neon
 .codex-temp
+playwright-report
+test-results
+ios/**/xcuserdata
+ios/**/*.xcuserstate
+ios/build/
+ios/DerivedData/

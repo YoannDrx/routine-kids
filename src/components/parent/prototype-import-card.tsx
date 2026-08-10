@@ -13,6 +13,7 @@ import {
 type PrototypeImportCardProps = {
   onImportAction?: (input: {
     snapshot: string;
+    confirmation: string;
   }) => Promise<{
     status: "success" | "error";
     message: string;
@@ -28,6 +29,7 @@ export function PrototypeImportCard({ onImportAction }: PrototypeImportCardProps
     getPrototypeStorageServerSnapshot,
   );
   const [pending, setPending] = useState(false);
+  const [confirmation, setConfirmation] = useState("");
   const [feedback, setFeedback] = useState<{
     status: "success" | "error";
     message: string;
@@ -71,7 +73,11 @@ export function PrototypeImportCard({ onImportAction }: PrototypeImportCardProps
   }, [storageSnapshot]);
 
   const importDisabled =
-    pending || status !== "ready" || preview === null || !onImportAction;
+    pending ||
+    confirmation !== "IMPORTER" ||
+    status !== "ready" ||
+    preview === null ||
+    !onImportAction;
 
   const handleImport = async () => {
     if (status !== "ready" || preview === null || !onImportAction) {
@@ -88,6 +94,7 @@ export function PrototypeImportCard({ onImportAction }: PrototypeImportCardProps
     try {
       const result = await onImportAction({
         snapshot: storageSnapshot,
+        confirmation,
       });
 
       setFeedback(result);
@@ -156,7 +163,9 @@ export function PrototypeImportCard({ onImportAction }: PrototypeImportCardProps
             <p className="mt-2">
               {messages.forms.localPremium}:{" "}
               <strong>
-                {preview.premiumEnabled ? messages.forms.active : messages.forms.inactive}
+                {preview.legacyPremiumIgnored
+                  ? messages.forms.legacyPremiumIgnored
+                  : messages.forms.inactive}
               </strong>
             </p>
           </div>
@@ -164,6 +173,17 @@ export function PrototypeImportCard({ onImportAction }: PrototypeImportCardProps
           <div className="mt-4 rounded-[24px] border border-amber-300/18 bg-amber-500/10 p-4 text-sm leading-6 text-amber-50/88">
             {messages.forms.importReplaceNotice}
           </div>
+
+          <label className="mt-4 flex flex-col gap-2 text-sm font-semibold text-white/80">
+            {messages.forms.importConfirmationLabel}
+            <input
+              value={confirmation}
+              onChange={(event) => setConfirmation(event.target.value)}
+              placeholder={messages.forms.importConfirmationPlaceholder}
+              autoComplete="off"
+              className="h-12 rounded-2xl border border-white/15 bg-black/20 px-4 font-mono text-white outline-none focus:border-amber-300"
+            />
+          </label>
 
           {feedback ? (
             <div

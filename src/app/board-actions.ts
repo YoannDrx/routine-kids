@@ -21,10 +21,7 @@ import {
   normalizeExistingMediaReference,
   persistPrivateImage,
 } from "@/lib/media-storage";
-import {
-  deriveJourneyStateFromRoutines,
-  getCompletedDayKeysFromRoutines,
-} from "@/lib/journey";
+import { type JourneyState } from "@/lib/journey";
 import { prisma } from "@/lib/prisma";
 import {
   canAssignTemplatesToPeriods,
@@ -38,6 +35,8 @@ import {
 } from "@/lib/routine-task-service";
 import { getServerCopy } from "@/lib/server-copy";
 import { getRequiredAdmin, getRequiredUser } from "@/lib/session";
+import { toggleTaskCompletion } from "@/lib/task-completion-service";
+import { getParentStepUpStatus } from "@/lib/parent-security";
 import {
   deleteTaskTemplate,
   upsertTaskTemplate,
@@ -345,7 +344,7 @@ export type BoardTaskMutationResult = {
 export type BoardTaskToggleResult = {
   childProfileId: string;
   streak: number;
-  journey: ReturnType<typeof deriveJourneyStateFromRoutines>;
+  journey: JourneyState;
 };
 
 type BoardAdminAccess =
@@ -369,6 +368,18 @@ async function getRequiredAdminHousehold(
     userId: user.id,
     userName: user.name,
   });
+  const parentAccess = await getParentStepUpStatus(user.id);
+
+  if (!parentAccess.ok) {
+    return {
+      error: {
+        status: "error" as const,
+        message: parentAccess.message,
+        code: parentAccess.code,
+      },
+    };
+  }
+
   const household = await prisma.household.findUnique({
     where: {
       ownerUserId: user.id,
@@ -441,6 +452,7 @@ export async function toggleBoardTaskAction(input: {
       },
       select: {
         id: true,
+        timeZone: true,
       },
     });
 
@@ -448,121 +460,23 @@ export async function toggleBoardTaskAction(input: {
       throw new Error(copy.actions.householdMissing);
     }
 
-    const task = await tx.routineTask.findFirst({
-      where: {
-        id: parsed.data.taskId,
-        routine: {
-          householdId: household.id,
-          childProfileId: parsed.data.childProfileId,
-        },
-      },
-      select: {
-        id: true,
-      },
+    const nextJourney = await toggleTaskCompletion({
+      tx,
+      householdId: household.id,
+      timeZone: household.timeZone,
+      childProfileId: parsed.data.childProfileId,
+      taskId: parsed.data.taskId,
+      dayKey: parsed.data.dayKey,
+      completed: parsed.data.completed,
+    }).catch((error: unknown) => {
+      if (error instanceof Error && error.message === "task_not_found") {
+        throw new Error(copy.actions.missionDeleteError);
+      }
+      throw error;
     });
-
-    if (!task) {
-      throw new Error(copy.actions.missionDeleteError);
-    }
-
-    await tx.taskCompletion.updateMany({
-      where: {
-        childProfileId: parsed.data.childProfileId,
-        dayKey: parsed.data.dayKey,
-        streakSnapshot: {
-          not: null,
-        },
-      },
-      data: {
-        streakSnapshot: null,
-      },
-    });
-
-    if (parsed.data.completed) {
-      await tx.taskCompletion.upsert({
-        where: {
-          taskId_childProfileId_dayKey: {
-            taskId: parsed.data.taskId,
-            childProfileId: parsed.data.childProfileId,
-            dayKey: parsed.data.dayKey,
-          },
-        },
-        update: {
-          completedAt: new Date(),
-        },
-        create: {
-          taskId: parsed.data.taskId,
-          childProfileId: parsed.data.childProfileId,
-          dayKey: parsed.data.dayKey,
-        },
-      });
-    } else {
-      await tx.taskCompletion.deleteMany({
-        where: {
-          taskId: parsed.data.taskId,
-          childProfileId: parsed.data.childProfileId,
-          dayKey: parsed.data.dayKey,
-        },
-      });
-    }
-
-    const profile = await tx.childProfile.findFirst({
-      where: {
-        id: parsed.data.childProfileId,
-        householdId: household.id,
-      },
-      select: {
-        id: true,
-        routines: {
-          where: {
-            isArchived: false,
-          },
-          include: {
-            tasks: {
-              include: {
-                completions: {
-                  select: {
-                    dayKey: true,
-                    childProfileId: true,
-                    streakSnapshot: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!profile) {
-      throw new Error(copy.actions.profileNotInHousehold);
-    }
-
-    const nextJourney = deriveJourneyStateFromRoutines(
-      profile.routines,
-      profile.id,
-      parsed.data.dayKey,
-    );
-    const dayIsComplete = getCompletedDayKeysFromRoutines(
-      profile.routines,
-      profile.id,
-      parsed.data.dayKey,
-    ).includes(parsed.data.dayKey);
-
-    if (dayIsComplete) {
-      await tx.taskCompletion.updateMany({
-        where: {
-          childProfileId: parsed.data.childProfileId,
-          dayKey: parsed.data.dayKey,
-        },
-        data: {
-          streakSnapshot: nextJourney.streak,
-        },
-      });
-    }
 
     return {
-      profileId: profile.id,
+      profileId: parsed.data.childProfileId,
       journey: nextJourney,
     };
   });

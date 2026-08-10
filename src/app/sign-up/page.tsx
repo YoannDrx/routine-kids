@@ -1,4 +1,5 @@
 import { AuthForm } from "@/components/auth/auth-form";
+import { isTransactionalEmailConfigured } from "@/lib/email";
 
 type SignUpPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -13,7 +14,11 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      <AuthForm mode="sign-up" callbackUrl={callbackUrl} />
+      <AuthForm
+        mode="sign-up"
+        callbackUrl={callbackUrl}
+        requireEmailVerification={isTransactionalEmailConfigured()}
+      />
     </main>
   );
 }

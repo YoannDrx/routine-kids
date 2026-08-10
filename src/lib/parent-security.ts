@@ -8,7 +8,10 @@ import {
 } from "node:crypto";
 import { cookies } from "next/headers";
 
-import { ensureServerEnv } from "@/lib/env.server";
+import {
+  ensureServerEnv,
+  getRequiredProductionSecret,
+} from "@/lib/env.server";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/prisma";
 import { getServerCopy } from "@/lib/server-copy";
@@ -20,7 +23,7 @@ const parentStepUpCookieName = "routine-kids-parent-step-up";
 const defaultStepUpMinutes = 15;
 
 function getParentSecuritySecret() {
-  return process.env.BETTER_AUTH_SECRET ?? "routine-kids-dev-secret-change-me";
+  return getRequiredProductionSecret("BETTER_AUTH_SECRET");
 }
 
 function toBase64Url(buffer: Buffer) {
@@ -40,6 +43,7 @@ function signStepUpPayload(payload: string) {
 function encodeStepUpCookie(input: {
   userId: string;
   expiresAt: number;
+  securityVersion: number;
 }) {
   const payload = toBase64Url(
     Buffer.from(JSON.stringify(input), "utf8"),
@@ -53,6 +57,7 @@ function decodeStepUpCookie(
 ): {
   userId: string;
   expiresAt: number;
+  securityVersion: number;
 } | null {
   const [payload, signature] = value.split(".");
 
@@ -76,11 +81,13 @@ function decodeStepUpCookie(
     const decoded = JSON.parse(fromBase64Url(payload).toString("utf8")) as {
       userId?: string;
       expiresAt?: number;
+      securityVersion?: number;
     };
 
     if (
       typeof decoded.userId !== "string" ||
-      typeof decoded.expiresAt !== "number"
+      typeof decoded.expiresAt !== "number" ||
+      typeof decoded.securityVersion !== "number"
     ) {
       return null;
     }
@@ -88,6 +95,7 @@ function decodeStepUpCookie(
     return {
       userId: decoded.userId,
       expiresAt: decoded.expiresAt,
+      securityVersion: decoded.securityVersion,
     };
   } catch {
     return null;
@@ -130,11 +138,15 @@ export async function getParentSecurityRecord(userId: string) {
     select: {
       adminPinHash: true,
       stepUpMinutes: true,
+      updatedAt: true,
     },
   });
 }
 
-export async function hasActiveParentStepUp(userId: string) {
+export async function hasActiveParentStepUp(
+  userId: string,
+  securityVersion?: number,
+) {
   const cookieStore = await cookies();
   const rawValue = cookieStore.get(parentStepUpCookieName)?.value;
 
@@ -148,12 +160,20 @@ export async function hasActiveParentStepUp(userId: string) {
     return false;
   }
 
-  return decoded.userId === userId && decoded.expiresAt > Date.now();
+  const currentSecurityVersion =
+    securityVersion ?? (await getParentSecurityRecord(userId))?.updatedAt.getTime();
+
+  return (
+    decoded.userId === userId &&
+    decoded.expiresAt > Date.now() &&
+    decoded.securityVersion === currentSecurityVersion
+  );
 }
 
 export async function setParentStepUpCookie(input: {
   userId: string;
   stepUpMinutes?: number;
+  securityVersion: number;
 }) {
   const cookieStore = await cookies();
   const expiresAt =
@@ -162,6 +182,7 @@ export async function setParentStepUpCookie(input: {
   cookieStore.set(parentStepUpCookieName, encodeStepUpCookie({
     userId: input.userId,
     expiresAt,
+    securityVersion: input.securityVersion,
   }), {
     httpOnly: true,
     sameSite: "lax",
@@ -186,7 +207,9 @@ export async function getParentSecuritySummary(
   return {
     pinConfigured,
     stepUpMinutes: settings?.stepUpMinutes ?? defaultStepUpMinutes,
-    stepUpActive: pinConfigured ? await hasActiveParentStepUp(userId) : false,
+    stepUpActive: pinConfigured
+      ? await hasActiveParentStepUp(userId, settings?.updatedAt.getTime())
+      : false,
   };
 }
 
@@ -194,7 +217,7 @@ export async function getParentStepUpStatus(userId: string) {
   const copy = getServerCopy(await getCurrentAppLocale());
   const settings = await getParentSecurityRecord(userId);
 
-  if (!settings?.adminPinHash) {
+  if (!settings) {
     return {
       ok: false as const,
       code: "parent_pin_not_configured" as const,
@@ -202,7 +225,18 @@ export async function getParentStepUpStatus(userId: string) {
     };
   }
 
-  const unlocked = await hasActiveParentStepUp(userId);
+  const unlocked = await hasActiveParentStepUp(
+    userId,
+    settings.updatedAt.getTime(),
+  );
+
+  if (!settings.adminPinHash && !unlocked) {
+    return {
+      ok: false as const,
+      code: "parent_pin_not_configured" as const,
+      message: copy.actions.parentPinMissingConfig,
+    };
+  }
 
   if (!unlocked) {
     return {

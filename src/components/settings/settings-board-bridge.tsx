@@ -51,6 +51,7 @@ type SettingsBoardBridgeProps = {
   }) => Promise<MutationResult>;
   onImportPrototypeAction?: (input: {
     snapshot: string;
+    confirmation: string;
   }) => Promise<{
     status: "success" | "error";
     message: string;
@@ -274,6 +275,8 @@ export function SettingsBoardBridge({
   );
 
   useEffect(() => {
+    // Reconcile optimistic board state after a router refresh.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalProfiles(profiles);
     setTasksByProfile(createTaskState(profiles));
   }, [profiles]);
@@ -283,6 +286,8 @@ export function SettingsBoardBridge({
       return;
     }
 
+    // Settings may be edited from another parent surface.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBoardSettings(initialSettings);
     setPremiumActive(initialSettings.premiumActive);
   }, [initialSettings]);

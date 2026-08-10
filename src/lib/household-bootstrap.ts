@@ -222,15 +222,35 @@ export async function ensureHouseholdBaseline({
       },
     });
 
+    await tx.householdMember.upsert({
+      where: {
+        householdId_userId: {
+          householdId: household.id,
+          userId,
+        },
+      },
+      update: {
+        role: "OWNER",
+      },
+      create: {
+        householdId: household.id,
+        userId,
+        role: "OWNER",
+      },
+    });
+
     await tx.subscription.upsert({
       where: {
         referenceId: userId,
       },
-      update: {},
+      update: {
+        householdId: household.id,
+      },
       create: {
         id: `free_${userId}`,
         plan: BillingPlan.FREE,
         referenceId: userId,
+        householdId: household.id,
         status: "ACTIVE",
       },
     });

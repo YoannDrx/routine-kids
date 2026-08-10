@@ -9,7 +9,7 @@ const prototypeAssignmentSchema = z.object({
 const prototypeProfileSchema = z.object({
   id: z.number(),
   name: z.string(),
-  age: z.number().int().min(1).max(99),
+  age: z.number().int().min(2).max(12),
   avatar: z.string(),
   assignedTasks: z.array(prototypeAssignmentSchema),
   completedKeys: z.array(z.string()),
@@ -59,7 +59,7 @@ export type PrototypeImportPreview = {
   templateCount: number;
   assignmentCount: number;
   completionCount: number;
-  premiumEnabled: boolean;
+  legacyPremiumIgnored: boolean;
   language: "fr" | "en" | "unset";
 };
 
@@ -81,7 +81,8 @@ export function buildPrototypeImportPreview(
       (sum, profile) => sum + profile.completedKeys.length,
       0,
     ),
-    premiumEnabled: data.isPremium,
+    // Legacy premium state is client-controlled and is never imported.
+    legacyPremiumIgnored: data.isPremium,
     language: data.language ?? "unset",
   };
 }

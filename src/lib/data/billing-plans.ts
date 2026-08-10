@@ -4,8 +4,7 @@ export type BillingPlan = {
   yearlyPrice: number;
   limits: {
     childProfiles: number;
-    smartPresets: number;
-    auditHistoryDays: number;
+    tasksPerRoutine: number;
   };
 };
 
@@ -16,18 +15,16 @@ export const billingPlans: BillingPlan[] = [
     yearlyPrice: 0,
     limits: {
       childProfiles: 1,
-      smartPresets: 3,
-      auditHistoryDays: 7,
+      tasksPerRoutine: 4,
     },
   },
   {
     id: "family-plus",
-    monthlyPrice: 9,
-    yearlyPrice: 90,
+    monthlyPrice: 4.99,
+    yearlyPrice: 39.99,
     limits: {
-      childProfiles: 10,
-      smartPresets: 999,
-      auditHistoryDays: 365,
+      childProfiles: 6,
+      tasksPerRoutine: 20,
     },
   },
 ];

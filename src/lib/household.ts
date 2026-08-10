@@ -37,6 +37,12 @@ export const householdBoardInclude = {
     },
     include: {
       defaultTheme: true,
+      dayCompletions: {
+        distinct: ["dayKey"],
+        orderBy: { completedAt: "desc" as const },
+        take: 400,
+        select: { dayKey: true },
+      },
       routines: {
         where: {
           isArchived: false,
@@ -50,7 +56,12 @@ export const householdBoardInclude = {
               order: "asc" as const,
             },
             include: {
-              completions: true,
+              completions: {
+                orderBy: {
+                  completedAt: "desc" as const,
+                },
+                take: 400,
+              },
             },
           },
         },

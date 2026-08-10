@@ -14,7 +14,9 @@ import {
 } from "@/lib/data/prototype-seed";
 import {
   deriveJourneyStateFromRoutines,
+  getCompletedDayKeysFromRoutines,
   getJourneyStateFromStreak,
+  getProfileStreakFromCompletedDays,
 } from "@/lib/journey";
 import { themePacks, type ThemeId } from "@/lib/theme/packs";
 
@@ -225,11 +227,22 @@ export function getBoardProfilesFromBoardOverview(
     const prototype = getPrototypeProfileForAge(profile.age);
     const morningRoutine = getRoutineForMode(profile.routines, "morning");
     const eveningRoutine = getRoutineForMode(profile.routines, "evening");
-    const journey = deriveJourneyStateFromRoutines(
-      profile.routines,
-      profile.id,
-      dayKey,
+    const immutableDayKeys = (profile.dayCompletions ?? []).map(
+      (completion) => completion.dayKey,
     );
+    const completedDayKeys = [
+      ...new Set([
+        ...immutableDayKeys,
+        ...getCompletedDayKeysFromRoutines(profile.routines, profile.id, dayKey),
+      ]),
+    ];
+    const journey =
+      completedDayKeys.length > 0
+        ? getJourneyStateFromStreak(
+            getProfileStreakFromCompletedDays(completedDayKeys, dayKey),
+            completedDayKeys.length,
+          )
+        : deriveJourneyStateFromRoutines(profile.routines, profile.id, dayKey);
 
     return {
       id: profile.id,

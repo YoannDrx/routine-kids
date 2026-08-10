@@ -387,6 +387,27 @@ export async function importPrototypeSnapshotToHousehold(
     return null;
   }
 
+  if (input.currentPlan === BillingPlan.FREE) {
+    if (data.profiles.length > 1) {
+      throw new Error("The Free plan can import only one child profile.");
+    }
+
+    const exceedsTaskLimit = data.profiles.some((profile) => {
+      const morningTasks = profile.assignedTasks.filter(
+        (assignment) => assignment.period === "morning",
+      ).length;
+      const eveningTasks = profile.assignedTasks.filter(
+        (assignment) => assignment.period === "evening",
+      ).length;
+
+      return morningTasks > 4 || eveningTasks > 4;
+    });
+
+    if (exceedsTaskLimit) {
+      throw new Error("The Free plan can import only four tasks per routine.");
+    }
+  }
+
   return prisma.$transaction(async (tx) => {
     await tx.activityLog.deleteMany({
       where: {
@@ -583,18 +604,6 @@ export async function importPrototypeSnapshotToHousehold(
       },
     });
 
-    if (data.isPremium && input.currentPlan === BillingPlan.FREE) {
-      await tx.subscription.updateMany({
-        where: {
-          referenceId: input.actorUserId,
-        },
-        data: {
-          plan: BillingPlan.FAMILY,
-          status: "ACTIVE",
-        },
-      });
-    }
-
     await tx.activityLog.create({
       data: {
         householdId: input.householdId,
@@ -624,7 +633,7 @@ export async function importPrototypeSnapshotToHousehold(
           templates: preview.templateCount,
           assignments: preview.assignmentCount,
           completions: allCompletionRows.length,
-          premiumImported: data.isPremium,
+          legacyPremiumIgnored: data.isPremium,
           language: data.language ?? "unset",
         },
       },

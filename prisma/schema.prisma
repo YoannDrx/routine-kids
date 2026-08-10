@@ -43,6 +43,35 @@ enum SubscriptionStatus {
   INCOMPLETE
 }
 
+enum HouseholdRole {
+  OWNER
+  PARENT
+  CAREGIVER
+  VIEWER
+}
+
+enum BillingProvider {
+  NONE
+  STRIPE
+  APPLE
+}
+
+enum BillingEnvironment {
+  TEST
+  PRODUCTION
+}
+
+enum RewardLedgerKind {
+  EARNED
+  REDEEMED
+  ADJUSTED
+}
+
+enum NotificationPlatform {
+  WEB
+  IOS
+}
+
 model User {
   id               String    @id
   name             String
@@ -56,13 +85,16 @@ model User {
   banReason        String?
   banExpires       DateTime?
   stripeCustomerId String?   @unique
+  appAccountToken  String    @unique @default(uuid())
 
-  sessions         Session[]
-  accounts         Account[]
-  subscription     Subscription?
-  household        Household?              @relation("HouseholdOwner")
-  securitySettings ParentSecuritySettings?
-  auditLogs        AdminAuditLog[]         @relation("AuditActor")
+  sessions             Session[]
+  accounts             Account[]
+  subscription         Subscription?
+  household            Household?              @relation("HouseholdOwner")
+  securitySettings     ParentSecuritySettings?
+  auditLogs            AdminAuditLog[]         @relation("AuditActor")
+  householdMemberships HouseholdMember[]
+  devices              DeviceRegistration[]
 }
 
 model Session {
@@ -107,41 +139,64 @@ model Verification {
 }
 
 model Subscription {
-  id                   String             @id
-  plan                 BillingPlan        @default(FREE)
-  referenceId          String             @unique
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  status               SubscriptionStatus? @default(ACTIVE)
-  periodStart          DateTime?
-  periodEnd            DateTime?
-  cancelAtPeriodEnd    Boolean?           @default(false)
+  id                     String              @id
+  plan                   BillingPlan         @default(FREE)
+  referenceId            String              @unique
+  stripeCustomerId       String?
+  stripeSubscriptionId   String?
+  status                 SubscriptionStatus? @default(ACTIVE)
+  periodStart            DateTime?
+  periodEnd              DateTime?
+  cancelAtPeriodEnd      Boolean?            @default(false)
+  householdId            String?             @unique
+  provider               BillingProvider     @default(NONE)
+  environment            BillingEnvironment  @default(TEST)
+  providerCustomerId     String?
+  providerSubscriptionId String?
+  productId              String?
+  originalTransactionId  String?             @unique
+  gracePeriodEndsAt      DateTime?
+  revokedAt              DateTime?
+  lastProviderEventAt    DateTime?
 
-  user User @relation(fields: [referenceId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [referenceId], references: [id], onDelete: Cascade)
+  household Household? @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerSubscriptionId])
 }
 
 model Household {
-  id                 String                   @id @default(cuid())
-  name               String
-  ownerUserId        String                   @unique
-  locale             String                   @default("fr")
-  soundsEnabled      Boolean                  @default(true)
-  morningStart       String                   @default("06:00")
-  morningEnd         String                   @default("12:00")
-  eveningStart       String                   @default("18:00")
-  eveningEnd         String                   @default("21:00")
-  isOnboarded        Boolean                  @default(false)
-  createdAt          DateTime                 @default(now())
-  updatedAt          DateTime                 @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  ownerUserId   String   @unique
+  locale        String   @default("fr")
+  timeZone      String   @default("Europe/Paris")
+  soundsEnabled Boolean  @default(true)
+  morningStart  String   @default("06:00")
+  morningEnd    String   @default("12:00")
+  eveningStart  String   @default("18:00")
+  eveningEnd    String   @default("21:00")
+  isOnboarded   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  owner              User                     @relation("HouseholdOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
-  childProfiles      ChildProfile[]
-  routines           Routine[]
-  taskTemplates      TaskTemplate[]
-  activityLogs       ActivityLog[]
-  adminAuditLogs     AdminAuditLog[]
-  suggestionPresets  RoutineSuggestionPreset[]
-  themePacks         ThemePack[]
+  owner             User                      @relation("HouseholdOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  childProfiles     ChildProfile[]
+  routines          Routine[]
+  taskTemplates     TaskTemplate[]
+  activityLogs      ActivityLog[]
+  adminAuditLogs    AdminAuditLog[]
+  suggestionPresets RoutineSuggestionPreset[]
+  themePacks        ThemePack[]
+  members           HouseholdMember[]
+  invites           HouseholdInvite[]
+  subscription      Subscription?
+  dayCompletions    DayCompletion[]
+  rewardDefinitions RewardDefinition[]
+  rewardLedger      RewardLedgerEntry[]
+  devices           DeviceRegistration[]
+  clientMutations   ClientMutation[]
+  mediaAssets       MediaAsset[]
 }
 
 model ParentSecuritySettings {
@@ -158,7 +213,7 @@ model ParentSecuritySettings {
 }
 
 model ChildProfile {
-  id             String    @id @default(cuid())
+  id             String   @id @default(cuid())
   householdId    String
   defaultThemeId String?
   name           String
@@ -168,15 +223,18 @@ model ChildProfile {
   avatar         String?
   photoUrl       String?
   headline       String?
-  order          Int       @default(0)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  household        Household       @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  defaultTheme     ThemePack?      @relation(fields: [defaultThemeId], references: [id], onDelete: SetNull)
-  routines         Routine[]
-  taskCompletions  TaskCompletion[]
-  activityLogs     ActivityLog[]
+  household         Household           @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  defaultTheme      ThemePack?          @relation(fields: [defaultThemeId], references: [id], onDelete: SetNull)
+  routines          Routine[]
+  taskCompletions   TaskCompletion[]
+  activityLogs      ActivityLog[]
+  dayCompletions    DayCompletion[]
+  rewardDefinitions RewardDefinition[]
+  rewardLedger      RewardLedgerEntry[]
 
   @@index([householdId, order])
 }
@@ -196,17 +254,19 @@ model Routine {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
-  household        Household                @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  childProfile     ChildProfile?            @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
-  suggestionPreset RoutineSuggestionPreset? @relation(fields: [suggestionPresetId], references: [id], onDelete: SetNull)
-  tasks            RoutineTask[]
+  household          Household                  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  childProfile       ChildProfile?              @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
+  suggestionPreset   RoutineSuggestionPreset?   @relation(fields: [suggestionPresetId], references: [id], onDelete: SetNull)
+  tasks              RoutineTask[]
+  dayCompletions     DayCompletion[]
+  scheduleExceptions RoutineScheduleException[]
 
   @@index([householdId, period, order])
   @@index([childProfileId, period])
 }
 
 model RoutineTask {
-  id              String    @id @default(cuid())
+  id              String   @id @default(cuid())
   routineId       String
   templateId      String?
   title           String
@@ -216,16 +276,16 @@ model RoutineTask {
   color           String?
   scheduleDays    Json?
   durationMinutes Int?
-  points          Int       @default(1)
-  isRequired      Boolean   @default(true)
+  points          Int      @default(1)
+  isRequired      Boolean  @default(true)
   rewardType      String?
-  order           Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  routine      Routine          @relation(fields: [routineId], references: [id], onDelete: Cascade)
-  template     TaskTemplate?    @relation(fields: [templateId], references: [id], onDelete: SetNull)
-  completions  TaskCompletion[]
+  routine     Routine          @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  template    TaskTemplate?    @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  completions TaskCompletion[]
 
   @@index([routineId, order])
 }
@@ -247,7 +307,7 @@ model TaskCompletion {
 }
 
 model TaskTemplate {
-  id                 String    @id @default(cuid())
+  id                 String   @id @default(cuid())
   householdId        String?
   title              String
   shortLabel         String?
@@ -258,11 +318,11 @@ model TaskTemplate {
   category           String?
   minAge             Int?
   maxAge             Int?
-  autoAssignEnabled  Boolean   @default(true)
-  isBuiltIn          Boolean   @default(false)
+  autoAssignEnabled  Boolean  @default(true)
+  isBuiltIn          Boolean  @default(false)
   recommendationMeta Json?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   household Household?    @relation(fields: [householdId], references: [id], onDelete: Cascade)
   tasks     RoutineTask[]
@@ -271,7 +331,7 @@ model TaskTemplate {
 }
 
 model ThemePack {
-  id           String    @id @default(cuid())
+  id           String   @id @default(cuid())
   householdId  String?
   slug         String
   name         String
@@ -280,12 +340,12 @@ model ThemePack {
   accentColor  String
   surfaceColor String
   ageBand      AgeBand?
-  isPremium    Boolean   @default(false)
-  isBuiltIn    Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  isPremium    Boolean  @default(false)
+  isBuiltIn    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  household    Household?    @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  household     Household?     @relation(fields: [householdId], references: [id], onDelete: Cascade)
   childProfiles ChildProfile[]
 
   @@index([householdId, slug])
@@ -311,15 +371,15 @@ model RoutineSuggestionPreset {
 }
 
 model ActivityLog {
-  id             String    @id @default(cuid())
-  householdId     String
-  childProfileId  String?
-  eventType       String
-  title           String
-  metadata        Json?
-  createdAt       DateTime @default(now())
+  id             String   @id @default(cuid())
+  householdId    String
+  childProfileId String?
+  eventType      String
+  title          String
+  metadata       Json?
+  createdAt      DateTime @default(now())
 
-  household    Household    @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  household    Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
   childProfile ChildProfile? @relation(fields: [childProfileId], references: [id], onDelete: SetNull)
 
   @@index([householdId, createdAt])
@@ -327,19 +387,194 @@ model ActivityLog {
 
 model AdminAuditLog {
   id          String   @id @default(cuid())
-  householdId  String
-  actorUserId  String
-  action       String
-  targetType   String
-  targetId     String?
-  metadata     Json?
-  ipAddress    String?
-  userAgent    String?
-  createdAt    DateTime @default(now())
+  householdId String
+  actorUserId String
+  action      String
+  targetType  String
+  targetId    String?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
 
   household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   actor     User      @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: Cascade)
 
   @@index([householdId, createdAt])
   @@index([actorUserId, createdAt])
+}
+
+model RateLimit {
+  id          String @id @default(cuid())
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+}
+
+model WebhookEvent {
+  id              String          @id @default(cuid())
+  provider        BillingProvider
+  externalEventId String
+  payloadHash     String?
+  outcome         String?
+  processedAt     DateTime        @default(now())
+
+  @@unique([provider, externalEventId])
+  @@index([processedAt])
+}
+
+model HouseholdMember {
+  id          String        @id @default(cuid())
+  householdId String
+  userId      String
+  role        HouseholdRole @default(PARENT)
+  acceptedAt  DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([householdId, userId])
+  @@index([userId])
+}
+
+model HouseholdInvite {
+  id              String        @id @default(cuid())
+  householdId     String
+  email           String
+  role            HouseholdRole @default(PARENT)
+  tokenHash       String        @unique
+  invitedByUserId String
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime      @default(now())
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId, email])
+  @@index([expiresAt])
+}
+
+model DayCompletion {
+  id                 String   @id @default(cuid())
+  householdId        String
+  childProfileId     String
+  routineId          String
+  dayKey             String
+  timeZone           String
+  requiredTaskCount  Int
+  completedTaskCount Int
+  streakSnapshot     Int
+  completedAt        DateTime @default(now())
+
+  household    Household    @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  childProfile ChildProfile @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
+  routine      Routine      @relation(fields: [routineId], references: [id], onDelete: Cascade)
+
+  @@unique([childProfileId, routineId, dayKey])
+  @@index([householdId, dayKey])
+  @@index([childProfileId, completedAt])
+}
+
+model RoutineScheduleException {
+  id        String   @id @default(cuid())
+  routineId String
+  dayKey    String
+  isSkipped Boolean  @default(false)
+  startTime String?
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  routine Routine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+
+  @@unique([routineId, dayKey])
+}
+
+model RewardDefinition {
+  id             String   @id @default(cuid())
+  householdId    String
+  childProfileId String?
+  title          String
+  pointsCost     Int
+  isArchived     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  household     Household           @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  childProfile  ChildProfile?       @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
+  ledgerEntries RewardLedgerEntry[]
+
+  @@index([householdId, isArchived])
+}
+
+model RewardLedgerEntry {
+  id             String           @id @default(cuid())
+  householdId    String
+  childProfileId String
+  rewardId       String?
+  kind           RewardLedgerKind
+  pointsDelta    Int
+  reason         String
+  metadata       Json?
+  createdAt      DateTime         @default(now())
+
+  household    Household         @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  childProfile ChildProfile      @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
+  reward       RewardDefinition? @relation(fields: [rewardId], references: [id], onDelete: SetNull)
+
+  @@index([childProfileId, createdAt])
+}
+
+model DeviceRegistration {
+  id                   String               @id @default(cuid())
+  householdId          String
+  userId               String
+  platform             NotificationPlatform
+  deviceId             String
+  pushTokenHash        String?
+  locale               String               @default("fr")
+  notificationsEnabled Boolean              @default(false)
+  lastSeenAt           DateTime             @default(now())
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deviceId])
+  @@index([householdId, lastSeenAt])
+}
+
+model ClientMutation {
+  id             String   @id
+  householdId    String
+  actorUserId    String
+  deviceId       String?
+  mutationType   String
+  resultMetadata Json?
+  appliedAt      DateTime @default(now())
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId, appliedAt])
+}
+
+model MediaAsset {
+  id          String    @id @default(cuid())
+  householdId String
+  pathname    String    @unique
+  category    String
+  mimeType    String
+  byteSize    Int
+  contentHash String?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId, deletedAt])
 }

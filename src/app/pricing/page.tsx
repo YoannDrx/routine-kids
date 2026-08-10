@@ -62,8 +62,7 @@ export default async function PricingPage() {
                   </p>
                   <ul className="mt-3 flex flex-col gap-2 text-sm text-white/72">
                     <li>{messages.pricing.childProfiles(plan.limits.childProfiles)}</li>
-                    <li>{messages.pricing.smartPresets(plan.limits.smartPresets)}</li>
-                    <li>{messages.pricing.auditDays(plan.limits.auditHistoryDays)}</li>
+                    <li>{messages.pricing.tasksPerRoutine(plan.limits.tasksPerRoutine)}</li>
                   </ul>
                 </div>
               ) : null}

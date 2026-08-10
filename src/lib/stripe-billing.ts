@@ -9,6 +9,11 @@ ensureServerEnv();
 
 export type FamilyBillingInterval = "monthly" | "yearly";
 
+export const familyPriceConfiguration = {
+  monthly: { amount: 499, currency: "eur", interval: "month" },
+  yearly: { amount: 3_999, currency: "eur", interval: "year" },
+} as const;
+
 let stripeClient: Stripe | null = null;
 
 export function getStripeClient() {
@@ -19,7 +24,7 @@ export function getStripeClient() {
   }
 
   stripeClient ??= new Stripe(secretKey, {
-    apiVersion: "2026-06-24.dahlia",
+    apiVersion: "2026-07-29.dahlia",
   });
   return stripeClient;
 }
@@ -43,14 +48,16 @@ export async function getValidatedFamilyPrice(
 ) {
   const stripe = getStripeClient();
   const price = await stripe.prices.retrieve(getFamilyPriceId(interval));
+  const expected = familyPriceConfiguration[interval];
 
   if (
     !price.active ||
     price.type !== "recurring" ||
-    price.recurring?.interval !== (interval === "monthly" ? "month" : "year") ||
-    price.currency !== "eur"
+    price.recurring?.interval !== expected.interval ||
+    price.currency !== expected.currency ||
+    price.unit_amount !== expected.amount
   ) {
-    throw new Error(`The ${interval} Family Premium price is invalid.`);
+    throw new Error(`The ${interval} Family Plus price is invalid.`);
   }
 
   return price;
@@ -106,7 +113,37 @@ export function getSubscriptionPeriod(subscription: Stripe.Subscription) {
 export function getLocalPlanForStripeSubscription(
   subscription: Stripe.Subscription,
 ) {
-  return toSubscriptionStatus(subscription.status) === SubscriptionStatus.CANCELED
-    ? BillingPlan.FREE
-    : BillingPlan.FAMILY_PLUS;
+  if (toSubscriptionStatus(subscription.status) === SubscriptionStatus.CANCELED) {
+    return BillingPlan.FREE;
+  }
+
+  const configuredPriceIds = new Set(
+    [
+      process.env.STRIPE_FAMILY_PLUS_MONTHLY_PRICE_ID,
+      process.env.STRIPE_FAMILY_PLUS_YEARLY_PRICE_ID,
+    ].filter((priceId): priceId is string => Boolean(priceId)),
+  );
+  const subscriptionPriceIds = subscription.items?.data.map(
+    (item) => item.price.id,
+  ) ?? [];
+
+  if (
+    configuredPriceIds.size === 0 ||
+    !subscriptionPriceIds.some((priceId) => configuredPriceIds.has(priceId))
+  ) {
+    return BillingPlan.FREE;
+  }
+
+  return BillingPlan.FAMILY_PLUS;
+}
+
+export function getStripeSubscriptionProductId(
+  subscription: Stripe.Subscription,
+) {
+  return subscription.items?.data.find((item) =>
+    [
+      process.env.STRIPE_FAMILY_PLUS_MONTHLY_PRICE_ID,
+      process.env.STRIPE_FAMILY_PLUS_YEARLY_PRICE_ID,
+    ].includes(item.price.id),
+  )?.price.id ?? null;
 }

@@ -390,22 +390,24 @@ export function ProfileEditorModal({
                 <span className="mr-2 text-sm text-white/50">{messages.profile.ageLabel} :</span>
                 <button
                   type="button"
-                  onClick={() => setAge((current) => Math.max(1, current - 1))}
+                  onClick={() => setAge((current) => Math.max(2, current - 1))}
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
                 >
                   -
                 </button>
                 <input
                   type="number"
-                  min={1}
-                  max={99}
+                  min={2}
+                  max={12}
                   value={age}
-                  onChange={(event) => setAge(Math.max(1, Number(event.target.value) || 1))}
+                  onChange={(event) =>
+                    setAge(Math.min(12, Math.max(2, Number(event.target.value) || 2)))
+                  }
                   className="w-12 bg-transparent text-center font-bold outline-none"
                 />
                 <button
                   type="button"
-                  onClick={() => setAge((current) => Math.min(99, current + 1))}
+                  onClick={() => setAge((current) => Math.min(12, current + 1))}
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
                 >
                   +

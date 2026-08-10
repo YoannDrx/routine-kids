@@ -22,10 +22,14 @@ import {
 import { getServerCopy } from "@/lib/server-copy";
 import {
   collectHouseholdMediaReferences,
-  deleteRoutineKidsAccountRecord,
   getAccountDeletionSnapshot,
 } from "@/lib/account-data";
+import {
+  AccountDeletionError,
+  deleteRoutineKidsAccount,
+} from "@/lib/account-deletion";
 import { deletePrivateImages } from "@/lib/media-storage";
+import { getParentStepUpStatus } from "@/lib/parent-security";
 import {
   getAppUrl,
   getStripeClient,
@@ -76,6 +80,18 @@ function revalidateSettingsSurfaces() {
   revalidatePath("/settings");
 }
 
+async function getParentSettingsAccessError(userId: string) {
+  const access = await getParentStepUpStatus(userId);
+
+  return access.ok
+    ? null
+    : {
+        status: "error" as const,
+        message: access.message,
+        code: access.code,
+      };
+}
+
 export async function updateBoardSettingsAction(input: {
   locale: "fr" | "en";
   soundsEnabled: boolean;
@@ -95,6 +111,12 @@ export async function updateBoardSettingsAction(input: {
   }
 
   const user = await getRequiredAdmin();
+  const accessError = await getParentSettingsAccessError(user.id);
+
+  if (accessError) {
+    return accessError;
+  }
+
   await ensureHouseholdBaseline({
     userId: user.id,
     userName: user.name,
@@ -196,6 +218,12 @@ export async function activateBoardPremiumAction(input: {
   }
 
   const user = await getRequiredAdmin();
+  const accessError = await getParentSettingsAccessError(user.id);
+
+  if (accessError) {
+    return accessError;
+  }
+
   await ensureHouseholdBaseline({
     userId: user.id,
     userName: user.name,
@@ -303,6 +331,12 @@ export async function openBillingPortalAction(): Promise<SettingsMutationResult>
   }
 
   const user = await getRequiredAdmin();
+  const accessError = await getParentSettingsAccessError(user.id);
+
+  if (accessError) {
+    return accessError;
+  }
+
   const subscription = await getOwnerSubscription(user.id);
 
   if (!subscription?.stripeCustomerId) {
@@ -333,6 +367,7 @@ export async function openBillingPortalAction(): Promise<SettingsMutationResult>
 
 export async function importPrototypeSnapshotAction(input: {
   snapshot: string;
+  confirmation: string;
 }): Promise<PrototypeImportMutationResult> {
   const locale = await getCurrentAppLocale();
   const copy = getServerCopy(locale);
@@ -344,7 +379,7 @@ export async function importPrototypeSnapshotAction(input: {
     };
   }
 
-  if (!input.snapshot.trim()) {
+  if (!input.snapshot.trim() || input.confirmation !== "IMPORTER") {
     return {
       status: "error",
       message: copy.actions.prototypeImportEmpty,
@@ -352,6 +387,12 @@ export async function importPrototypeSnapshotAction(input: {
   }
 
   const user = await getRequiredAdmin();
+  const accessError = await getParentSettingsAccessError(user.id);
+
+  if (accessError) {
+    return accessError;
+  }
+
   await ensureHouseholdBaseline({
     userId: user.id,
     userName: user.name,
@@ -370,6 +411,12 @@ export async function importPrototypeSnapshotAction(input: {
   }
 
   try {
+    const beforeImportSnapshot = await getAccountDeletionSnapshot(user.id);
+    const previousMediaReferences = beforeImportSnapshot?.household
+      ? collectHouseholdMediaReferences(beforeImportSnapshot.household).map(
+          ({ reference }) => reference,
+        )
+      : [];
     const summary = await importPrototypeSnapshotToHousehold({
       householdId: household.id,
       actorUserId: user.id,
@@ -383,6 +430,28 @@ export async function importPrototypeSnapshotAction(input: {
         status: "error",
         message: copy.actions.prototypeImportEmpty,
       };
+    }
+
+    if (previousMediaReferences.length > 0) {
+      const afterImportSnapshot = await getAccountDeletionSnapshot(user.id);
+      const activeReferences = new Set(
+        afterImportSnapshot?.household
+          ? collectHouseholdMediaReferences(afterImportSnapshot.household).map(
+              ({ reference }) => reference,
+            )
+          : [],
+      );
+      const orphanedReferences = previousMediaReferences.filter(
+        (reference) => !activeReferences.has(reference),
+      );
+
+      try {
+        await deletePrivateImages(orphanedReferences);
+      } catch {
+        console.error("routinekids_import_media_cleanup_failed", {
+          mediaCount: orphanedReferences.length,
+        });
+      }
     }
 
     const nextLocale =
@@ -432,56 +501,45 @@ export async function deleteRoutineKidsAccountAction(input: {
   }
 
   const user = await getRequiredAdmin();
-  const snapshot = await getAccountDeletionSnapshot(user.id);
+  const accessError = await getParentSettingsAccessError(user.id);
 
-  if (!snapshot?.household) {
-    return { status: "error", message: copy.actions.householdMissing };
-  }
-
-  if (parsed.data.householdName !== snapshot.household.name) {
-    return { status: "error", message: copy.actions.accountDeleteHouseholdMismatch };
+  if (accessError) {
+    return accessError;
   }
 
   try {
-    if (snapshot.stripeCustomerId) {
-      const stripe = getStripeClient();
-      await stripe.customers.del(snapshot.stripeCustomerId);
-    } else if (snapshot.subscription?.stripeSubscriptionId) {
-      const stripe = getStripeClient();
-      await stripe.subscriptions.cancel(snapshot.subscription.stripeSubscriptionId);
+    const { cleanupPending } = await deleteRoutineKidsAccount({
+      householdName: parsed.data.householdName,
+      userId: user.id,
+    });
+
+    return {
+      status: "success",
+      message: cleanupPending
+        ? copy.actions.accountDeletedCleanupPending
+        : copy.actions.accountDeleted,
+      deleted: true,
+      cleanupPending,
+    };
+  } catch (error) {
+    if (error instanceof AccountDeletionError) {
+      if (error.code === "household_not_found") {
+        return { status: "error", message: copy.actions.householdMissing };
+      }
+      if (error.code === "household_name_mismatch") {
+        return {
+          status: "error",
+          message: copy.actions.accountDeleteHouseholdMismatch,
+        };
+      }
+      if (error.code === "billing_cleanup_failed") {
+        return {
+          status: "error",
+          message: copy.actions.accountDeleteBillingError,
+        };
+      }
     }
-  } catch {
+
     return { status: "error", message: copy.actions.accountDeleteBillingError };
   }
-
-  const mediaReferences = collectHouseholdMediaReferences(snapshot.household)
-    .map(({ reference }) => reference);
-
-  await deleteRoutineKidsAccountRecord(user.id);
-
-  let cleanupPending = false;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      await deletePrivateImages(mediaReferences);
-      cleanupPending = false;
-      break;
-    } catch {
-      cleanupPending = true;
-    }
-  }
-
-  if (cleanupPending) {
-    console.error("routinekids_account_media_cleanup_failed", {
-      mediaCount: mediaReferences.length,
-    });
-  }
-
-  return {
-    status: "success",
-    message: cleanupPending
-      ? copy.actions.accountDeletedCleanupPending
-      : copy.actions.accountDeleted,
-    deleted: true,
-    cleanupPending,
-  };
 }

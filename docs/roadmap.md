@@ -1,5 +1,9 @@
 # RoutineKids Roadmap
 
+> Archive de la feuille de route initiale. Le backlog priorisé après implémentation est
+> maintenu dans
+> [`implementation-status-2026-08-10.md`](implementation-status-2026-08-10.md).
+
 Last updated: July 17, 2026
 
 ## Mission

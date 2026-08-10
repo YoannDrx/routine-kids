@@ -1,90 +1,87 @@
-# routine-kids
+# RoutineKids
 
-RoutineKids est en cours de migration depuis le prototype HTML monolithique vers une vraie application `Next.js` iPad-first.
+RoutineKids est une application familiale iPad-first qui transforme les routines du
+matin et du soir en missions visuelles. Le parent configure le foyer dans un espace
+protégé ; l'enfant utilise la board tactile, suit sa progression et synchronise ses
+validations entre appareils.
 
-## Etat du repo
+## État actuel
 
-- Le prototype original reste disponible dans [`index.html`](/Users/yoannandrieux/Projets/routine-kids/index.html) et peut encore etre servi localement.
-- La nouvelle application vit dans `src/`, `prisma/` et `docs/`.
-- La feuille de route complete est dans [`docs/roadmap.md`](/Users/yoannandrieux/Projets/routine-kids/docs/roadmap.md).
-- L'audit fonctionnel detaille est dans [`docs/feature-audit.md`](/Users/yoannandrieux/Projets/routine-kids/docs/feature-audit.md).
-- La reference UI/UX a conserver est dans [`docs/ui-reference.md`](/Users/yoannandrieux/Projets/routine-kids/docs/ui-reference.md).
-- Le plan d'execution zero mock est dans [`docs/zero-mock-plan.md`](/Users/yoannandrieux/Projets/routine-kids/docs/zero-mock-plan.md).
-- La direction produit actuelle ne garde pas de page admin dediee: toute la profondeur parent doit revenir dans l'overlay de parametres.
-- La route produit `/admin` et les anciens repertoires techniques `admin` ont ete supprimes. Les actions parent vivent dans `src/app/parent-*.ts` et les composants dans `src/components/parent`.
-- La homepage signee-out n'affiche plus de famille prototype: elle garde la board visuelle, mais redirige vers les vrais flows `sign-in`, `sign-up` et `pricing`.
-- L'import prototype depuis `routineKidsData` est maintenant reel depuis les parametres et ecrit dans Prisma/Neon. La limite actuelle reste le scheduler hebdo du HTML, encore aplati sur le modele V1 `matin / soir`.
-- Les sons de board, le CRUD photo enfant, le CRUD photo des missions, la base i18n globale et les principaux retours serveur localises sont maintenant poses, mais la repasse zero-hardcoded complete continue.
-- Les nouvelles photos enfant et mission sont stockees dans un Vercel Blob prive. La base ne conserve qu'une reference opaque, et `/api/media/*` controle la session et l'appartenance au foyer avant de diffuser le fichier. Les anciens data URLs restent lisibles pendant la transition.
-- Le faux interrupteur Premium a ete remplace par Stripe Checkout mensuel/annuel, avec webhook signe et synchronisation de l'abonnement. Le test local requiert des cles Stripe de test et les deux Price IDs documentes dans `.env.example`.
-- Les limites du plan gratuit sont controlees cote serveur sur les deux parcours parent, et les affectations multi-missions/matin-soir sont atomiques.
-- Une routine live vide reste vide : aucune mission prototype n'est affichee comme une vraie donnee. Les journees terminees figent leur snapshot de streak afin qu'une future modification de routine ne reecrive pas l'historique.
-- Le parcours Stripe test a ete valide avec une vraie Checkout Session de test, webhook signe et idempotent, activation Family Premium, annulation et retour au plan Free. Les fixtures Stripe et la branche Neon de test ont ete supprimees apres verification.
-- Le catalogue Stripe de test conserve un seul produit `RoutineKids Family Premium`, avec une offre mensuelle a 9 EUR et annuelle a 90 EUR. Son visuel de marque est genere par l'application sur `/family-premium-card` afin de rester versionne avec l'identite du produit.
-- La preview publique `https://routine-kids-yoanndrx-yoanndrxs-projects.vercel.app` utilise une branche Neon isolee, un Blob prive et un webhook Stripe de test. Inscription, profil, lecture authentifiee du media, Checkout, rejeu idempotent, annulation et purge QA ont ete verifies a distance. La branche Neon principale et Stripe live restent intacts.
-- L'espace parent propose un export JSON prive `no-store` comprenant les donnees du foyer et les medias Blob disponibles. La suppression renforcee stoppe la facturation, supprime le compte et toutes les donnees en cascade, puis purge les medias prives avec retry.
-- Le cycle compte a aussi ete rejoue sur la preview distante avec un vrai media prive : inscription, profil enfant, upload/crop, verification du Blob, confirmation destructive par nom de foyer + `DELETE`, suppression, puis controle du store Blob. Le pathname existait avant suppression et n'existait plus ensuite ; Neon confirme egalement qu'aucune fixture `codex-media-*` ne subsiste.
+Le socle web est une application Next.js/Prisma réelle : Better Auth, Neon, médias
+privés, routines, historique, import du prototype, export/suppression et Stripe. Un
+client natif SwiftUI avec synchronisation hors ligne, rappels locaux et StoreKit 2 vit
+dans `ios/`.
 
-## Stack cible
+La release candidate web et iOS est compilée et testée. La publication reste bloquée
+par des opérations externes contrôlées : promotion de la migration Neon, secrets
+Resend/Stripe, fiche et produits Apple, signature/archivage puis App Review. Voir :
 
-- `Next.js 16`
-- `React 19`
-- `TypeScript`
-- `Tailwind CSS v4`
-- `Prisma`
-- `Neon Postgres`
-- `Better Auth`
-- `Vercel Blob` prive pour les medias familiaux
+- [`docs/implementation-status-2026-08-10.md`](docs/implementation-status-2026-08-10.md)
+- [`docs/production-runbook.md`](docs/production-runbook.md)
+- [`docs/app-store-submission.md`](docs/app-store-submission.md)
+- [`docs/release-verification.md`](docs/release-verification.md)
+- [`docs/store-readiness-checklist.md`](docs/store-readiness-checklist.md)
+- [`docs/ui-reference.md`](docs/ui-reference.md)
 
-## Lancer la nouvelle app
+## Stack
 
-1. Installer les dependances:
+- Next.js 16, React 19, TypeScript et Tailwind CSS 4
+- Prisma 6 et Neon Postgres
+- Better Auth et Resend
+- Stripe Billing et StoreKit 2 / App Store Server API
+- Vercel Blob privé
+- SwiftUI iOS 17+
+- Vitest, Playwright et GitHub Actions
+
+## Développement web
 
 ```bash
 pnpm install
-```
-
-2. Configurer l'environnement:
-
-```bash
 cp .env.example .env.local
-```
-
-3. Generer Prisma:
-
-```bash
 pnpm prisma:generate
-```
-
-4. Lancer Next.js:
-
-```bash
 pnpm dev
 ```
 
-L'app sera disponible sur `http://localhost:3000`.
+L'application est disponible sur `http://localhost:3000`. Redémarrer le serveur après
+tout changement de `.env.local`.
 
-Important:
-
-- Si tu modifies `.env.local`, redemarre `pnpm dev`.
-- Sinon Prisma / Better Auth peuvent rester charges avec un ancien environnement.
-- L'application ne lit jamais `.env.local` elle-meme : Next.js le charge en local et Vercel injecte les variables par environnement. Le fichier n'entre donc pas dans les artefacts deployes.
-
-## Lancer le prototype d'origine
+## Vérification
 
 ```bash
-pnpm prototype:serve
+pnpm verify
+pnpm test:e2e
 ```
+
+`pnpm verify` contrôle aussi que le dépôt Git pointe exclusivement vers le GitHub
+personnel `YoannDrx/routine-kids`.
+
+## iOS
+
+Le projet Xcode généré est dans `ios/RoutineKids.xcodeproj`. Pour le régénérer :
+
+```bash
+cd ios
+xcodegen generate
+```
+
+Les tests et builds Release iPhone/iPad sont validés sur le runtime iOS 26.3.1. Une
+archive distribuable nécessite encore l'équipe Apple Developer et les produits App
+Store Connect décrits dans `docs/app-store-submission.md`.
 
 ## Structure
 
-- `src/app` : routes App Router et layouts
-- `src/components/board` : UI enfant et modales de board
-- `src/components/settings` : espace parent cible, plein ecran parametres et overlays
-- `src/components/auth` : auth parent
-- `src/components/parent` : formulaires et outils parent ouverts dans les overlays de `settings`
-- `src/lib` : donnees de transition, auth, Prisma, themes
-- `prisma/schema.prisma` : modele de donnees de depart
-- `docs/roadmap.md` : audit, decisions et backlog
-- `index.html` : prototype original conserve comme reference fonctionnelle
-- `server.js` : serveur du prototype d'origine
+- `src/app` : pages, Server Actions et API
+- `src/components` : board, auth, espace parent et PWA
+- `src/lib` : règles métier, sécurité, facturation et accès données
+- `prisma` : schéma et migrations additives
+- `ios` : application SwiftUI native
+- `e2e` : scénarios Playwright iPad
+- `docs` : audit, release, App Store et exploitation
+- `index.html` : prototype historique conservé comme référence visuelle
+
+## Sécurité des données familiales
+
+Les pages authentifiées ne sont pas mises en cache par le service worker. Les médias
+sont privés et diffusés uniquement après contrôle du foyer. Les actions parentales
+sensibles exigent une revalidation. Aucun secret ni fichier `.env*` ne doit être ajouté
+au dépôt.

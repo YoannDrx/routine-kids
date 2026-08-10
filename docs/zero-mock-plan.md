@@ -1,5 +1,9 @@
 # RoutineKids Zero-Mock Execution Plan
 
+> Plan historique. Pour l'état réellement livré, les limites connues et les gates de
+> lancement, consulter
+> [`implementation-status-2026-08-10.md`](implementation-status-2026-08-10.md).
+
 Last updated: March 13, 2026
 
 ## Objective

@@ -1,7 +1,9 @@
 "use server";
 
 import { z } from "zod";
+import { headers } from "next/headers";
 
+import { auth } from "@/lib/auth";
 import { isDatabaseConfigured } from "@/lib/config";
 import { ensureHouseholdBaseline } from "@/lib/household-bootstrap";
 import {
@@ -20,15 +22,16 @@ export type ParentGateMutationResult = {
 };
 
 export async function validateParentPinAction(input: {
-  pin: string;
+  credential: string;
 }): Promise<ParentGateMutationResult> {
   const locale = await getCurrentAppLocale();
   const copy = getServerCopy(locale);
-  const pinSchema = z.object({
-    pin: z
+  const credentialSchema = z.object({
+    credential: z
       .string()
       .trim()
-      .regex(/^\d{4}$/, copy.validation.parentPinFourDigits),
+      .min(1, copy.validation.parentPinFourDigits)
+      .max(128, copy.validation.parentPinFourDigits),
   });
 
   if (!isDatabaseConfigured()) {
@@ -38,7 +41,7 @@ export async function validateParentPinAction(input: {
     };
   }
 
-  const parsed = pinSchema.safeParse(input);
+  const parsed = credentialSchema.safeParse(input);
 
   if (!parsed.success) {
     return {
@@ -56,7 +59,7 @@ export async function validateParentPinAction(input: {
 
   const settings = await getParentSecurityRecord(user.id);
 
-  if (!settings?.adminPinHash) {
+  if (!settings) {
     return {
       status: "error",
       message: copy.actions.parentPinMissingConfig,
@@ -64,19 +67,50 @@ export async function validateParentPinAction(input: {
     };
   }
 
-  const pinValid = verifyParentPin(parsed.data.pin, settings.adminPinHash);
+  if (!settings.adminPinHash) {
+    try {
+      const verified = await auth.api.verifyPassword({
+        body: { password: parsed.data.credential },
+        headers: await headers(),
+      });
 
-  if (!pinValid) {
-    return {
-      status: "error",
-      message: copy.actions.parentPinIncorrect,
-      code: "invalid_pin",
-    };
+      if (!verified.status) {
+        throw new Error("Password verification failed.");
+      }
+    } catch {
+      return {
+        status: "error",
+        message: copy.actions.parentPinIncorrect,
+        code: "invalid_pin",
+      };
+    }
+  } else {
+    if (!/^\d{4}$/.test(parsed.data.credential)) {
+      return {
+        status: "error",
+        message: copy.validation.parentPinFourDigits,
+        code: "invalid_pin",
+      };
+    }
+
+    const pinValid = verifyParentPin(
+      parsed.data.credential,
+      settings.adminPinHash,
+    );
+
+    if (!pinValid) {
+      return {
+        status: "error",
+        message: copy.actions.parentPinIncorrect,
+        code: "invalid_pin",
+      };
+    }
   }
 
   await setParentStepUpCookie({
     userId: user.id,
     stepUpMinutes: settings.stepUpMinutes,
+    securityVersion: settings.updatedAt.getTime(),
   });
 
   return {

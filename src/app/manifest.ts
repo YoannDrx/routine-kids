@@ -11,5 +11,20 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "landscape",
     background_color: "#120d2b",
     theme_color: "#120d2b",
+    categories: ["education", "family", "productivity"],
+    icons: [
+      {
+        src: "/web-app-icon",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/web-app-icon",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
   };
 }

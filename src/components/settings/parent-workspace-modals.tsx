@@ -121,6 +121,7 @@ type ImportWorkspaceModalProps = {
   onClose: () => void;
   onImportAction?: (input: {
     snapshot: string;
+    confirmation: string;
   }) => Promise<{
     status: "success" | "error";
     message: string;

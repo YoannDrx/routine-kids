@@ -17,6 +17,7 @@ import {
 } from "@/lib/household";
 import {
   getParentSecurityRecord,
+  getParentStepUpStatus,
   hashParentPin,
   setParentStepUpCookie,
   verifyParentPin,
@@ -27,6 +28,12 @@ import { getRequiredAdmin } from "@/lib/session";
 import { localeCookieName } from "@/lib/i18n";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
 import { getServerCopy } from "@/lib/server-copy";
+
+async function getParentActionAccessError(userId: string) {
+  const access = await getParentStepUpStatus(userId);
+
+  return access.ok ? null : access.message;
+}
 
 function createChildProfileSchema(locale: "fr" | "en") {
   const copy = getServerCopy(locale);
@@ -141,6 +148,12 @@ export async function createChildProfileAction(
   }
 
   const user = await getRequiredAdmin();
+  const accessError = await getParentActionAccessError(user.id);
+
+  if (accessError) {
+    return { status: "error", message: accessError };
+  }
+
   await ensureHouseholdBaseline({
     userId: user.id,
     userName: user.name,
@@ -226,6 +239,12 @@ export async function updateHouseholdSettingsAction(
   }
 
   const user = await getRequiredAdmin();
+  const accessError = await getParentActionAccessError(user.id);
+
+  if (accessError) {
+    return { status: "error", message: accessError };
+  }
+
   await ensureHouseholdBaseline({
     userId: user.id,
     userName: user.name,
@@ -315,6 +334,12 @@ export async function updateChildProfileThemeAction(
   }
 
   const user = await getRequiredAdmin();
+  const accessError = await getParentActionAccessError(user.id);
+
+  if (accessError) {
+    return { status: "error", message: accessError };
+  }
+
   await ensureHouseholdBaseline({
     userId: user.id,
     userName: user.name,
@@ -419,6 +444,11 @@ export async function updateParentSecurityAction(
     userId: user.id,
     userName: user.name,
   });
+  const accessError = await getParentActionAccessError(user.id);
+
+  if (accessError) {
+    return { status: "error", message: accessError };
+  }
 
   const parsed = createUpdateParentSecuritySchema(locale).safeParse({
     currentPin: formData.get("currentPin"),
@@ -489,7 +519,7 @@ export async function updateParentSecurityAction(
     };
   }
 
-  await prisma.parentSecuritySettings.update({
+  const updatedSecurity = await prisma.parentSecuritySettings.update({
     where: {
       userId: user.id,
     },
@@ -502,6 +532,7 @@ export async function updateParentSecurityAction(
   await setParentStepUpCookie({
     userId: user.id,
     stepUpMinutes: parsed.data.stepUpMinutes,
+    securityVersion: updatedSecurity.updatedAt.getTime(),
   });
 
   await prisma.adminAuditLog.create({

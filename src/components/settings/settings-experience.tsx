@@ -51,6 +51,9 @@ import { type UpdateParentSecurityState } from "@/components/parent/parent-secur
 import { type ParentWorkbenchMutationResult } from "@/components/parent/workbench-types";
 import { signOut } from "@/lib/auth-client";
 
+const supportEmail =
+  process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support.routinekids@gmail.com";
+
 type SettingsExperienceProps = {
   householdName?: string;
   open?: boolean;
@@ -73,6 +76,7 @@ type SettingsExperienceProps = {
   }>;
   onImportPrototypeAction?: (input: {
     snapshot: string;
+    confirmation: string;
   }) => Promise<{
     status: "success" | "error";
     message: string;
@@ -210,6 +214,8 @@ export function SettingsExperience({
       return;
     }
 
+    // Refresh the local editable snapshot from persisted server settings.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSettings(initialSettings);
   }, [initialSettings]);
 
@@ -369,7 +375,8 @@ export function SettingsExperience({
       }
 
       await signOut();
-      window.location.assign("/");
+      router.push("/");
+      router.refresh();
     } catch {
       setFeedback({ status: "error", message: messages.settings.saveError });
     } finally {
@@ -379,7 +386,11 @@ export function SettingsExperience({
 
   return (
     <>
-      <FullScreenSheet open={open}>
+      <FullScreenSheet
+        open={open}
+        onClose={closeSettings}
+        ariaLabel={messages.settings.title}
+      >
         <header className="sticky top-0 z-10 flex items-center gap-4 border-b border-white/10 bg-[#120d2b] p-4 shadow-md shrink-0">
           <button
             type="button"
@@ -779,6 +790,17 @@ export function SettingsExperience({
             onClick={() => activatePremium("yearly")}
           />
         </div>
+        <p className="mt-4 text-center text-xs leading-5 text-white/50">
+          {messages.settings.subscriptionDisclosure}
+        </p>
+        <div className="mt-2 flex justify-center gap-4 text-xs">
+          <a className="text-cyan-200 underline" href="/privacy">
+            {messages.settings.privacy}
+          </a>
+          <a className="text-cyan-200 underline" href="/terms">
+            {messages.settings.terms}
+          </a>
+        </div>
       </OverlayModalShell>
 
       <OverlayModalShell
@@ -792,7 +814,7 @@ export function SettingsExperience({
         <h3 className="mb-2 text-2xl font-bold">{messages.common.appName}</h3>
         <p className="mb-6 text-sm italic text-white/50">{messages.settings.aboutTagline}</p>
         <div className="space-y-2 border-t border-white/10 pt-6 text-xs text-white/40">
-          <p>{messages.settings.versionLabel} 1.1.0</p>
+          <p>{messages.settings.versionLabel} 1.0.0</p>
           <p>{messages.settings.copyright}</p>
           <div className="mt-4 flex justify-center gap-4">
             <button
@@ -805,7 +827,7 @@ export function SettingsExperience({
             <button
               type="button"
               onClick={() => {
-                window.location.href = "mailto:support.routinekids@gmail.com";
+                window.location.href = `mailto:${supportEmail}`;
               }}
               className="underline transition hover:text-white"
             >
@@ -871,10 +893,10 @@ export function SettingsExperience({
                 <>
                   {messages.settings.privacyContactBody}{" "}
                   <a
-                    href="mailto:support.routinekids@gmail.com"
+                    href={`mailto:${supportEmail}`}
                     className="text-cyan-200 underline decoration-cyan-200/60 underline-offset-4"
                   >
-                    support.routinekids@gmail.com
+                    {supportEmail}
                   </a>
                 </>
               }
