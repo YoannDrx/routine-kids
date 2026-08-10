@@ -1,12 +1,14 @@
 {
   "name": "routine-kids",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.30.3",
   "private": true,
   "description": "RoutineKids family routines app for web, iPhone, and iPad",
   "scripts": {
     "check:git-target": "node scripts/verify-git-target.mjs",
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest",
