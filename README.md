@@ -12,9 +12,11 @@ privés, routines, historique, import du prototype, export/suppression et Stripe
 client natif SwiftUI avec synchronisation hors ligne, rappels locaux et StoreKit 2 vit
 dans `ios/`.
 
-La release candidate web et iOS est compilée et testée. La publication reste bloquée
-par des opérations externes contrôlées : promotion de la migration Neon, secrets
-Resend/Stripe, fiche et produits Apple, signature/archivage puis App Review. Voir :
+La release candidate web et iOS est compilée et testée. La migration Neon est appliquée,
+Resend est configuré, le build iOS 3 est traité par Apple et le brouillon App Review
+réunit la version et les abonnements. La publication attend encore le runtime Stripe,
+le déploiement public final, la recette TestFlight/Sandbox et les accords Paid Apps.
+Voir :
 
 - [`docs/implementation-status-2026-08-10.md`](docs/implementation-status-2026-08-10.md)
 - [`docs/production-runbook.md`](docs/production-runbook.md)
@@ -64,9 +66,9 @@ cd ios
 xcodegen generate
 ```
 
-Les tests et builds Release iPhone/iPad sont validés sur le runtime iOS 26.3.1. Une
-archive distribuable nécessite encore l'équipe Apple Developer et les produits App
-Store Connect décrits dans `docs/app-store-submission.md`.
+Les tests et builds Release iPhone/iPad sont validés. Le build 3 a été signé, archivé,
+téléversé et traité par App Store Connect ; la recette sur appareil via TestFlight est
+décrite dans `docs/app-store-submission.md`.
 
 ## Structure
 

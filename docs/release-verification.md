@@ -1,6 +1,6 @@
 # RoutineKids — vérification de release
 
-Dernière mise à jour : 10 août 2026
+Dernière mise à jour : 11 août 2026
 
 ## Résultat automatisé
 
@@ -20,6 +20,7 @@ Dernière mise à jour : 10 août 2026
 | Build Release appareil générique | PASS — SDK iOS 26.2, sans signature |
 | Privacy manifest | PASS — `plutil -lint` |
 | Diff whitespace | PASS — `git diff --check` |
+| GitHub Actions | PASS — verify, GitGuardian et Vercel |
 
 Commandes de référence :
 
@@ -44,35 +45,38 @@ e-mail.
 
 ## Base Neon
 
-La migration additive de production a été préparée via le workflow de migration Neon :
+La migration additive de production a été préparée, validée puis appliquée via le
+workflow de migration Neon :
 
 - projet : `routine-kids` ;
-- branche principale : inchangée ;
-- migration préparée : `7294d6f7-821b-4eab-b41b-a5ee8ebe7ee3` ;
+- branche principale : `main`, migration appliquée ;
+- migration : `7294d6f7-821b-4eab-b41b-a5ee8ebe7ee3` ;
 - branche temporaire : `br-wandering-block-ag8ugpfx` ;
 - schéma vérifié : membres, webhooks, mutations client et journées accomplies ;
 - données vérifiées : 5 utilisateurs avec token Apple unique, 5 foyers avec membre
   propriétaire, 5 abonnements reliés au foyer.
 
-La promotion n'a pas été exécutée. Elle reste une mutation de la base principale et
-nécessite l'accord explicite du propriétaire.
+Les quatre migrations Prisma sont enregistrées comme appliquées. Le contrôle
+post-migration confirme 5 utilisateurs, 5 foyers, 5 propriétaires et aucun abonnement
+ou token orphelin.
 
 ## iOS
 
-Le runtime iOS 26.3.1 est installé. Les XCTest passent sur iPhone 17 Pro, le build
-Release passe sur iPad et le build générique appareil passe sans signature. L'URL
-d'API et les identifiants StoreKit sont injectés dans l'Info.plist réel. Il reste à
-sélectionner l'équipe Apple, archiver avec signature et valider le build via TestFlight.
+Les tests iOS passent (4 tests : XCTest et Swift Testing), ainsi que les builds Release
+iPhone/iPad et appareil générique. Le build 3 a été signé, archivé, téléversé, traité
+par Apple puis sélectionné pour la version 1.0. L'URL d'API de production et les
+identifiants StoreKit sont injectés dans l'Info.plist réel. Le compte titulaire a été
+ajouté au groupe TestFlight interne ; il reste à accepter l'invitation et exécuter la
+recette sur un appareil.
 
 ## Gates externes restants
 
-1. Accord pour promouvoir la migration Neon préparée.
-2. Secret Resend et expéditeur vérifié en production.
-3. Clé Stripe live restreinte, endpoint webhook et secret de signature.
-4. App et produits StoreKit dans App Store Connect.
-5. Équipe de signature Apple, archive et TestFlight.
-6. Captures, réponses App Privacy, décision Kids et compte de review.
-7. Relecture juridique des pages confidentialité et conditions.
+1. Validation SMS Stripe, clé live restreinte, endpoint webhook et secret de signature.
+2. Déploiement Vercel de production, smoke tests publics et notifications serveur Apple V2.
+3. Acceptation de l'invitation interne et recette Sandbox/TestFlight sur appareil.
+4. Contrat Paid Apps, fiscalité et coordonnées bancaires complétés par le titulaire.
+5. Relecture juridique finale des pages confidentialité et conditions.
+6. Confirmation explicite du propriétaire avant de cliquer sur l'envoi App Review.
 
 Tant que ces gates ne sont pas fermés, la version est une release candidate vérifiée,
 pas une application publiée.

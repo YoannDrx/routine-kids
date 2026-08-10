@@ -1,6 +1,6 @@
 # RoutineKids — checklist de préparation aux stores
 
-Date de référence : 10 août 2026
+Date de référence : 11 août 2026
 
 Branche : `codex/routinekids-production-readiness`
 Périmètre V1 : web de production + App Store iPhone/iPad. Android n'existe pas dans
@@ -19,9 +19,11 @@ ce dépôt et constitue un chantier produit distinct.
 2. Déployer le web de production et vérifier les parcours réels.
 3. Configurer l'URL Apple App Store Server Notifications V2.
 4. Créer le compte de review, les données fictives et les captures. **Terminé.**
-5. Installer le build TestFlight, tester les achats Sandbox et corriger les écarts.
+5. Accepter l'invitation interne, installer le build 3 via TestFlight, tester les achats
+   Sandbox et corriger les écarts.
 6. Faire compléter par le titulaire les contrats Paid Apps, la fiscalité et la banque.
-7. Ajouter les captures et notes de review des abonnements, puis les associer à la version. **Terminé pour les deux produits ; version à joindre après l'upload du build 3.**
+7. Associer la version, les deux abonnements et leur groupe au même brouillon App
+   Review. **Terminé : quatre éléments prêts et action d'envoi activée.**
 8. Soumettre à App Review uniquement après confirmation finale explicite.
 
 Chaque étape dépend de la précédente. En particulier, aucun achat live ne doit être
@@ -39,7 +41,7 @@ de suppression de compte, restauration d'achat et expiration d'abonnement en Tes
 | FAIT | Inscription et reset de mot de passe natifs | Aucun renvoi obligatoire vers un navigateur |
 | FAIT | Sécurité HTTP/PWA | CSP, HSTS production, no-store authentifié, service worker limité |
 | FAIT | Prix Stripe strictement validés côté serveur | EUR 4,99/mois et 39,99/an, périodicité et statut contrôlés |
-| FAIT | Vérifications web | Prisma, TypeScript, ESLint, Vitest, build et audit dépendances |
+| FAIT | Vérifications web | Prisma, TypeScript, ESLint, Vitest, build, audit dépendances et CI GitHub verte |
 | FAIT | Vérifications iOS | Swift typecheck, 4 tests iOS, builds Release iPhone/iPad/appareil générique |
 | FAIT | Cycle de session iOS | Origine Better Auth envoyée, cookies du domaine purgés même si le sign-out serveur échoue, reconnexion validée sans réinstallation |
 | FAIT | Playwright local final | 14 scénarios sur deux résolutions paysage ; à rejouer après déploiement public |
@@ -116,8 +118,8 @@ démontrer la valeur premium.
 | FAIT | Équipe et distribution Apple | Team `G9WFV7HNV6`, certificat et profil de distribution automatiques |
 | FAIT | Archive Release initiale | Version 1.0, build 2, archive validée et uploadée sans erreur |
 | FAIT | Archive corrective | Build 3 archivé et validé avec l'URL de production et la correction de session iOS |
-| FAIT | Upload correctif | Build 3 téléversé avec succès depuis Xcode ; traitement App Store Connect en cours |
-| PARTIEL | TestFlight interne | Build 2 prêt et groupe automatique créé ; aucun testeur interne encore éligible dans le compte |
+| FAIT | Upload correctif | Build 3 téléversé, traité par Apple, état « Prêt à soumettre » et sélectionné sur la version 1.0 |
+| PARTIEL | TestFlight interne | Compte titulaire ajouté au groupe, invitation envoyée ; build 3 à installer sur appareil |
 | PRÊT | Recette TestFlight | Auth, offline, rotation, photos, rappels, achat, restore, delete account |
 | FAIT | Export conformité | `ITSAppUsesNonExemptEncryption=false`, accepté lors de l'upload |
 
@@ -126,6 +128,7 @@ démontrer la valeur premium.
 | État | Tâche | Critère de sortie |
 | --- | --- | --- |
 | FAIT | Métadonnées FR préparées | Nom, sous-titre, description, promotional text et keywords |
+| FAIT | Catégories et droits de contenu | Éducation, Style de vie et absence de contenu tiers enregistrés |
 | FAIT | Pages publiques préparées | Support, confidentialité et conditions sans authentification |
 | BLOQUÉ | Identité légale de l'éditeur | Nom/statut, adresse de contact et e-mail juridique à confirmer, sans invention |
 | FAIT | Statut trader DSA | Statut trader déclaré actif dans App Store Connect |
@@ -149,8 +152,9 @@ seulement après choix explicite du titulaire et alignement du marketing.
 
 | État | Tâche | Critère de sortie |
 | --- | --- | --- |
+| FAIT | Brouillon App Review | Version iOS 1.0, build 3, deux abonnements et groupe Family Plus réunis ; quatre éléments prêts |
 | PRÊT | Checklist pré-soumission | Aucun placeholder, aucune donnée réelle dans les captures, compte review testé |
-| PRÊT | Soumission App Review | Action finale uniquement après confirmation explicite du propriétaire |
+| PRÊT | Soumission App Review | Bouton activé ; action finale uniquement après tests Sandbox, accords payants et confirmation explicite du propriétaire |
 | PRÊT | Support lancement | Procédures remboursement, suppression, restauration et incident documentées |
 | PRÊT | Surveillance 72 h | Santé, erreurs auth, e-mails, webhooks Apple/Stripe et crashs TestFlight |
 | PRÊT | Plan de rollback | Retrait vente si nécessaire, rollback Vercel, aucune migration destructive |

@@ -1,6 +1,6 @@
 # RoutineKids — dossier App Store
 
-Date : 10 août 2026
+Date : 11 août 2026
 
 ## Identité proposée
 
@@ -133,6 +133,7 @@ not committed to Git.
 - [ ] Apple Developer Program actif et contrats Paid Apps acceptés.
 - [x] App créée dans App Store Connect avec Bundle ID exact (`6800070456`).
 - [x] Équipe Xcode `G9WFV7HNV6` sélectionnée dans la source XcodeGen.
+- [x] Catégorie principale Éducation, secondaire Style de vie et droits de contenu enregistrés.
 - [ ] Alias public déployé ; support, confidentialité et conditions accessibles sans login.
 - [x] Inscription, réinitialisation du mot de passe et suppression complète du compte disponibles dans l'app native.
 - [x] Produits mensuel/annuel créés, localisés FR/EN, tarifés et disponibles dans 175 territoires.
@@ -148,8 +149,12 @@ not committed to Git.
 - [x] Compte de démo fonctionnel, vérifié et données fictives stables.
 - [x] Build 1.0 (2) téléversé et traité par Apple, état « Prêt à soumettre » dans TestFlight.
 - [x] Build 3 téléversé dans App Store Connect.
-- [ ] Build 3 traité par Apple, installé et validé via TestFlight interne.
-- [x] Les deux abonnements sont ajoutés au même brouillon de vérification ; la version 1.0 sera jointe après l'upload du build 3.
+- [x] Build 3 traité par Apple, état « Prêt à soumettre » et sélectionné pour la version 1.0.
+- [x] Compte titulaire ajouté au groupe TestFlight interne et invitation envoyée.
+- [ ] Build 3 installé et validé via TestFlight interne sur iPhone/iPad.
+- [x] Version iOS 1.0, deux abonnements et groupe Family Plus ajoutés au même brouillon App Review (4 éléments).
+- [x] Le brouillon App Review ne présente plus de métadonnée manquante et l'action d'envoi est activée.
+- [ ] Envoi final déclenché uniquement après recette Sandbox, contrats payants et confirmation explicite du propriétaire.
 
 ## Sources Apple officielles
 

@@ -1,6 +1,6 @@
 # RoutineKids — état d'implémentation complet
 
-Date de référence : 10 août 2026
+Date de référence : 11 août 2026
 Branche de livraison : `codex/routinekids-production-readiness`
 
 Ce document est la source de vérité de la livraison. Les pourcentages indiquent la
@@ -13,16 +13,16 @@ prototype : authentification parent, stockage Neon/Prisma, routines, profils,
 validations quotidiennes, progression, espace parent, médias privés, export et
 suppression de compte sont reliés au serveur.
 
-Le socle de lancement est solide, mais une publication commerciale ne peut pas être
-annoncée avant quatre opérations externes : promouvoir la migration Neon vérifiée,
-configurer les derniers identifiants de production, créer les produits Apple et signer
-puis tester une archive iOS via TestFlight.
+Le socle de lancement est solide. La migration Neon est appliquée, les produits Apple
+sont créés et le build 3 est prêt à soumettre. Une publication commerciale attend
+encore quatre opérations externes : validation SMS et runtime Stripe, déploiement web
+final, recette Sandbox/TestFlight sur appareil et activation contractuelle de Paid Apps.
 
 ## Matrice fonctionnelle
 
 | Domaine | Niveau | État réel | Reste avant production |
 | --- | ---: | --- | --- |
-| Authentification parent | 90 % | Inscription, connexion, déconnexion, vérification e-mail, oubli et réinitialisation du mot de passe | Domaine Resend vérifié et tests d'e-mails réels |
+| Authentification parent | 98 % | Inscription, connexion, déconnexion, vérification e-mail, oubli et réinitialisation du mot de passe ; Resend production vérifié | Smoke test public post-déploiement |
 | Sécurité parentale | 95 % | Code PIN chiffré, revalidation par mot de passe au premier accès, cookie de step-up court et invalidé au changement de PIN | Test manuel final sur appareil partagé |
 | Profils enfant | 95 % | CRUD, âge 2–12, avatar, photo privée, crop, thème, limites serveur | Validation UX finale VoiceOver |
 | Routines et missions | 95 % | Matin/soir, modèles, affectation unitaire ou multiple, planification hebdomadaire, images privées | Tests manuels exhaustifs des modales les plus denses |
@@ -31,16 +31,16 @@ puis tester une archive iOS via TestFlight.
 | Import du prototype | 90 % | Preview, confirmation destructive `IMPORTER`, limites de plan, planning hebdo conservé, médias orphelins nettoyés | Jeu de données réel du propriétaire à rejouer avant lancement |
 | Export et suppression | 98 % | Export JSON privé `no-store`, suppression renforcée compte/foyer, arrêt Stripe, purge média et suppression initiable dans l'app iOS | Vérifier la révocation Apple dans le scénario support |
 | Facturation web Stripe | 90 % | Checkout, portail, webhook signé et idempotent, propriété vérifiée, entitlements serveur ; produit et tarifs live créés | Clé live restreinte, secret webhook et smoke test live contrôlé |
-| Facturation iOS StoreKit 2 | 75 % | Produits, achat, restauration, `appAccountToken`, validation JWS serveur, notifications V2 Apple | Produits App Store Connect, certificats racine, test Sandbox/TestFlight et review |
+| Facturation iOS StoreKit 2 | 92 % | Produits Apple FR/EN, achat, restauration, `appAccountToken`, validation JWS serveur et notifications V2 | URL de notifications, test Sandbox/TestFlight et review |
 | PWA | 80 % | Manifest, icônes, service worker, shell public hors ligne | La board web n'est volontairement pas mise en cache pour protéger les données enfant |
-| Application native SwiftUI | 88 % | Connexion, inscription, reset, suppression de compte, board, synchronisation, file hors ligne, rappels, réglages et StoreKit ; XCTest et builds Release validés | Archive signée, TestFlight et tests sur appareil physique |
+| Application native SwiftUI | 95 % | Connexion, inscription, reset, suppression de compte, board, synchronisation, file hors ligne, rappels, réglages et StoreKit ; build 3 signé et traité par Apple | TestFlight et tests sur appareil physique |
 | Notifications | 55 % | Rappels matin/soir locaux iOS et enregistrement appareil | Pas d'APNs distant, pas de centre de préférences avancé |
 | Accessibilité | 85 % | Focus visible, modales dialog, piège de focus, Échap, zoom autorisé, reduced motion | Audit VoiceOver/Dynamic Type et contraste sur appareil |
 | Internationalisation | 85 % | Catalogue typé FR/EN sur les parcours principaux | Quelques libellés natifs restent uniquement français |
 | Co-parent | 35 % | Modèle membre/invitation, rôles et lecture API membre | Invitation, acceptation, choix du foyer et gestion UI non exposés |
 | Récompenses | 25 % | Modèles de récompense et ledger prêts | Catalogue, attribution et UX enfant non exposés |
 | Observabilité | 65 % | Logs JSON pseudonymes sur santé et paiements, endpoint `/api/health` | Moniteur externe, alertes et éventuellement Sentry serveur sans données enfant |
-| App Store | 65 % | Projet Xcode, icône, manifeste confidentialité, StoreKit, compte complet dans l'app, textes légaux et builds Release | Fiche Apple, IAP, captures, archive signée, TestFlight et review |
+| App Store | 95 % | Fiche, confidentialité, captures, IAP, groupe, build signé et brouillon App Review complet à 4 éléments | Paid Apps, TestFlight/Sandbox et envoi final confirmé |
 
 ## Fonctionnalités livrées dans cette tranche
 
@@ -68,7 +68,8 @@ puis tester une archive iOS via TestFlight.
 - CI : cible Git, Prisma, TypeScript, ESLint, Vitest, build et Playwright iPad.
 - Projet SwiftUI générable avec XcodeGen, manifeste de confidentialité et StoreKit 2.
 - XCTest sur simulateur, build Release iPad et build Release appareil générique validés.
-- Migration additive testée sur une branche Neon isolée, données principales intactes.
+- Migration additive testée sur une branche Neon isolée puis appliquée sur `main`, avec
+  historique Prisma et données post-migration vérifiés.
 
 ## Ce qui n'est volontairement pas présenté comme terminé
 
@@ -99,11 +100,11 @@ dans le cache HTTP du navigateur. Le natif possède une file hors ligne mieux is
 
 ### P0 — lancement
 
-1. Promouvoir la migration Neon validée et enregistrer l'historique Prisma.
-2. Configurer domaine, Better Auth, Resend, Blob, Stripe et Apple en production.
-3. Signer l'archive, tester StoreKit Sandbox puis distribuer via TestFlight.
-4. Faire relire les textes légaux et confirmer l'adresse de support.
-5. Créer un compte de démonstration App Review avec des données fictives.
+1. Finaliser la validation SMS, la clé restreinte et le webhook Stripe live.
+2. Déployer Vercel, exécuter les smoke tests publics et renseigner les notifications Apple V2.
+3. Accepter l'invitation interne, tester StoreKit Sandbox puis valider le build 3 sur appareil.
+4. Faire accepter Paid Apps et compléter fiscalité/banque par le titulaire du compte.
+5. Faire relire les textes légaux et confirmer l'adresse de support.
 6. Activer un moniteur de `/api/health` et une alerte sur les erreurs webhook.
 
 ### P1 — valeur et rétention
