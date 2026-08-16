@@ -10,6 +10,7 @@ type ProfileSeedInput = {
   age: number;
   name: string;
   locale?: "fr" | "en";
+  taskLimit?: number;
 };
 
 export type DefaultRoutineSeed = {
@@ -73,6 +74,9 @@ export function getDefaultRoutineSeeds(profile: ProfileSeedInput): DefaultRoutin
     period: getRoutinePeriod(mode),
     ageMin: Math.max(2, profile.age - 1),
     ageMax: Math.min(12, profile.age + 1),
-    tasks: serializeBoardTasks(prototype.tasksByMode[mode]),
+    tasks: serializeBoardTasks(prototype.tasksByMode[mode]).slice(
+      0,
+      profile.taskLimit ?? Number.POSITIVE_INFINITY,
+    ),
   }));
 }

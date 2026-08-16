@@ -105,6 +105,7 @@ struct TaskTemplateSummary: Codable, Identifiable, Sendable {
     let title: String
     let shortLabel: String?
     let icon: String?
+    let imageUrl: String?
     let color: String?
     let durationMinutes: Int?
     let isBuiltIn: Bool

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
+import { Prisma } from "@prisma/client";
 
 import { startApiRequest } from "@/lib/api-observability";
 import { prisma } from "@/lib/prisma";
@@ -187,7 +188,7 @@ async function syncSubscription(
         },
       });
     }
-  });
+  }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 }
 
 async function handleCheckoutCompleted(

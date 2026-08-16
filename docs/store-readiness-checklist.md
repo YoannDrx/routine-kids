@@ -1,6 +1,6 @@
 # RoutineKids — checklist de préparation aux stores
 
-Date de référence : 11 août 2026
+Date de référence : 16 août 2026
 
 Branche : `codex/routinekids-production-readiness`
 Périmètre V1 : web de production + App Store iPhone/iPad. Android n'existe pas dans
@@ -19,7 +19,7 @@ ce dépôt et constitue un chantier produit distinct.
 2. Déployer le web de production et vérifier les parcours réels.
 3. Configurer l'URL Apple App Store Server Notifications V2.
 4. Créer le compte de review, les données fictives et les captures. **Terminé.**
-5. Accepter l'invitation interne, installer le build 3 via TestFlight, tester les achats
+5. Archiver/téléverser le build 4, l'installer via TestFlight, tester les achats
    Sandbox et corriger les écarts.
 6. Faire compléter par le titulaire les contrats Paid Apps, la fiscalité et la banque.
 7. Associer la version, les deux abonnements et leur groupe au même brouillon App
@@ -41,10 +41,10 @@ de suppression de compte, restauration d'achat et expiration d'abonnement en Tes
 | FAIT | Inscription et reset de mot de passe natifs | Aucun renvoi obligatoire vers un navigateur |
 | FAIT | Sécurité HTTP/PWA | CSP, HSTS production, no-store authentifié, service worker limité |
 | FAIT | Prix Stripe strictement validés côté serveur | EUR 4,99/mois et 39,99/an, périodicité et statut contrôlés |
-| FAIT | Vérifications web | Prisma, TypeScript, ESLint, Vitest, build, audit dépendances et CI GitHub verte |
-| FAIT | Vérifications iOS | Swift typecheck, 4 tests iOS, builds Release iPhone/iPad/appareil générique |
+| FAIT | Vérifications web | Prisma, TypeScript, ESLint, 41 tests Vitest, build et audit dépendances passent localement |
+| FAIT | Vérifications iOS | 3 XCTest + 2 Swift Testing et build 4 simulateur passent |
 | FAIT | Cycle de session iOS | Origine Better Auth envoyée, cookies du domaine purgés même si le sign-out serveur échoue, reconnexion validée sans réinstallation |
-| FAIT | Playwright local final | 14 scénarios sur deux résolutions paysage ; à rejouer après déploiement public |
+| FAIT | Playwright local final | 16 scénarios réussis, dont parcours authentifiés et webhook Stripe ; à rejouer après déploiement public |
 | PRÊT | Test manuel accessibilité | VoiceOver, Dynamic Type XXL, contraste et rotation sur iPhone/iPad physiques |
 
 ## 2. Base de données Neon
@@ -96,7 +96,7 @@ démontrer la valeur premium.
 
 | État | Tâche | Critère de sortie |
 | --- | --- | --- |
-| FAIT | Authentification App Store Connect | Session titulaire active, équipe Apple `G9WFV7HNV6` |
+| BLOQUÉ | Authentification App Store Connect | La session web n'est plus authentifiée ; reconnexion titulaire requise |
 | BLOQUÉ | Contrats, fiscalité et banque | Paid Apps actif, coordonnées et accords à jour |
 | FAIT | Enregistrement de l'app | App Apple `6800070456`, SKU `routinekids-ios-1`, bundle exact |
 | FAIT | Groupe Family Plus | Groupe `22300397`, localisations FR/EN |
@@ -117,9 +117,9 @@ démontrer la valeur premium.
 | FAIT | Runtime et builds locaux | iOS 26.3.1, iPhone/iPad, Release et appareil générique |
 | FAIT | Équipe et distribution Apple | Team `G9WFV7HNV6`, certificat et profil de distribution automatiques |
 | FAIT | Archive Release initiale | Version 1.0, build 2, archive validée et uploadée sans erreur |
-| FAIT | Archive corrective | Build 3 archivé et validé avec l'URL de production et la correction de session iOS |
-| FAIT | Upload correctif | Build 3 téléversé, traité par Apple, état « Prêt à soumettre » et sélectionné sur la version 1.0 |
-| PARTIEL | TestFlight interne | Compte titulaire ajouté au groupe, invitation envoyée ; build 3 à installer sur appareil |
+| FAIT | Archive corrective historique | Build 3 archivé et validé, désormais obsolète fonctionnellement |
+| PRÊT | Archive et upload final | Build 4 à archiver, téléverser, traiter et sélectionner sur la version 1.0 |
+| PARTIEL | TestFlight interne | Compte titulaire ajouté au groupe ; build 4 à installer sur appareil |
 | PRÊT | Recette TestFlight | Auth, offline, rotation, photos, rappels, achat, restore, delete account |
 | FAIT | Export conformité | `ITSAppUsesNonExemptEncryption=false`, accepté lors de l'upload |
 
@@ -137,7 +137,7 @@ démontrer la valeur premium.
 | FAIT | Questionnaire d'âge | Classification calculée 4+, aucun contenu sensible déclaré |
 | FAIT | Prix et disponibilité de l'app | Téléchargement gratuit, diffusion publique, France comme base, 175 territoires |
 | FAIT | Compte de démo | Compte fictif vérifié, foyer et routines stables, identifiants enregistrés uniquement dans App Store Connect |
-| FAIT | Captures | 5 iPhone 1284×2778 et 5 iPad 2064×2752, profils fictifs, chargées dans App Store Connect |
+| PARTIEL | Captures | Anciennes captures chargées ; à régénérer après validation de la DA du build 4 |
 | FAIT | Coordonnées et notes App Review | Contact, compte de connexion et instructions de vérification enregistrés |
 | PARTIEL | Déclarations d'accessibilité | Brouillons iPhone/iPad renseignés pour VoiceOver, contrôle vocal, interface sombre, différenciation sans couleur et animations réduites ; publication possible après mise en ligne d'une version |
 | PRÊT | Vérification des URLs | Support, privacy et terms répondent en HTTPS sans login |
@@ -152,7 +152,7 @@ seulement après choix explicite du titulaire et alignement du marketing.
 
 | État | Tâche | Critère de sortie |
 | --- | --- | --- |
-| FAIT | Brouillon App Review | Version iOS 1.0, build 3, deux abonnements et groupe Family Plus réunis ; quatre éléments prêts |
+| PARTIEL | Brouillon App Review | Version iOS 1.0 et abonnements préparés ; remplacer le build 3 par le build 4 et les captures |
 | PRÊT | Checklist pré-soumission | Aucun placeholder, aucune donnée réelle dans les captures, compte review testé |
 | PRÊT | Soumission App Review | Bouton activé ; action finale uniquement après tests Sandbox, accords payants et confirmation explicite du propriétaire |
 | PRÊT | Support lancement | Procédures remboursement, suppression, restauration et incident documentées |

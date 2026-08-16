@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const authenticatedTestMode = process.env.E2E_AUTHENTICATED === "true";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -40,6 +42,20 @@ export default defineConfig({
       ROUTINEKIDS_INSECURE_TEST_COOKIES: "true",
       RESEND_API_KEY: "",
       EMAIL_FROM: "",
+      STRIPE_SECRET_KEY: authenticatedTestMode
+        ? "sk_test_routinekids_ci_placeholder"
+        : process.env.STRIPE_SECRET_KEY ?? "",
+      STRIPE_WEBHOOK_SECRET: authenticatedTestMode
+        ? "whsec_routinekids_ci_webhook_secret"
+        : process.env.STRIPE_WEBHOOK_SECRET ?? "",
+      STRIPE_FAMILY_PLUS_MONTHLY_PRICE_ID:
+        authenticatedTestMode
+          ? "price_routinekids_ci_monthly"
+          : process.env.STRIPE_FAMILY_PLUS_MONTHLY_PRICE_ID ?? "",
+      STRIPE_FAMILY_PLUS_YEARLY_PRICE_ID:
+        authenticatedTestMode
+          ? "price_routinekids_ci_yearly"
+          : process.env.STRIPE_FAMILY_PLUS_YEARLY_PRICE_ID ?? "",
     },
   },
 });

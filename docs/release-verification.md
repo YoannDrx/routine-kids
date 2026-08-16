@@ -1,6 +1,6 @@
 # RoutineKids — vérification de release
 
-Dernière mise à jour : 11 août 2026
+Dernière mise à jour : 16 août 2026
 
 ## Résultat automatisé
 
@@ -10,14 +10,13 @@ Dernière mise à jour : 11 août 2026
 | Prisma validate/generate | PASS — Prisma Client 6.19.2 |
 | TypeScript | PASS |
 | ESLint | PASS |
-| Vitest | PASS — 28 tests, 11 fichiers |
-| Next.js production build | PASS — Next.js 16.3.0, 28 pages générées |
-| Playwright | PASS — 14 scénarios sur 1024×768 et 1366×1024 |
+| Vitest | PASS — 41 tests, 14 fichiers |
+| Next.js production build | PASS — Next.js 16.3.1, 32 routes compilées |
+| Playwright | PASS — 16 scénarios, 2 doublons métier ignorés ; deux résolutions publiques |
 | Audit dépendances production | PASS — aucune vulnérabilité connue |
 | Swift typecheck | PASS — tous les fichiers `ios/RoutineKids/*.swift` |
-| XCTest iPhone | PASS — 2 tests, iPhone 17 Pro / iOS 26.3.1 |
-| Build Release iPad | PASS — iPad Pro 13 pouces (M5) / iOS 26.3.1 |
-| Build Release appareil générique | PASS — SDK iOS 26.2, sans signature |
+| Tests iPhone | PASS — 3 XCTest + 2 Swift Testing, iPhone 16 Pro / iOS 18.5 |
+| Build simulateur | PASS — iPhone 16 Pro / iOS 18.5, build applicatif 4 |
 | Privacy manifest | PASS — `plutil -lint` |
 | Diff whitespace | PASS — `git diff --check` |
 | GitHub Actions | PASS — verify, GitGuardian et Vercel |
@@ -29,14 +28,13 @@ RESEND_API_KEY=re_verify_placeholder \
 EMAIL_FROM='RoutineKids Verify <verify@example.com>' \
 pnpm verify
 
-RESEND_API_KEY=re_e2e_placeholder \
-EMAIL_FROM='RoutineKids E2E <e2e@example.com>' \
-pnpm test:e2e
+DATABASE_URL='postgresql://…/routinekids' \
+DIRECT_URL='postgresql://…/routinekids' \
+E2E_AUTHENTICATED=true pnpm test:e2e
 
-xcrun swiftc -typecheck ios/RoutineKids/*.swift
 plutil -lint ios/RoutineKids/PrivacyInfo.xcprivacy
 xcodebuild -project ios/RoutineKids.xcodeproj -scheme RoutineKids \
-  -destination 'platform=iOS Simulator,OS=26.3.1,name=iPhone 17 Pro' test
+  -destination 'platform=iOS Simulator,OS=18.5,name=iPhone 16 Pro' test
 pnpm audit --prod
 ```
 
@@ -62,18 +60,18 @@ ou token orphelin.
 
 ## iOS
 
-Les tests iOS passent (4 tests : XCTest et Swift Testing), ainsi que les builds Release
-iPhone/iPad et appareil générique. Le build 3 a été signé, archivé, téléversé, traité
-par Apple puis sélectionné pour la version 1.0. L'URL d'API de production et les
-identifiants StoreKit sont injectés dans l'Info.plist réel. Le compte titulaire a été
-ajouté au groupe TestFlight interne ; il reste à accepter l'invitation et exécuter la
-recette sur un appareil.
+Les tests iOS passent (3 XCTest et 2 Swift Testing) et le build 4 compile sur simulateur.
+Le build 3 a été signé, archivé, téléversé, traité par Apple puis sélectionné pour la
+version 1.0, mais il ne contient pas les derniers parcours natifs et ne doit plus être
+soumis. Il faut archiver/téléverser le build 4, le sélectionner et exécuter la recette
+TestFlight sur appareils physiques.
 
 ## Gates externes restants
 
-1. Validation SMS Stripe, clé live restreinte, endpoint webhook et secret de signature.
-2. Déploiement Vercel de production, smoke tests publics et test de livraison des notifications Apple V2.
-3. Acceptation de l'invitation interne et recette Sandbox/TestFlight sur appareil.
+1. Réauthentification Stripe, clé live restreinte, endpoint webhook et secret de signature.
+2. Secret GitHub `VERCEL_TOKEN`, merge contrôlé, déploiement Vercel de production,
+   smoke tests publics et test de livraison des notifications Apple V2.
+3. Téléversement du build 4 et recette Sandbox/TestFlight sur iPhone et iPad.
 4. Contrat Paid Apps, fiscalité et coordonnées bancaires complétés par le titulaire.
 5. Relecture juridique finale des pages confidentialité et conditions.
 6. Confirmation explicite du propriétaire avant de cliquer sur l'envoi App Review.

@@ -21,13 +21,16 @@ struct NativeParentalGateView: View {
 
                 Text(
                     pinConfigured
-                        ? "Saisissez le code parent à 4 chiffres."
-                        : "Confirmez le mot de passe du compte parent."
+                        ? String(localized: "parent.gate.pin.hint")
+                        : String(localized: "parent.gate.password.hint")
                 )
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
 
-                SecureField(pinConfigured ? "Code parent" : "Mot de passe", text: $credential)
+                SecureField(
+                    pinConfigured ? String(localized: "parent.gate.pin") : String(localized: "parent.gate.password"),
+                    text: $credential
+                )
                     .textContentType(pinConfigured ? .oneTimeCode : .password)
                     .nativeParentCredentialTraits(pinConfigured: pinConfigured)
                     .padding()
@@ -80,11 +83,11 @@ struct NativeParentalGateView: View {
             try await APIClient.shared.verifyParent(credential: credential)
             onUnlocked()
         } catch let error as APIError where error.error == "too_many_attempts" {
-            errorMessage = "Trop de tentatives. Réessayez dans dix minutes."
+            errorMessage = String(localized: "parent.gate.rate.limit")
         } catch {
             errorMessage = pinConfigured
-                ? "Code parent incorrect."
-                : "Mot de passe incorrect."
+                ? String(localized: "parent.gate.pin.error")
+                : String(localized: "parent.gate.password.error")
         }
     }
 }

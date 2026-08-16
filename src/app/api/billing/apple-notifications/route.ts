@@ -68,10 +68,17 @@ export async function POST(request: Request) {
         getAppleProductIds().has(transaction.productId)
       ) {
         const status = toAppleSubscriptionStatus(notification.data?.status);
+        const providerEventAt = notification.signedDate
+          ? new Date(notification.signedDate)
+          : new Date();
         await prisma.subscription.updateMany({
           where: {
             provider: "APPLE",
             originalTransactionId: transaction.originalTransactionId,
+            OR: [
+              { lastProviderEventAt: null },
+              { lastProviderEventAt: { lte: providerEventAt } },
+            ],
           },
           data: {
             environment: environment === "Production" ? "PRODUCTION" : "TEST",
@@ -88,9 +95,7 @@ export async function POST(request: Request) {
             revokedAt: transaction.revocationDate
               ? new Date(transaction.revocationDate)
               : null,
-            lastProviderEventAt: notification.signedDate
-              ? new Date(notification.signedDate)
-              : new Date(),
+            lastProviderEventAt: providerEventAt,
           },
         });
       }

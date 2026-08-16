@@ -607,6 +607,63 @@ export async function removeRoutineTaskDayFromProfile(input: {
   };
 }
 
+export async function updateRoutineTaskScheduleForProfile(input: {
+  householdId: string;
+  actorUserId: string;
+  childProfileId: string;
+  routineTaskId: string;
+  scheduleDays: number[];
+  locale?: AppLocale;
+}) {
+  const task = await prisma.routineTask.findFirst({
+    where: {
+      id: input.routineTaskId,
+      routine: {
+        householdId: input.householdId,
+        childProfileId: input.childProfileId,
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      scheduleDays: true,
+    },
+  });
+
+  if (!task) {
+    throw new Error(getServerCopy(input.locale ?? "fr").actions.missionDeleteError);
+  }
+
+  const nextDays = normalizeScheduleDays(input.scheduleDays, true);
+  if (nextDays.length === 0) {
+    throw new Error(getServerCopy(input.locale ?? "fr").actions.routineSaveError);
+  }
+
+  await prisma.$transaction([
+    prisma.routineTask.update({
+      where: { id: task.id },
+      data: { scheduleDays: nextDays },
+    }),
+    prisma.adminAuditLog.create({
+      data: {
+        householdId: input.householdId,
+        actorUserId: input.actorUserId,
+        action: "ROUTINE_TASK_SCHEDULE_UPDATED",
+        targetType: "RoutineTask",
+        targetId: task.id,
+        metadata: {
+          childProfileId: input.childProfileId,
+          title: task.title,
+          previousDays: task.scheduleDays,
+          scheduleDays: nextDays,
+        },
+      },
+    }),
+  ]);
+
+  return { id: task.id, scheduleDays: nextDays };
+}
+
 export async function reorderRoutineTasksForProfile(input: {
   householdId: string;
   actorUserId: string;

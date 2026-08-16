@@ -61,8 +61,8 @@ export async function upsertTaskTemplate(
           title: input.title,
           shortLabel: input.shortLabel,
           icon: input.icon,
-          imageUrl: input.imageUrl ?? null,
-          color: input.color ?? null,
+          imageUrl: input.imageUrl,
+          color: input.color,
           durationMinutes: input.durationMinutes,
         },
         select: {

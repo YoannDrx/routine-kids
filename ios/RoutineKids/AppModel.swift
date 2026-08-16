@@ -79,7 +79,7 @@ final class AppModel {
             try await api.signIn(email: email, password: password)
             try await refresh()
         } catch {
-            errorMessage = "Connexion impossible. Vérifiez vos identifiants."
+            errorMessage = String(localized: "auth.signin.error")
         }
     }
 
@@ -95,15 +95,15 @@ final class AppModel {
                 try await refresh()
             } catch {
                 phase = .signedOut
-                authNotice = "Compte créé. Consultez votre e-mail pour confirmer votre adresse."
+                authNotice = String(localized: "auth.signup.verify")
             }
         } catch {
-            errorMessage = "Création impossible. Vérifiez les informations saisies."
+            errorMessage = String(localized: "auth.signup.error")
         }
     }
 
     func requestPasswordReset(email: String) async {
-        authNotice = "Si cette adresse existe, un lien de réinitialisation vient d’être envoyé."
+        authNotice = String(localized: "auth.reset.sent")
         try? await api.requestPasswordReset(email: email)
     }
 
@@ -131,18 +131,30 @@ final class AppModel {
             errorMessage = error.error.replacingOccurrences(of: "_", with: " ")
             return false
         } catch {
-            errorMessage = "La suppression du compte a échoué. Réessayez plus tard."
+            errorMessage = String(localized: "account.delete.error")
             return false
         }
     }
 
-    func createProfile(name: String, age: Int, avatar: String, headline: String?) async -> Bool {
+    func createProfile(
+        name: String,
+        age: Int,
+        avatar: String,
+        headline: String?,
+        photoDataURL: String? = nil
+    ) async -> Bool {
         isWorking = true
         errorMessage = nil
         defer { isWorking = false }
 
         do {
-            try await api.createProfile(name: name, age: age, avatar: avatar, headline: headline)
+            try await api.createProfile(
+                name: name,
+                age: age,
+                avatar: avatar,
+                headline: headline,
+                photoDataURL: photoDataURL
+            )
             try await refresh()
             selectedProfileId = envelope?.household.childProfiles.last?.id
             return true
@@ -150,7 +162,101 @@ final class AppModel {
             errorMessage = error.error.replacingOccurrences(of: "_", with: " ")
             return false
         } catch {
-            errorMessage = "Le profil n’a pas pu être créé. Réessayez."
+            errorMessage = String(localized: "profile.create.error")
+            return false
+        }
+    }
+
+    func updateProfile(
+        id: String,
+        name: String,
+        age: Int,
+        avatar: String,
+        headline: String?,
+        photoDataURL: String?,
+        removePhoto: Bool = false
+    ) async -> Bool {
+        isWorking = true
+        errorMessage = nil
+        defer { isWorking = false }
+
+        do {
+            try await api.updateProfile(id: id, name: name, age: age, avatar: avatar, headline: headline)
+            if let photoDataURL {
+                try await api.updateProfilePhoto(id: id, dataURL: photoDataURL)
+            } else if removePhoto {
+                try await api.removeProfilePhoto(id: id)
+            }
+            try await refresh()
+            selectedProfileId = id
+            return true
+        } catch let error as APIError {
+            errorMessage = error.error.replacingOccurrences(of: "_", with: " ")
+            return false
+        } catch {
+            errorMessage = String(localized: "profile.update.error")
+            return false
+        }
+    }
+
+    func deleteProfile(id: String) async -> Bool {
+        isWorking = true
+        errorMessage = nil
+        defer { isWorking = false }
+
+        do {
+            try await api.deleteProfile(id: id)
+            selectedProfileId = nil
+            try await refresh()
+            return true
+        } catch {
+            errorMessage = String(localized: "profile.delete.error")
+            return false
+        }
+    }
+
+    func removeProfilePhoto(id: String) async -> Bool {
+        isWorking = true
+        errorMessage = nil
+        defer { isWorking = false }
+        do {
+            try await api.removeProfilePhoto(id: id)
+            try await refresh()
+            return true
+        } catch {
+            errorMessage = String(localized: "profile.photo.delete.error")
+            return false
+        }
+    }
+
+    func updateHousehold(
+        name: String,
+        locale: String,
+        timeZone: String,
+        soundsEnabled: Bool,
+        morningStart: String,
+        morningEnd: String,
+        eveningStart: String,
+        eveningEnd: String
+    ) async -> Bool {
+        isWorking = true
+        errorMessage = nil
+        defer { isWorking = false }
+        do {
+            try await api.updateHousehold(
+                name: name,
+                locale: locale,
+                timeZone: timeZone,
+                soundsEnabled: soundsEnabled,
+                morningStart: morningStart,
+                morningEnd: morningEnd,
+                eveningStart: eveningStart,
+                eveningEnd: eveningEnd
+            )
+            try await refresh()
+            return true
+        } catch {
+            errorMessage = String(localized: "household.update.error")
             return false
         }
     }

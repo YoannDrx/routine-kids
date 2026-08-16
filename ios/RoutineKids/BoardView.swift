@@ -235,7 +235,8 @@ private struct FamilyRoutineRow: View {
                             style: StrokeStyle(lineWidth: 5, lineCap: .round)
                         )
                         .rotationEffect(.degrees(-90))
-                    Text(profile.avatar ?? "🧑‍🚀").font(.system(size: 35))
+                    ProfilePortrait(profile: profile, fontSize: 35)
+                        .frame(width: 58, height: 58)
                 }
                 .frame(width: 70, height: 70)
                 Text(profile.name)
@@ -321,7 +322,9 @@ private struct CompactTaskCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(task.title)
-        .accessibilityValue(completed ? "Terminée" : "À faire")
+        .accessibilityValue(
+            completed ? String(localized: "task.completed") : String(localized: "task.pending")
+        )
         .accessibilityHint("Touchez deux fois pour changer l’état")
     }
 

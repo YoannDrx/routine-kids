@@ -12,6 +12,8 @@ struct NativeSettingsView: View {
     @State private var accountDeletionPresented = false
     @State private var profileEditorPresented = false
     @State private var missionManagerPresented = false
+    @State private var householdEditorPresented = false
+    @State private var editingProfile: ChildProfile?
 
     var body: some View {
         ZStack {
@@ -63,6 +65,12 @@ struct NativeSettingsView: View {
         }
         .task { await store.load() }
         .sheet(isPresented: $profileEditorPresented) { NativeProfileEditorView() }
+        .sheet(item: $editingProfile) { profile in NativeProfileEditorView(profile: profile) }
+        .sheet(isPresented: $householdEditorPresented) {
+            if let household = model.envelope?.household {
+                NativeHouseholdSettingsView(household: household)
+            }
+        }
         .sheet(isPresented: $missionManagerPresented) { NativeMissionManagerView() }
         .sheet(isPresented: $accountDeletionPresented) {
             AccountDeletionView(householdName: model.envelope?.household.name ?? "") {
@@ -77,8 +85,35 @@ struct NativeSettingsView: View {
             settingsCard(title: "Mon équipage", icon: "person.3.fill", accent: .pink) {
                 LabeledContent("Foyer", value: model.envelope?.household.name ?? "—")
                 LabeledContent("Fuseau", value: model.envelope?.household.timeZone ?? "—")
+                Button {
+                    householdEditorPresented = true
+                } label: {
+                    Label("Modifier le foyer et les horaires", systemImage: "slider.horizontal.3")
+                }
+                .buttonStyle(.bordered)
+
+                ForEach(model.envelope?.household.childProfiles ?? []) { profile in
+                    HStack(spacing: 10) {
+                        ProfilePortrait(profile: profile, fontSize: 24)
+                            .frame(width: 42, height: 42)
+                            .background(.white.opacity(0.07), in: .circle)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(profile.name).fontWeight(.semibold)
+                            Text(String(format: String(localized: "profile.age.short"), profile.age))
+                                .font(.caption).foregroundStyle(.white.opacity(0.55))
+                        }
+                        Spacer()
+                        Button("Modifier") { editingProfile = profile }
+                            .buttonStyle(.bordered)
+                    }
+                }
                 HStack {
-                    Text("\(model.envelope?.household.childProfiles.count ?? 0) astronaute(s)")
+                    Text(
+                        String(
+                            format: String(localized: "settings.astronaut.count"),
+                            model.envelope?.household.childProfiles.count ?? 0
+                        )
+                    )
                         .foregroundStyle(.white.opacity(0.66))
                     Spacer()
                     Button("Ajouter") { profileEditorPresented = true }
@@ -222,18 +257,20 @@ struct NativeSettingsView: View {
 
     private func billingPeriod(for product: Product) -> String {
         guard let period = product.subscription?.subscriptionPeriod else {
-            return "période"
+            return String(localized: "billing.period.generic")
         }
 
         let unit = switch period.unit {
-        case .day: "jour"
-        case .week: "semaine"
-        case .month: "mois"
-        case .year: "an"
-        @unknown default: "période"
+        case .day: String(localized: "billing.period.day")
+        case .week: String(localized: "billing.period.week")
+        case .month: String(localized: "billing.period.month")
+        case .year: String(localized: "billing.period.year")
+        @unknown default: String(localized: "billing.period.generic")
         }
 
-        return period.value == 1 ? unit : "\(period.value) \(unit)s"
+        return period.value == 1
+            ? unit
+            : String(format: String(localized: "billing.period.multiple"), period.value, unit)
     }
 
     private func publicURL(path: String) -> URL {
@@ -267,7 +304,7 @@ private struct AccountDeletionView: View {
         NavigationStack {
             Form {
                 Section("Suppression définitive") {
-                    Text("Toutes les routines, profils, images et données du foyer « \(householdName) » seront supprimés.")
+                    Text(String(format: String(localized: "account.delete.message"), householdName))
                     Text("Si vous payez via Apple, gérez d’abord l’abonnement dans l’App Store pour éviter son renouvellement.")
                         .foregroundStyle(.secondary)
                     Link(

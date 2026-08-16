@@ -1,4 +1,4 @@
-import { BillingPlan, SubscriptionStatus } from "@prisma/client";
+import { BillingPlan, Prisma, SubscriptionStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -89,53 +89,43 @@ export async function POST(request: Request) {
     }
 
     const active = isActiveAppleTransaction(transaction);
-    await prisma.subscription.upsert({
-      where: { referenceId: user.id },
-      update: {
-        householdId: household.id,
-        provider: "APPLE",
-        environment: environment === "Production" ? "PRODUCTION" : "TEST",
-        providerCustomerId: account.appAccountToken,
-        providerSubscriptionId: transaction.originalTransactionId,
-        originalTransactionId: transaction.originalTransactionId,
-        productId: transaction.productId,
-        plan: active ? BillingPlan.FAMILY_PLUS : BillingPlan.FREE,
-        status: active ? SubscriptionStatus.ACTIVE : SubscriptionStatus.CANCELED,
-        periodStart: transaction.purchaseDate
-          ? new Date(transaction.purchaseDate)
-          : null,
-        periodEnd: transaction.expiresDate ? new Date(transaction.expiresDate) : null,
-        revokedAt: transaction.revocationDate
-          ? new Date(transaction.revocationDate)
-          : null,
-        lastProviderEventAt: transaction.signedDate
-          ? new Date(transaction.signedDate)
-          : new Date(),
-      },
-      create: {
-        id: `subscription_${user.id}`,
-        referenceId: user.id,
-        householdId: household.id,
-        provider: "APPLE",
-        environment: environment === "Production" ? "PRODUCTION" : "TEST",
-        providerCustomerId: account.appAccountToken,
-        providerSubscriptionId: transaction.originalTransactionId,
-        originalTransactionId: transaction.originalTransactionId,
-        productId: transaction.productId,
-        plan: active ? BillingPlan.FAMILY_PLUS : BillingPlan.FREE,
-        status: active ? SubscriptionStatus.ACTIVE : SubscriptionStatus.CANCELED,
-        periodStart: transaction.purchaseDate
-          ? new Date(transaction.purchaseDate)
-          : null,
-        periodEnd: transaction.expiresDate ? new Date(transaction.expiresDate) : null,
-        revokedAt: transaction.revocationDate
-          ? new Date(transaction.revocationDate)
-          : null,
-        lastProviderEventAt: transaction.signedDate
-          ? new Date(transaction.signedDate)
-          : new Date(),
-      },
-    });
+    const providerEventAt = transaction.signedDate
+      ? new Date(transaction.signedDate)
+      : new Date();
+    const subscriptionData = {
+      householdId: household.id,
+      provider: "APPLE" as const,
+      environment: environment === "Production" ? "PRODUCTION" as const : "TEST" as const,
+      providerCustomerId: account.appAccountToken,
+      providerSubscriptionId: transaction.originalTransactionId,
+      originalTransactionId: transaction.originalTransactionId,
+      productId: transaction.productId,
+      plan: active ? BillingPlan.FAMILY_PLUS : BillingPlan.FREE,
+      status: active ? SubscriptionStatus.ACTIVE : SubscriptionStatus.CANCELED,
+      periodStart: transaction.purchaseDate ? new Date(transaction.purchaseDate) : null,
+      periodEnd: transaction.expiresDate ? new Date(transaction.expiresDate) : null,
+      revokedAt: transaction.revocationDate ? new Date(transaction.revocationDate) : null,
+      lastProviderEventAt: providerEventAt,
+    };
+
+    await prisma.$transaction(async (tx) => {
+      const current = await tx.subscription.findUnique({
+        where: { referenceId: user.id },
+        select: { lastProviderEventAt: true },
+      });
+      if (current?.lastProviderEventAt && current.lastProviderEventAt > providerEventAt) {
+        return;
+      }
+      await tx.subscription.upsert({
+        where: { referenceId: user.id },
+        update: subscriptionData,
+        create: {
+          id: `subscription_${user.id}`,
+          referenceId: user.id,
+          ...subscriptionData,
+        },
+      });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     log.done(200, { active, outcome: "succeeded", provider: "apple" });
     return NextResponse.json({ active, plan: active ? "FAMILY_PLUS" : "FREE" });

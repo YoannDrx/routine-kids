@@ -70,7 +70,34 @@ actor APIClient {
         try await send(path: "/api/v1/household", method: "GET", body: Optional<EmptyRequest>.none)
     }
 
-    func createProfile(name: String, age: Int, avatar: String, headline: String?) async throws {
+    func createProfile(
+        name: String,
+        age: Int,
+        avatar: String,
+        headline: String?,
+        photoDataURL: String?
+    ) async throws {
+        struct Body: Encodable {
+            let name: String
+            let age: Int
+            let avatar: String
+            let headline: String?
+            let photoDataUrl: String?
+        }
+        _ = try await send(
+            path: "/api/v1/profiles",
+            method: "POST",
+            body: Body(
+                name: name,
+                age: age,
+                avatar: avatar,
+                headline: headline,
+                photoDataUrl: photoDataURL
+            )
+        ) as EmptyResponse
+    }
+
+    func updateProfile(id: String, name: String, age: Int, avatar: String, headline: String?) async throws {
         struct Body: Encodable {
             let name: String
             let age: Int
@@ -78,9 +105,70 @@ actor APIClient {
             let headline: String?
         }
         _ = try await send(
-            path: "/api/v1/profiles",
-            method: "POST",
+            path: "/api/v1/profiles/\(id)",
+            method: "PATCH",
             body: Body(name: name, age: age, avatar: avatar, headline: headline)
+        ) as EmptyResponse
+    }
+
+    func deleteProfile(id: String) async throws {
+        _ = try await send(
+            path: "/api/v1/profiles/\(id)",
+            method: "DELETE",
+            body: EmptyRequest()
+        ) as EmptyResponse
+    }
+
+    func updateProfilePhoto(id: String, dataURL: String) async throws {
+        struct Body: Encodable { let dataUrl: String }
+        _ = try await send(
+            path: "/api/v1/profiles/\(id)/photo",
+            method: "PUT",
+            body: Body(dataUrl: dataURL)
+        ) as EmptyResponse
+    }
+
+    func removeProfilePhoto(id: String) async throws {
+        _ = try await send(
+            path: "/api/v1/profiles/\(id)/photo",
+            method: "DELETE",
+            body: EmptyRequest()
+        ) as EmptyResponse
+    }
+
+    func updateHousehold(
+        name: String,
+        locale: String,
+        timeZone: String,
+        soundsEnabled: Bool,
+        morningStart: String,
+        morningEnd: String,
+        eveningStart: String,
+        eveningEnd: String
+    ) async throws {
+        struct Body: Encodable {
+            let name: String
+            let locale: String
+            let timeZone: String
+            let soundsEnabled: Bool
+            let morningStart: String
+            let morningEnd: String
+            let eveningStart: String
+            let eveningEnd: String
+        }
+        _ = try await send(
+            path: "/api/v1/household",
+            method: "PATCH",
+            body: Body(
+                name: name,
+                locale: locale,
+                timeZone: timeZone,
+                soundsEnabled: soundsEnabled,
+                morningStart: morningStart,
+                morningEnd: morningEnd,
+                eveningStart: eveningStart,
+                eveningEnd: eveningEnd
+            )
         ) as EmptyResponse
     }
 
@@ -88,30 +176,80 @@ actor APIClient {
         try await send(path: "/api/v1/templates", method: "GET", body: Optional<EmptyRequest>.none)
     }
 
-    func createTemplate(title: String, shortLabel: String, icon: String, durationMinutes: Int) async throws {
+    func saveTemplate(
+        id: String?,
+        title: String,
+        shortLabel: String,
+        icon: String,
+        durationMinutes: Int,
+        imageDataURL: String?,
+        removeImage: Bool
+    ) async throws {
         struct Body: Encodable {
+            let templateId: String?
             let title: String
             let shortLabel: String
             let icon: String
             let durationMinutes: Int
+            let imageDataUrl: String?
+            let removeImage: Bool
         }
         _ = try await send(
             path: "/api/v1/templates",
             method: "POST",
-            body: Body(title: title, shortLabel: shortLabel, icon: icon, durationMinutes: durationMinutes)
+            body: Body(
+                templateId: id,
+                title: title,
+                shortLabel: shortLabel,
+                icon: icon,
+                durationMinutes: durationMinutes,
+                imageDataUrl: imageDataURL,
+                removeImage: removeImage
+            )
         ) as EmptyResponse
     }
 
-    func assignTemplate(templateId: String, childProfileId: String, period: String) async throws {
+    func deleteTemplate(id: String) async throws {
+        _ = try await send(
+            path: "/api/v1/templates/\(id)",
+            method: "DELETE",
+            body: EmptyRequest()
+        ) as EmptyResponse
+    }
+
+    func assignTemplate(
+        templateId: String,
+        childProfileId: String,
+        period: String,
+        scheduleDays: [Int] = Array(0...6)
+    ) async throws {
         struct Body: Encodable {
             let templateId: String
             let childProfileId: String
             let period: String
+            let scheduleDays: [Int]
         }
         _ = try await send(
             path: "/api/v1/routine-tasks",
             method: "POST",
-            body: Body(templateId: templateId, childProfileId: childProfileId, period: period)
+            body: Body(
+                templateId: templateId,
+                childProfileId: childProfileId,
+                period: period,
+                scheduleDays: scheduleDays
+            )
+        ) as EmptyResponse
+    }
+
+    func updateRoutineTaskSchedule(taskId: String, childProfileId: String, scheduleDays: [Int]) async throws {
+        struct Body: Encodable {
+            let childProfileId: String
+            let scheduleDays: [Int]
+        }
+        _ = try await send(
+            path: "/api/v1/routine-tasks/\(taskId)",
+            method: "PATCH",
+            body: Body(childProfileId: childProfileId, scheduleDays: scheduleDays)
         ) as EmptyResponse
     }
 
@@ -134,6 +272,23 @@ actor APIClient {
             path: "/api/v1/routines",
             method: "POST",
             body: Body(childProfileId: childProfileId, period: period, title: title)
+        ) as EmptyResponse
+    }
+
+    func reorderRoutineTasks(childProfileId: String, period: String, orderedTaskIds: [String]) async throws {
+        struct Body: Encodable {
+            let childProfileId: String
+            let period: String
+            let orderedTaskIds: [String]
+        }
+        _ = try await send(
+            path: "/api/v1/routines",
+            method: "PATCH",
+            body: Body(
+                childProfileId: childProfileId,
+                period: period,
+                orderedTaskIds: orderedTaskIds
+            )
         ) as EmptyResponse
     }
 

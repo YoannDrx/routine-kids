@@ -6,6 +6,7 @@ import { getDefaultRoutineSeeds } from "@/lib/default-routines";
 import { getAgeBandFromAge, getToneFromAge } from "@/lib/household";
 import { type AppLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
+import { freePlanLimits } from "@/lib/product-entitlements";
 import { getServerCopy } from "@/lib/server-copy";
 
 type CreateChildProfileInput = {
@@ -136,6 +137,7 @@ export async function createChildProfileWithDefaults(
       age: input.age,
       name: input.name,
       locale: input.locale,
+      taskLimit: freePlanLimits.tasksPerRoutine,
     }).entries()) {
       await tx.routine.create({
         data: {
@@ -226,18 +228,29 @@ export async function updateChildProfileDetails(
       },
     });
 
-    const routineSeeds = getDefaultRoutineSeeds({
+    const previousRoutineSeeds = (["fr", "en"] as const).flatMap((locale) =>
+      getDefaultRoutineSeeds({
+        age: existingProfile.age,
+        name: existingProfile.name,
+        locale,
+      }),
+    );
+    const nextRoutineSeeds = getDefaultRoutineSeeds({
       age: input.age,
       name: input.name,
       locale: input.locale,
     });
 
-    for (const seed of routineSeeds) {
+    for (const seed of nextRoutineSeeds) {
+      const previousTitles = previousRoutineSeeds
+        .filter((candidate) => candidate.period === seed.period)
+        .map((candidate) => candidate.title);
       await tx.routine.updateMany({
         where: {
           householdId: input.householdId,
           childProfileId: existingProfile.id,
           period: seed.period,
+          title: { in: previousTitles },
         },
         data: {
           title: seed.title,

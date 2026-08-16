@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getApiParentContext } from "@/lib/api-parent-context";
 import { createChildProfileWithDefaults } from "@/lib/child-profile-service";
+import { deletePrivateImage, persistPrivateImage } from "@/lib/media-storage";
 import { canCreateChildProfile } from "@/lib/product-entitlements";
 
 const profileSchema = z.object({
@@ -10,6 +11,13 @@ const profileSchema = z.object({
   age: z.number().int().min(2).max(12),
   avatar: z.string().trim().min(1).max(16).default("🧑‍🚀"),
   headline: z.string().trim().max(80).nullable().optional(),
+  photoDataUrl: z
+    .string()
+    .trim()
+    .min(1)
+    .max(1_500_000)
+    .refine((value) => value.startsWith("data:image/"))
+    .optional(),
 });
 
 export async function POST(request: Request) {
@@ -34,15 +42,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "profile_limit_reached" }, { status: 409 });
   }
 
-  const profile = await createChildProfileWithDefaults({
-    householdId: context.household.id,
-    actorUserId: context.user.id,
-    name: parsed.data.name,
-    age: parsed.data.age,
-    avatar: parsed.data.avatar,
-    headline: parsed.data.headline ?? null,
-    locale: context.household.locale === "en" ? "en" : "fr",
-  });
+  let photoUrl: string | null = null;
+  try {
+    if (parsed.data.photoDataUrl) {
+      photoUrl = await persistPrivateImage({
+        dataUrl: parsed.data.photoDataUrl,
+        householdId: context.household.id,
+        category: "profiles",
+      });
+    }
+    const profile = await createChildProfileWithDefaults({
+      householdId: context.household.id,
+      actorUserId: context.user.id,
+      name: parsed.data.name,
+      age: parsed.data.age,
+      avatar: parsed.data.avatar,
+      headline: parsed.data.headline ?? null,
+      photoUrl,
+      locale: context.household.locale === "en" ? "en" : "fr",
+    });
 
-  return NextResponse.json({ profile }, { status: 201 });
+    return NextResponse.json({ profile }, { status: 201 });
+  } catch {
+    await deletePrivateImage(photoUrl).catch(() => undefined);
+    return NextResponse.json({ error: "profile_creation_failed" }, { status: 400 });
+  }
 }

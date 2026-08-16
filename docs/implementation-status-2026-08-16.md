@@ -43,21 +43,23 @@ La réconciliation du 16 août a examiné sept abonnements et ramené quatre dro
 
 ### API et autonomie iOS
 
-- Des API JSON v1 permettent maintenant de créer, modifier et supprimer un profil,
-  lire/créer/supprimer les modèles de mission, renommer une routine et
-  affecter/supprimer une mission.
+- Des API JSON v1 permettent maintenant de lire et modifier le foyer, créer,
+  modifier et supprimer un profil et sa photo privée, gérer les modèles de mission
+  et leurs images, renommer/réordonner une routine, affecter/supprimer/réordonner
+  une mission et modifier ses jours de planification.
 - Un nouveau compte iOS peut créer son premier enfant sans quitter l'application ;
   les routines matin et soir sont générées par le même service métier que le web.
-- Le planificateur natif permet de gérer le titre d'une routine, sa bibliothèque et
-  ses missions principales.
+- Le planificateur natif permet de gérer le titre et l'ordre d'une routine, sa
+  bibliothèque, les missions, leurs jours et les modèles personnalisés.
 - La dernière enveloppe foyer/board est mise en cache avec une version de schéma et
   purgée à la déconnexion. En cas d'échec réseau, l'ancienne board reste affichée,
   l'état hors ligne est explicite et les mutations restent en file.
 - `refresh()` restaure l'état précédent après échec au lieu de laisser l'application
   bloquée en chargement.
-- Un catalogue `Localizable.xcstrings` FR/EN est présent. Les textes statiques
-  SwiftUI couverts utilisent le catalogue ; les messages techniques dynamiques
-  doivent encore être passés en revue avant la soumission finale.
+- Les réglages du foyer, l'édition/suppression des profils, le choix et le recadrage
+  des photos ainsi que l'édition des modèles sont disponibles sans quitter l'app.
+- Un catalogue `Localizable.xcstrings` FR/EN couvre les textes SwiftUI et les
+  messages dynamiques recensés. La recette linguistique humaine reste nécessaire.
 
 ### Direction artistique iOS
 
@@ -68,10 +70,10 @@ La réconciliation du 16 août a examiné sept abonnements et ramené quatre dro
   deux colonnes sur iPad paysage, au lieu d'un `Form` noir générique.
 - Onboarding et planificateur ont été rethémés dans la même famille visuelle.
 
-La parité stricte n'est pas encore certifiée : les polices Fredoka/Nunito ne sont pas
-embarquées, les parcours photo/crop n'existent pas encore en natif, les captures App
-Store n'ont pas été régénérées et la recette visuelle sur iPhone/iPad physique reste à
-faire.
+La parité stricte n'est pas encore certifiée : les parcours photo/crop sont maintenant
+présents, mais les captures App Store n'ont pas été régénérées et la recette visuelle,
+typographique et accessibilité sur iPhone/iPad physiques reste à faire. L'app utilise
+encore une police système arrondie plutôt qu'une police de marque embarquée.
 
 ### Livraison et dépendances
 
@@ -86,9 +88,11 @@ faire.
 ## Validation locale finale
 
 - Prisma : quatre migrations appliquées sur une base PostgreSQL 16 neuve.
-- `pnpm verify` : schéma, TypeScript, ESLint, 39/39 tests Vitest et build Next passent.
-- Playwright : 16/16 passent, dont onboarding authentifié et isolement de deux foyers,
-  à 1024×768 et 1366×1024.
+- `pnpm verify` : schéma, TypeScript, ESLint, 41/41 tests Vitest et build Next passent.
+- Playwright : 16 scénarios passent et 2 doublons métier sont ignorés sur la seconde
+  résolution. Les contrôles publics couvrent 1024×768 et 1366×1024 ; les parcours
+  authentifiés couvrent onboarding, CRUD, limites Free, planning, séparation de deux
+  foyers et webhook Stripe signé/idempotent sur une base PostgreSQL jetable.
 - iOS : build simulateur, 3 tests XCTest et 2 tests Swift Testing passent sur iPhone
   16 Pro / iOS 18.5.
 - `pnpm audit --prod` : aucune vulnérabilité connue.
@@ -107,10 +111,11 @@ fait pas échouer la suite ; elle reste à surveiller dans les logs de productio
    Stripe Tax.
 4. Faire un vrai cycle Resend : inscription, réception, vérification, oubli, réception
    et reset.
-5. Finir les API/UI natives restantes : édition/suppression de profil depuis l'UI,
-   photo/crop, réglages du foyer, jours de planning et réordonnancement complet.
-6. Terminer la localisation native, les polices et la recette accessibilité/visuelle
-   sur iPhone et iPad physiques, puis régénérer les captures App Store.
+5. Terminer la recette linguistique, la police de marque et la recette
+   accessibilité/visuelle sur iPhone et iPad physiques, puis régénérer les captures
+   App Store.
+6. Archiver et téléverser le build iOS 4 qui contient les nouvelles API/UI natives ;
+   le build 3 actuellement sélectionné dans App Store Connect est désormais obsolète.
 7. Valider StoreKit Sandbox/TestFlight : achat, restore, renouvellement, expiration,
    révocation et remboursement.
 8. Accepter Paid Apps, finaliser banque/fiscalité, faire relire les textes légaux et
@@ -121,4 +126,3 @@ fait pas échouer la suite ; elle reste à surveiller dans les logs de productio
 
 Tant que ces points ne sont pas clos, RoutineKids reste une release candidate interne
 et le domaine Production ne doit pas accepter de clients payants.
-

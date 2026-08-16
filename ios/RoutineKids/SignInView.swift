@@ -14,7 +14,7 @@ struct SignInView: View {
         VStack(spacing: 20) {
             Text("RoutineKids")
                 .font(.system(size: 42, weight: .bold, design: .rounded))
-            Text(isSignUp ? "Créer le compte parent" : "Espace parent")
+            Text(isSignUp ? String(localized: "auth.signup.title") : String(localized: "auth.signin.title"))
                 .foregroundStyle(.secondary)
 
             if isSignUp {
@@ -62,7 +62,7 @@ struct SignInView: View {
                     if model.isWorking {
                         ProgressView()
                     } else {
-                        Text(isSignUp ? "Créer mon compte" : "Se connecter")
+                        Text(isSignUp ? String(localized: "auth.signup.action") : String(localized: "auth.signin.action"))
                     }
                 }
                 .frame(maxWidth: .infinity, minHeight: 52)
@@ -77,7 +77,7 @@ struct SignInView: View {
             )
 
             HStack(spacing: 18) {
-                Button(isSignUp ? "J’ai déjà un compte" : "Créer un compte") {
+                Button(isSignUp ? String(localized: "auth.signin.switch") : String(localized: "auth.signup.switch")) {
                     model.errorMessage = nil
                     model.authNotice = nil
                     isSignUp.toggle()
