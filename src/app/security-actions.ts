@@ -11,6 +11,10 @@ import {
   setParentStepUpCookie,
   verifyParentPin,
 } from "@/lib/parent-security";
+import {
+  claimParentStepUpAttempt,
+  resetParentStepUpAttempts,
+} from "@/lib/parent-step-up-rate-limit";
 import { getCurrentAppLocale } from "@/lib/i18n.server";
 import { getRequiredAdmin } from "@/lib/session";
 import { getServerCopy } from "@/lib/server-copy";
@@ -18,7 +22,11 @@ import { getServerCopy } from "@/lib/server-copy";
 export type ParentGateMutationResult = {
   status: "success" | "error";
   message: string;
-  code?: "parent_pin_required" | "parent_pin_not_configured" | "invalid_pin";
+  code?:
+    | "parent_pin_required"
+    | "parent_pin_not_configured"
+    | "invalid_pin"
+    | "too_many_attempts";
 };
 
 export async function validateParentPinAction(input: {
@@ -67,6 +75,15 @@ export async function validateParentPinAction(input: {
     };
   }
 
+  const attempt = await claimParentStepUpAttempt(user.id);
+  if (!attempt.allowed) {
+    return {
+      status: "error",
+      message: copy.actions.parentPinIncorrect,
+      code: "too_many_attempts",
+    };
+  }
+
   if (!settings.adminPinHash) {
     try {
       const verified = await auth.api.verifyPassword({
@@ -112,6 +129,7 @@ export async function validateParentPinAction(input: {
     stepUpMinutes: settings.stepUpMinutes,
     securityVersion: settings.updatedAt.getTime(),
   });
+  await resetParentStepUpAttempts(user.id);
 
   return {
     status: "success",

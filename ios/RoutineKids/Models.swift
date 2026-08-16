@@ -32,10 +32,21 @@ struct Subscription: Codable, Sendable {
     let plan: String
     let status: String?
     let provider: String
+    let environment: String
     let periodEnd: String?
+    let revokedAt: String?
 
     var isPremium: Bool {
-        plan == "FAMILY_PLUS" && ["ACTIVE", "TRIALING"].contains(status)
+        guard
+            plan == "FAMILY_PLUS",
+            ["ACTIVE", "TRIALING"].contains(status),
+            ["STRIPE", "APPLE"].contains(provider),
+            revokedAt == nil,
+            provider != "STRIPE" || environment == "PRODUCTION"
+        else { return false }
+
+        guard let periodEnd else { return true }
+        return ISO8601DateFormatter().date(from: periodEnd).map { $0 > .now } ?? false
     }
 }
 
@@ -83,6 +94,20 @@ struct CompletionMutation: Codable, Identifiable, Sendable {
     let completed: Bool
 
     var id: String { mutationId }
+}
+
+struct TemplateEnvelope: Codable, Sendable {
+    let templates: [TaskTemplateSummary]
+}
+
+struct TaskTemplateSummary: Codable, Identifiable, Sendable {
+    let id: String
+    let title: String
+    let shortLabel: String?
+    let icon: String?
+    let color: String?
+    let durationMinutes: Int?
+    let isBuiltIn: Bool
 }
 
 struct APIError: Codable, Error, LocalizedError, Sendable {

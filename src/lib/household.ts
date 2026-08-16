@@ -149,12 +149,20 @@ export async function getOwnerSubscription(ownerUserId: string) {
     select: {
       plan: true,
       status: true,
+      provider: true,
+      environment: true,
+      periodEnd: true,
+      revokedAt: true,
       stripeCustomerId: true,
       stripeSubscriptionId: true,
     },
   }) as Promise<{
     plan: BillingPlan;
     status: SubscriptionStatus | null;
+    provider: import("@prisma/client").BillingProvider;
+    environment: import("@prisma/client").BillingEnvironment;
+    periodEnd: Date | null;
+    revokedAt: Date | null;
     stripeCustomerId: string | null;
     stripeSubscriptionId: string | null;
   } | null>;

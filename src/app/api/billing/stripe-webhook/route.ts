@@ -5,6 +5,7 @@ import { startApiRequest } from "@/lib/api-observability";
 import { prisma } from "@/lib/prisma";
 import {
   getLocalPlanForStripeSubscription,
+  getStripeBillingEnvironment,
   getStripeClient,
   getStripeSubscriptionProductId,
   getSubscriptionPeriod,
@@ -81,7 +82,12 @@ async function resolveUserId(subscription: Stripe.Subscription) {
 async function syncSubscription(
   subscription: Stripe.Subscription,
   eventId: string,
+  liveMode: boolean,
+  providerEventAt: Date,
 ) {
+  if (subscription.livemode !== liveMode) {
+    throw new Error("Stripe event and subscription environments do not match.");
+  }
   const userId = await resolveUserId(subscription);
 
   if (!userId) {
@@ -107,6 +113,17 @@ async function syncSubscription(
   }
 
   await prisma.$transaction(async (transaction) => {
+    const existing = await transaction.subscription.findUnique({
+      where: { referenceId: userId },
+      select: { lastProviderEventAt: true },
+    });
+    if (
+      existing?.lastProviderEventAt &&
+      existing.lastProviderEventAt > providerEventAt
+    ) {
+      return;
+    }
+
     await transaction.subscription.upsert({
       where: {
         referenceId: userId,
@@ -116,13 +133,11 @@ async function syncSubscription(
         status,
         householdId: household?.id,
         provider: "STRIPE",
-        environment: process.env.STRIPE_SECRET_KEY?.startsWith("sk_live_")
-          ? "PRODUCTION"
-          : "TEST",
+        environment: getStripeBillingEnvironment(liveMode),
         providerCustomerId: stripeCustomerId,
         providerSubscriptionId: subscription.id,
         productId,
-        lastProviderEventAt: new Date(),
+        lastProviderEventAt: providerEventAt,
         stripeCustomerId,
         stripeSubscriptionId: subscription.id,
         periodStart: period.periodStart,
@@ -136,13 +151,11 @@ async function syncSubscription(
         status,
         householdId: household?.id,
         provider: "STRIPE",
-        environment: process.env.STRIPE_SECRET_KEY?.startsWith("sk_live_")
-          ? "PRODUCTION"
-          : "TEST",
+        environment: getStripeBillingEnvironment(liveMode),
         providerCustomerId: stripeCustomerId,
         providerSubscriptionId: subscription.id,
         productId,
-        lastProviderEventAt: new Date(),
+        lastProviderEventAt: providerEventAt,
         stripeCustomerId,
         stripeSubscriptionId: subscription.id,
         periodStart: period.periodStart,
@@ -180,6 +193,8 @@ async function syncSubscription(
 async function handleCheckoutCompleted(
   session: Stripe.Checkout.Session,
   eventId: string,
+  liveMode: boolean,
+  providerEventAt: Date,
 ) {
   const userId = session.client_reference_id ?? session.metadata?.userId;
   const stripeSubscriptionId = getStripeId(session.subscription);
@@ -192,6 +207,10 @@ async function handleCheckoutCompleted(
   const stripe = getStripeClient();
   const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
 
+  if (subscription.livemode !== liveMode) {
+    throw new Error("Stripe Checkout and subscription environments do not match.");
+  }
+
   if (!subscription.metadata.userId) {
     subscription.metadata.userId = userId;
   }
@@ -200,7 +219,7 @@ async function handleCheckoutCompleted(
     subscription.customer = stripeCustomerId;
   }
 
-  await syncSubscription(subscription, eventId);
+  await syncSubscription(subscription, eventId, liveMode, providerEventAt);
 }
 
 export async function POST(request: Request) {
@@ -255,12 +274,22 @@ export async function POST(request: Request) {
 
     switch (event.type) {
       case "checkout.session.completed":
-        await handleCheckoutCompleted(event.data.object, event.id);
+        await handleCheckoutCompleted(
+          event.data.object,
+          event.id,
+          event.livemode,
+          new Date(event.created * 1_000),
+        );
         break;
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted":
-        await syncSubscription(event.data.object, event.id);
+        await syncSubscription(
+          event.data.object,
+          event.id,
+          event.livemode,
+          new Date(event.created * 1_000),
+        );
         break;
       default:
         break;

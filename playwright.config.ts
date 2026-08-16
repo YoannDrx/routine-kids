@@ -36,8 +36,10 @@ export default defineConfig({
       ...process.env,
       NEXT_PUBLIC_APP_URL: "http://127.0.0.1:3010",
       BETTER_AUTH_URL: "http://127.0.0.1:3010",
-      RESEND_API_KEY: process.env.RESEND_API_KEY ?? "re_e2e_build_only",
-      EMAIL_FROM: process.env.EMAIL_FROM ?? "RoutineKids <e2e@example.com>",
+      VERCEL_ENV: "preview",
+      ROUTINEKIDS_INSECURE_TEST_COOKIES: "true",
+      RESEND_API_KEY: "",
+      EMAIL_FROM: "",
     },
   },
 });

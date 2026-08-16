@@ -9,38 +9,14 @@ import {
   setParentStepUpCookie,
   verifyParentPin,
 } from "@/lib/parent-security";
-import { prisma } from "@/lib/prisma";
+import {
+  claimParentStepUpAttempt,
+  resetParentStepUpAttempts,
+} from "@/lib/parent-step-up-rate-limit";
 
 const stepUpSchema = z.object({
   credential: z.string().trim().min(1).max(128),
 });
-
-const attemptWindowMs = 10 * 60_000;
-const maximumAttempts = 5;
-
-async function claimAttempt(userId: string) {
-  const key = `parent-step-up:${userId}`;
-  const now = BigInt(Date.now());
-
-  return prisma.$transaction(async (tx) => {
-    const current = await tx.rateLimit.findUnique({ where: { key } });
-    if (!current || now - current.lastRequest > BigInt(attemptWindowMs)) {
-      await tx.rateLimit.upsert({
-        where: { key },
-        update: { count: 1, lastRequest: now },
-        create: { key, count: 1, lastRequest: now },
-      });
-      return true;
-    }
-    if (current.count >= maximumAttempts) return false;
-
-    await tx.rateLimit.update({
-      where: { key },
-      data: { count: { increment: 1 }, lastRequest: now },
-    });
-    return true;
-  });
-}
 
 export async function POST(request: Request) {
   const log = startApiRequest(request, "/api/v1/parent/step-up");
@@ -56,11 +32,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }
 
-  if (!(await claimAttempt(user.id))) {
+  const attempt = await claimParentStepUpAttempt(user.id);
+  if (!attempt.allowed) {
     log.done(429, { outcome: "rate_limited" });
     return NextResponse.json(
       { error: "too_many_attempts" },
-      { status: 429, headers: { "Retry-After": "600" } },
+      {
+        status: 429,
+        headers: { "Retry-After": String(attempt.retryAfterSeconds) },
+      },
     );
   }
 
@@ -101,7 +81,7 @@ export async function POST(request: Request) {
       stepUpMinutes: settings.stepUpMinutes,
       securityVersion: settings.updatedAt.getTime(),
     }),
-    prisma.rateLimit.deleteMany({ where: { key: `parent-step-up:${user.id}` } }),
+    resetParentStepUpAttempts(user.id),
   ]);
 
   log.done(200, { outcome: "verified" });

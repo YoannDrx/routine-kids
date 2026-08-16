@@ -245,7 +245,7 @@ export async function activateBoardPremiumAction(input: {
     const price = await getValidatedFamilyPrice(parsed.data.interval);
 
     if (
-      isPremiumSubscription(subscription.plan, subscription.status) &&
+      isPremiumSubscription(subscription) &&
       subscription.stripeCustomerId
     ) {
       const portal = await stripe.billingPortal.sessions.create({
@@ -262,6 +262,7 @@ export async function activateBoardPremiumAction(input: {
 
     const checkout = await stripe.checkout.sessions.create({
       mode: "subscription",
+      integration_identifier: "routinekids_checkout_qksmvzpx",
       client_reference_id: user.id,
       customer: subscription.stripeCustomerId ?? undefined,
       customer_email: subscription.stripeCustomerId ? undefined : user.email,

@@ -186,7 +186,9 @@ export async function setParentStepUpCookie(input: {
   }), {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure:
+      process.env.NODE_ENV === "production" &&
+      process.env.ROUTINEKIDS_INSECURE_TEST_COOKIES !== "true",
     path: "/",
     expires: new Date(expiresAt),
   });
@@ -203,13 +205,16 @@ export async function getParentSecuritySummary(
 ): Promise<ParentSecuritySummary> {
   const settings = await getParentSecurityRecord(userId);
   const pinConfigured = Boolean(settings?.adminPinHash);
+  const stepUpActive = settings
+    ? await hasActiveParentStepUp(userId, settings.updatedAt.getTime())
+    : false;
 
   return {
     pinConfigured,
     stepUpMinutes: settings?.stepUpMinutes ?? defaultStepUpMinutes,
-    stepUpActive: pinConfigured
-      ? await hasActiveParentStepUp(userId, settings?.updatedAt.getTime())
-      : false,
+    // A new account first unlocks with its account password, before choosing a
+    // PIN. The signed step-up cookie is authoritative in both cases.
+    stepUpActive,
   };
 }
 

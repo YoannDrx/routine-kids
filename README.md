@@ -18,6 +18,7 @@ réunit la version et les abonnements. La publication attend encore le runtime S
 le déploiement public final, la recette TestFlight/Sandbox et les accords Paid Apps.
 Voir :
 
+- [`docs/implementation-status-2026-08-16.md`](docs/implementation-status-2026-08-16.md)
 - [`docs/implementation-status-2026-08-10.md`](docs/implementation-status-2026-08-10.md)
 - [`docs/production-runbook.md`](docs/production-runbook.md)
 - [`docs/app-store-submission.md`](docs/app-store-submission.md)

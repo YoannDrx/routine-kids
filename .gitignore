@@ -13,6 +13,7 @@ coverage
 .env.production.local
 .neon
 .codex-temp
+.routinekids-snapshots
 playwright-report
 test-results
 ios/**/xcuserdata

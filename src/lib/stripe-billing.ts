@@ -1,6 +1,10 @@
 import "server-only";
 
-import { BillingPlan, SubscriptionStatus } from "@prisma/client";
+import {
+  BillingEnvironment,
+  BillingPlan,
+  SubscriptionStatus,
+} from "@prisma/client";
 import Stripe from "stripe";
 
 import { ensureServerEnv } from "@/lib/env.server";
@@ -72,6 +76,12 @@ export function getAppUrl() {
   }
 
   return configuredUrl.replace(/\/$/, "");
+}
+
+export function getStripeBillingEnvironment(liveMode: boolean) {
+  return liveMode
+    ? BillingEnvironment.PRODUCTION
+    : BillingEnvironment.TEST;
 }
 
 export function toSubscriptionStatus(status: Stripe.Subscription.Status) {

@@ -8,7 +8,9 @@ final class SubscriptionTests: XCTestCase {
                 plan: "FAMILY_PLUS",
                 status: "ACTIVE",
                 provider: "APPLE",
-                periodEnd: nil
+                environment: "TEST",
+                periodEnd: nil,
+                revokedAt: nil
             ).isPremium
         )
         XCTAssertTrue(
@@ -16,7 +18,9 @@ final class SubscriptionTests: XCTestCase {
                 plan: "FAMILY_PLUS",
                 status: "TRIALING",
                 provider: "STRIPE",
-                periodEnd: nil
+                environment: "PRODUCTION",
+                periodEnd: nil,
+                revokedAt: nil
             ).isPremium
         )
         XCTAssertFalse(
@@ -24,7 +28,9 @@ final class SubscriptionTests: XCTestCase {
                 plan: "FAMILY_PLUS",
                 status: "PAST_DUE",
                 provider: "APPLE",
-                periodEnd: nil
+                environment: "TEST",
+                periodEnd: nil,
+                revokedAt: nil
             ).isPremium
         )
         XCTAssertFalse(
@@ -32,7 +38,19 @@ final class SubscriptionTests: XCTestCase {
                 plan: "FREE",
                 status: "ACTIVE",
                 provider: "NONE",
-                periodEnd: nil
+                environment: "TEST",
+                periodEnd: nil,
+                revokedAt: nil
+            ).isPremium
+        )
+        XCTAssertFalse(
+            Subscription(
+                plan: "FAMILY_PLUS",
+                status: "ACTIVE",
+                provider: "STRIPE",
+                environment: "TEST",
+                periodEnd: nil,
+                revokedAt: nil
             ).isPremium
         )
     }

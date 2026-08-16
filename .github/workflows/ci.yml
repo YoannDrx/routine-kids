@@ -38,6 +38,7 @@ jobs:
       EMAIL_FROM: RoutineKids CI <ci@example.com>
       DATABASE_URL: postgresql://routinekids:routinekids@127.0.0.1:5432/routinekids
       DIRECT_URL: postgresql://routinekids:routinekids@127.0.0.1:5432/routinekids
+      E2E_AUTHENTICATED: "true"
 
     steps:
       - uses: actions/checkout@v7
@@ -60,3 +61,20 @@ jobs:
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
+
+  verify-production-deployment:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      EXPECTED_GIT_SHA: ${{ github.sha }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: node scripts/verify-vercel-production.mjs

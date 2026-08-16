@@ -1,0 +1,357 @@
+{
+  "sourceLanguage": "fr",
+  "strings": {
+    "NOUVEL ASTRONAUTE": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "NEW ASTRONAUT" }
+        }
+      }
+    },
+    "Qui rejoint l’équipage ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Who is joining the crew?" }
+        }
+      }
+    },
+    "Deux routines prêtes à jouer seront créées automatiquement.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Two ready-to-play routines will be created automatically." }
+        }
+      }
+    },
+    "Avatar": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Avatar" }
+        }
+      }
+    },
+    "Prénom": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "First name" }
+        }
+      }
+    },
+    "Petite phrase (facultatif)": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Short phrase (optional)" }
+        }
+      }
+    },
+    "Lancer les routines": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Launch the routines" }
+        }
+      }
+    },
+    "Créer un profil": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Create a profile" }
+        }
+      }
+    },
+    "Annuler": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Cancel" }
+        }
+      }
+    },
+    "Mode hors ligne · synchronisation en attente": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Offline mode · waiting to sync" }
+        }
+      }
+    },
+    "Ajouter un astronaute": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Add an astronaut" }
+        }
+      }
+    },
+    "Heure actuelle": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Current time" }
+        }
+      }
+    },
+    "Matin": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Morning" }
+        }
+      }
+    },
+    "Soir": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Evening" }
+        }
+      }
+    },
+    "Réglages parents": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Parent settings" }
+        }
+      }
+    },
+    "Préparons la première mission": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Let’s prepare the first mission" }
+        }
+      }
+    },
+    "Créez le profil de votre enfant. RoutineKids préparera automatiquement les routines du matin et du soir.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Create your child’s profile. RoutineKids will automatically prepare morning and evening routines." }
+        }
+      }
+    },
+    "Créer le premier profil": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Create the first profile" }
+        }
+      }
+    },
+    "Ajouter des missions": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Add missions" }
+        }
+      }
+    },
+    "Paramètres": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Settings" }
+        }
+      }
+    },
+    "Ajouter": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Add" }
+        }
+      }
+    },
+    "Routines matin et soir": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Morning and evening routines" }
+        }
+      }
+    },
+    "Centre de support": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Support center" }
+        }
+      }
+    },
+    "Se déconnecter": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Sign out" }
+        }
+      }
+    },
+    "Supprimer mon compte et mes données": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Delete my account and data" }
+        }
+      }
+    },
+    "La suppression est définitive. Un abonnement Apple doit être résilié séparément.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Deletion is permanent. An Apple subscription must be cancelled separately." }
+        }
+      }
+    },
+    "Abonnement actif": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Active subscription" }
+        }
+      }
+    },
+    "Gérer l’abonnement": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Manage subscription" }
+        }
+      }
+    },
+    "Restaurer les achats": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Restore purchases" }
+        }
+      }
+    },
+    "Paiement via votre identifiant Apple. Renouvellement automatique sauf résiliation au moins 24 h avant l’échéance.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Payment is charged to your Apple ID. Auto-renews unless cancelled at least 24 hours before renewal." }
+        }
+      }
+    },
+    "Confidentialité": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Privacy" }
+        }
+      }
+    },
+    "Conditions": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Terms" }
+        }
+      }
+    },
+    "Suppression définitive": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Permanent deletion" }
+        }
+      }
+    },
+    "Si vous payez via Apple, gérez d’abord l’abonnement dans l’App Store pour éviter son renouvellement.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "If you pay through Apple, manage the subscription in the App Store first to prevent renewal." }
+        }
+      }
+    },
+    "Tapez SUPPRIMER": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Type DELETE" }
+        }
+      }
+    },
+    "Supprimer définitivement": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Delete permanently" }
+        }
+      }
+    },
+    "Supprimer le compte": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Delete account" }
+        }
+      }
+    },
+    "Prénom du parent": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Parent’s first name" }
+        }
+      }
+    },
+    "Email": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Email" }
+        }
+      }
+    },
+    "Mot de passe oublié": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Forgot password" }
+        }
+      }
+    },
+    "Support": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Support" }
+        }
+      }
+    },
+    "La même confirmation est affichée pour toutes les adresses afin de protéger les comptes.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "The same confirmation is shown for every address to protect accounts." }
+        }
+      }
+    },
+    "Si cette adresse existe, un lien de réinitialisation vient d’être envoyé.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "If this address exists, a reset link has been sent." }
+        }
+      }
+    },
+    "Envoyer le lien": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Send link" }
+        }
+      }
+    },
+    "Fermer": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Close" }
+        }
+      }
+    },
+    "Espace parents": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Parent area" }
+        }
+      }
+    },
+    "Ouvrir les réglages": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Open settings" }
+        }
+      }
+    },
+    "Vérification parentale": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Parent verification" }
+        }
+      }
+    },
+    "Synchronisation…": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Syncing…" }
+        }
+      }
+    },
+    "Routine vide": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Empty routine" }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
+

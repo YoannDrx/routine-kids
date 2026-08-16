@@ -35,7 +35,9 @@ export async function GET(request: Request) {
           plan: true,
           status: true,
           provider: true,
+          environment: true,
           periodEnd: true,
+          revokedAt: true,
         },
       },
       childProfiles: {

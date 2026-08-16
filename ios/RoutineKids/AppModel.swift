@@ -14,10 +14,12 @@ final class AppModel {
     var errorMessage: String?
     var authNotice: String?
     var isWorking = false
+    var isOffline = false
 
     let deviceId: String
     private let api = APIClient.shared
-    private let offlineStore = OfflineMutationStore()
+    private let offlineStore: OfflineMutationStore
+    private let envelopeStore: HouseholdEnvelopeStore
     private var pendingMutations: [CompletionMutation]
 
     init(defaults: UserDefaults = .standard) {
@@ -28,7 +30,21 @@ final class AppModel {
             defaults.set(created, forKey: "routinekids.device-id")
             deviceId = created
         }
+        offlineStore = OfflineMutationStore(defaults: defaults)
+        envelopeStore = HouseholdEnvelopeStore(defaults: defaults)
         pendingMutations = offlineStore.load()
+
+        if let cachedEnvelope = envelopeStore.load() {
+            envelope = cachedEnvelope
+            selectedProfileId = cachedEnvelope.household.childProfiles.first?.id
+            completedTaskIds = Set(
+                cachedEnvelope.completions
+                    .filter { $0.childProfileId == selectedProfileId }
+                    .map(\.taskId)
+            )
+            phase = .ready
+            isOffline = true
+        }
     }
 
     var selectedProfile: ChildProfile? {
@@ -44,10 +60,13 @@ final class AppModel {
         do {
             try await refresh()
         } catch let error as APIError where error.error == "unauthorized" {
+            envelopeStore.clear()
+            envelope = nil
             phase = .signedOut
         } catch {
             errorMessage = error.localizedDescription
-            phase = .signedOut
+            isOffline = true
+            phase = envelope == nil ? .signedOut : .ready
         }
     }
 
@@ -94,6 +113,8 @@ final class AppModel {
         completedTaskIds = []
         authNotice = nil
         offlineStore.clear()
+        envelopeStore.clear()
+        isOffline = false
         phase = .signedOut
     }
 
@@ -115,18 +136,53 @@ final class AppModel {
         }
     }
 
+    func createProfile(name: String, age: Int, avatar: String, headline: String?) async -> Bool {
+        isWorking = true
+        errorMessage = nil
+        defer { isWorking = false }
+
+        do {
+            try await api.createProfile(name: name, age: age, avatar: avatar, headline: headline)
+            try await refresh()
+            selectedProfileId = envelope?.household.childProfiles.last?.id
+            return true
+        } catch let error as APIError {
+            errorMessage = error.error.replacingOccurrences(of: "_", with: " ")
+            return false
+        } catch {
+            errorMessage = "Le profil n’a pas pu être créé. Réessayez."
+            return false
+        }
+    }
+
     func refresh() async throws {
-        phase = .loading
-        let response = try await api.loadHousehold()
-        envelope = response
-        selectedProfileId = selectedProfileId ?? response.household.childProfiles.first?.id
-        completedTaskIds = Set(
-            response.completions
-                .filter { $0.childProfileId == selectedProfile?.id }
-                .map(\.taskId)
-        )
-        phase = .ready
-        await flushPendingMutations()
+        let previousEnvelope = envelope
+        let previousProfileId = selectedProfileId
+        let previousCompletedTaskIds = completedTaskIds
+        if previousEnvelope == nil { phase = .loading }
+
+        do {
+            let response = try await api.loadHousehold()
+            envelope = response
+            selectedProfileId = previousProfileId ?? response.household.childProfiles.first?.id
+            completedTaskIds = Set(
+                response.completions
+                    .filter { $0.childProfileId == selectedProfile?.id }
+                    .map(\.taskId)
+            )
+            envelopeStore.save(response)
+            errorMessage = nil
+            isOffline = false
+            phase = .ready
+            await flushPendingMutations()
+        } catch {
+            envelope = previousEnvelope
+            selectedProfileId = previousProfileId
+            completedTaskIds = previousCompletedTaskIds
+            isOffline = true
+            phase = previousEnvelope == nil ? .signedOut : .ready
+            throw error
+        }
     }
 
     func selectProfile(_ profile: ChildProfile) {
@@ -141,6 +197,16 @@ final class AppModel {
 
     func toggle(task: RoutineTask) async {
         guard let profile = selectedProfile, let dayKey = envelope?.dayKey else { return }
+        await toggle(task: task, profile: profile, dayKey: dayKey)
+    }
+
+    func toggle(task: RoutineTask, profile: ChildProfile) async {
+        guard let dayKey = envelope?.dayKey else { return }
+        selectProfile(profile)
+        await toggle(task: task, profile: profile, dayKey: dayKey)
+    }
+
+    private func toggle(task: RoutineTask, profile: ChildProfile, dayKey: String) async {
         let completed = !completedTaskIds.contains(task.id)
         if completed { completedTaskIds.insert(task.id) } else { completedTaskIds.remove(task.id) }
 

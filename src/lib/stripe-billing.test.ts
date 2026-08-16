@@ -6,12 +6,17 @@ vi.mock("@/lib/env.server", () => ({ ensureServerEnv: vi.fn() }));
 
 import {
   familyPriceConfiguration,
+  getStripeBillingEnvironment,
   getLocalPlanForStripeSubscription,
   getSubscriptionPeriod,
   toSubscriptionStatus,
 } from "@/lib/stripe-billing";
 
 describe("RoutineKids Stripe billing", () => {
+  it("derives the billing environment from the signed event livemode flag", () => {
+    expect(getStripeBillingEnvironment(true)).toBe("PRODUCTION");
+    expect(getStripeBillingEnvironment(false)).toBe("TEST");
+  });
   it("locks the public Family Plus prices against legacy catalog values", () => {
     expect(familyPriceConfiguration).toEqual({
       monthly: { amount: 499, currency: "eur", interval: "month" },

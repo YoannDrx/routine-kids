@@ -20,10 +20,7 @@ export async function getProductEntitlement(userId: string) {
   const subscription = await getOwnerSubscription(userId);
 
   return {
-    isPremium: isPremiumSubscription(
-      subscription?.plan,
-      subscription?.status,
-    ),
+    isPremium: isPremiumSubscription(subscription),
   };
 }
 

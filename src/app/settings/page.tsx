@@ -75,7 +75,7 @@ export default async function SettingsPage() {
         morningEnd: household.morningEnd,
         eveningStart: household.eveningStart,
         eveningEnd: household.eveningEnd,
-        premiumActive: isPremiumSubscription(subscription?.plan, subscription?.status),
+        premiumActive: isPremiumSubscription(subscription),
       }
     : undefined;
 
