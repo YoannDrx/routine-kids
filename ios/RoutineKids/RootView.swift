@@ -18,6 +18,7 @@ struct RootView: View {
                 BoardView()
             }
         }
+        .font(RoutineTypography.body())
     }
 }
 

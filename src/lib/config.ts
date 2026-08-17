@@ -19,6 +19,7 @@ const requiredCommercialProductionEnv = [
   "STRIPE_BILLING_PORTAL_CONFIGURATION_ID",
   "STRIPE_FAMILY_PLUS_MONTHLY_PRICE_ID",
   "STRIPE_FAMILY_PLUS_YEARLY_PRICE_ID",
+  "COMMERCIAL_SALES_ENABLED",
   "APPLE_APP_BUNDLE_ID",
   "APPLE_APP_ID",
   "APPLE_FAMILY_PLUS_MONTHLY_PRODUCT_ID",
@@ -38,6 +39,31 @@ export function isDatabaseConfigured() {
 
 export function isVercelProduction() {
   return process.env.VERCEL_ENV === "production";
+}
+
+function getCommercialSalesTesterEmails() {
+  return new Set(
+    (process.env.COMMERCIAL_SALES_TESTER_EMAILS ?? "")
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  );
+}
+
+export function isCommercialSalesEnabled() {
+  if (!isVercelProduction()) {
+    return true;
+  }
+
+  return process.env.COMMERCIAL_SALES_ENABLED?.trim().toLowerCase() === "true";
+}
+
+export function canStartCommercialCheckout(email: string) {
+  if (isCommercialSalesEnabled()) {
+    return true;
+  }
+
+  return getCommercialSalesTesterEmails().has(email.trim().toLowerCase());
 }
 
 export function getMissingCommercialProductionEnv() {

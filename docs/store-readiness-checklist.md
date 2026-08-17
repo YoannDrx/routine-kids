@@ -19,7 +19,7 @@ ce dépôt et constitue un chantier produit distinct.
 2. Déployer le web de production et vérifier les parcours réels.
 3. Configurer l'URL Apple App Store Server Notifications V2.
 4. Créer le compte de review, les données fictives et les captures. **Terminé.**
-5. Archiver/téléverser le build 4, l'installer via TestFlight, tester les achats
+5. Archiver/téléverser le build 5, l'installer via TestFlight, tester les achats
    Sandbox et corriger les écarts.
 6. Faire compléter par le titulaire les contrats Paid Apps, la fiscalité et la banque.
 7. Associer la version, les deux abonnements et leur groupe au même brouillon App
@@ -41,8 +41,8 @@ de suppression de compte, restauration d'achat et expiration d'abonnement en Tes
 | FAIT | Inscription et reset de mot de passe natifs | Aucun renvoi obligatoire vers un navigateur |
 | FAIT | Sécurité HTTP/PWA | CSP, HSTS production, no-store authentifié, service worker limité |
 | FAIT | Prix Stripe strictement validés côté serveur | EUR 4,99/mois et 39,99/an, périodicité et statut contrôlés |
-| FAIT | Vérifications web | Prisma, TypeScript, ESLint, 45 tests Vitest, build et audit dépendances passent localement |
-| FAIT | Vérifications iOS | 3 XCTest + 2 Swift Testing et build 4 simulateur passent |
+| FAIT | Vérifications web | Prisma, TypeScript, ESLint, 49 tests Vitest, build et audit dépendances passent localement |
+| FAIT | Vérifications iOS | 3 XCTest + 2 Swift Testing + 2 XCUITest et build 5 simulateur passent |
 | FAIT | Cycle de session iOS | Origine Better Auth envoyée, cookies du domaine purgés même si le sign-out serveur échoue, reconnexion validée sans réinstallation |
 | FAIT | Playwright local final | 16 scénarios réussis, dont parcours authentifiés et webhook Stripe ; à rejouer après déploiement public |
 | PRÊT | Test manuel accessibilité | VoiceOver, Dynamic Type XXL, contraste et rotation sur iPhone/iPad physiques |
@@ -69,8 +69,8 @@ déploiement web précédent ; ne supprimer aucune colonne/table dans l'urgence.
 | FAIT | Secrets cœur configurés | Neon, Better Auth, Blob et certificats racine Apple |
 | FAIT | IDs de prix Stripe live configurés | Mensuel `price_1U2y48H4VwBfiTEIheyAI0FY`, annuel `price_1U2y6DH4VwBfiTEIHBYtVejc` |
 | PARTIEL | Resend production | Clé dédiée et expéditeur configurés ; acceptation API constatée, réception réelle vérification/reset encore à confirmer |
-| BLOQUÉ | Runtime Stripe live | Ajouter une clé restreinte avec Customers, Checkout, Billing Portal et Subscriptions |
-| BLOQUÉ | Portail Stripe dédié | Créer une configuration RoutineKids et ajouter `STRIPE_BILLING_PORTAL_CONFIGURATION_ID` |
+| FAIT | Runtime Stripe live | Compte RoutineKids, clé restreinte et secrets Vercel Production configurés |
+| FAIT | Portail Stripe dédié | Configuration RoutineKids créée et reliée à l'application |
 | PRÊT | Déploiement production | Déployer seulement après Neon + e-mail + Stripe runtime |
 | PRÊT | Webhook Stripe | URL `/api/billing/stripe-webhook`, événements checkout/subscription, secret dans Vercel |
 | PRÊT | Smoke tests publics | `/`, auth, e-mail, reset, `/privacy`, `/terms`, `/support`, `/api/health` |
@@ -84,10 +84,10 @@ déploiement web précédent ; ne supprimer aucune colonne/table dans l'urgence.
 | FAIT | Produit live | `prod_V34CEIffnjMeYy` — RoutineKids Family Plus |
 | FAIT | Tarif mensuel live | 4,99 EUR TTC/mois |
 | FAIT | Tarif annuel live | 39,99 EUR TTC/an, environ 33 % de remise |
-| BLOQUÉ | Identité du compte | Le compte Stripe partagé expose publiquement Pressay ; choisir un compte RoutineKids dédié ou valider explicitement cette cohabitation |
-| BLOQUÉ | Clé live applicative | La clé CLI actuelle est volontairement en lecture seule |
-| PRÊT | Endpoint webhook live | À créer après que la route soit réellement déployée |
-| PRÊT | Portail client | Configuration dédiée exigée par le code ; vérifier produits RoutineKids, annulation, retour et moyens de paiement |
+| FAIT | Identité du compte | Compte Stripe RoutineKids dédié créé |
+| FAIT | Clé live applicative | Clé restreinte dédiée ajoutée à Vercel Production |
+| FAIT | Endpoint webhook live | Endpoint créé avec secret de signature ; livraison à vérifier après déploiement |
+| FAIT | Portail client | Configuration RoutineKids dédiée créée ; cycle live à vérifier après déploiement |
 | PRÊT | Achat live contrôlé | Utiliser un vrai compte interne, rembourser si nécessaire, vérifier l'idempotence |
 
 Le lancement conserve 4,99/39,99 comme prix fondateur. Réévaluer après trois mois ou
@@ -120,8 +120,8 @@ démontrer la valeur premium.
 | FAIT | Équipe et distribution Apple | Team `G9WFV7HNV6`, certificat et profil de distribution automatiques |
 | FAIT | Archive Release initiale | Version 1.0, build 2, archive validée et uploadée sans erreur |
 | FAIT | Archive corrective historique | Build 3 archivé et validé, désormais obsolète fonctionnellement |
-| PRÊT | Archive et upload final | Build 4 à archiver, téléverser, traiter et sélectionner sur la version 1.0 |
-| PARTIEL | TestFlight interne | Compte titulaire ajouté au groupe ; build 4 à installer sur appareil |
+| PRÊT | Archive et upload final | Build 5 à archiver, téléverser, traiter et sélectionner sur la version 1.0 |
+| PARTIEL | TestFlight interne | Compte titulaire ajouté au groupe ; build 5 à installer sur appareil |
 | PRÊT | Recette TestFlight | Auth, offline, rotation, photos, rappels, achat, restore, delete account |
 | FAIT | Export conformité | `ITSAppUsesNonExemptEncryption=false`, accepté lors de l'upload |
 
@@ -139,7 +139,7 @@ démontrer la valeur premium.
 | FAIT | Questionnaire d'âge | Classification calculée 4+, aucun contenu sensible déclaré |
 | FAIT | Prix et disponibilité de l'app | Téléchargement gratuit, diffusion publique, France comme base, 175 territoires |
 | FAIT | Compte de démo | Compte fictif vérifié, foyer et routines stables, identifiants enregistrés uniquement dans App Store Connect |
-| PARTIEL | Captures | Anciennes captures chargées ; à régénérer après validation de la DA du build 4 |
+| PARTIEL | Captures | Anciennes captures chargées ; à régénérer après validation de la DA du build 5 |
 | FAIT | Coordonnées et notes App Review | Contact, compte de connexion et instructions de vérification enregistrés |
 | PARTIEL | Déclarations d'accessibilité | Brouillons iPhone/iPad renseignés pour VoiceOver, contrôle vocal, interface sombre, différenciation sans couleur et animations réduites ; publication possible après mise en ligne d'une version |
 | PRÊT | Vérification des URLs | Support, privacy et terms répondent en HTTPS sans login |
@@ -154,7 +154,7 @@ seulement après choix explicite du titulaire et alignement du marketing.
 
 | État | Tâche | Critère de sortie |
 | --- | --- | --- |
-| PARTIEL | Brouillon App Review | Version iOS 1.0 et abonnements préparés ; remplacer le build 3 par le build 4 et les captures |
+| PARTIEL | Brouillon App Review | Version iOS 1.0 et abonnements préparés ; remplacer le build 3 par le build 5 et les captures |
 | PRÊT | Checklist pré-soumission | Aucun placeholder, aucune donnée réelle dans les captures, compte review testé |
 | PRÊT | Soumission App Review | Bouton activé ; action finale uniquement après tests Sandbox, accords payants et confirmation explicite du propriétaire |
 | PRÊT | Support lancement | Procédures remboursement, suppression, restauration et incident documentées |

@@ -9,7 +9,10 @@ struct RoutineKidsApp: App {
             RootView()
                 .environment(model)
                 .preferredColorScheme(.dark)
-                .task { await model.restoreSession() }
+                .task {
+                    guard !AppModel.isRunningUITests else { return }
+                    await model.restoreSession()
+                }
         }
     }
 }

@@ -431,6 +431,8 @@ type AppMessages = {
     backToBoard: string;
     createParentAccount: string;
     openPlans: string;
+    salesPausedTitle: string;
+    salesPausedDescription: string;
     limits: string;
     childProfiles: (count: number) => string;
     tasksPerRoutine: (count: number) => string;
@@ -943,6 +945,9 @@ const messages: Record<AppLocale, AppMessages> = {
       backToBoard: "Retour a la board",
       createParentAccount: "Creer un compte parent",
       openPlans: "Voir les formules",
+      salesPausedTitle: "Ouverture commerciale en cours de validation",
+      salesPausedDescription:
+        "La version gratuite reste disponible. Les nouveaux abonnements seront ouverts apres la recette finale des paiements web et iOS.",
       limits: "Limites clefs",
       childProfiles: (count) => `${count} profils enfants`,
       tasksPerRoutine: (count) => `${count} missions par routine`,
@@ -1467,6 +1472,9 @@ const messages: Record<AppLocale, AppMessages> = {
       backToBoard: "Back to board",
       createParentAccount: "Create a parent account",
       openPlans: "View plans",
+      salesPausedTitle: "Commercial launch is undergoing final validation",
+      salesPausedDescription:
+        "The free version remains available. New subscriptions will open after the final web and iOS payment checks.",
       limits: "Key limits",
       childProfiles: (count) => `${count} child profiles`,
       tasksPerRoutine: (count) => `${count} tasks per routine`,

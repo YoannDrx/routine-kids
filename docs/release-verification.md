@@ -10,13 +10,13 @@ Dernière mise à jour : 17 août 2026
 | Prisma validate/generate | PASS — Prisma Client 6.19.2 |
 | TypeScript | PASS |
 | ESLint | PASS |
-| Vitest | PASS — 45 tests, 15 fichiers |
+| Vitest | PASS — 49 tests, 15 fichiers |
 | Next.js production build | PASS — Next.js 16.3.1, 32 routes compilées |
 | Playwright | PASS — 16 scénarios, 2 doublons métier ignorés ; deux résolutions publiques |
 | Audit dépendances production | PASS — aucune vulnérabilité connue |
 | Swift typecheck | PASS — tous les fichiers `ios/RoutineKids/*.swift` |
-| Tests iPhone | PASS — 3 XCTest + 2 Swift Testing, iPhone 17 Pro / iOS 26.3.1 |
-| Build Release appareil | PASS — cible iOS générique, sans signature, build applicatif 4 |
+| Tests iPhone | PASS — 3 XCTest + 2 Swift Testing + 2 XCUITest, iPhone 17 Pro / iOS 26.3.1 |
+| Build Release appareil | PASS — cible iOS générique, sans signature, build applicatif 5 |
 | Privacy manifest | PASS — `plutil -lint` |
 | Diff whitespace | PASS — `git diff --check` |
 | GitHub Actions | PASS — verify, GitGuardian et Vercel |
@@ -61,20 +61,19 @@ ou token orphelin.
 
 ## iOS
 
-Les tests iOS passent (3 XCTest et 2 Swift Testing) et le build 4 compile sur simulateur.
+Les tests iOS passent (3 XCTest, 2 Swift Testing et 2 XCUITest) et le build 5 compile
+sur simulateur. Fredoka et Nunito sont embarquées et déclarées dans le bundle.
 Le build 3 a été signé, archivé, téléversé, traité par Apple puis sélectionné pour la
 version 1.0, mais il ne contient pas les derniers parcours natifs et ne doit plus être
-soumis. Il faut archiver/téléverser le build 4, le sélectionner et exécuter la recette
+soumis. Il faut archiver/téléverser le build 5, le sélectionner et exécuter la recette
 TestFlight sur appareils physiques.
 
 ## Gates externes restants
 
-1. Choix d'un compte Stripe dédié ou validation explicite du compte partagé Pressay,
-   puis clé live restreinte, configuration Billing Portal RoutineKids, endpoint
-   webhook et secret de signature.
-2. Secret GitHub `VERCEL_TOKEN`, merge contrôlé, déploiement Vercel de production,
+1. Secret GitHub `VERCEL_TOKEN`, merge contrôlé, déploiement Vercel de production,
    smoke tests publics et test de livraison des notifications Apple V2.
-3. Téléversement du build 4 et recette Sandbox/TestFlight sur iPhone et iPad.
+2. Recette Stripe live contrôlée sur le compte RoutineKids désormais configuré.
+3. Téléversement du build 5 et recette Sandbox/TestFlight sur iPhone et iPad.
 4. Contrat Paid Apps, fiscalité et coordonnées bancaires complétés par le titulaire.
 5. Relecture juridique finale des pages confidentialité et conditions.
 6. Confirmation explicite du propriétaire avant de cliquer sur l'envoi App Review.

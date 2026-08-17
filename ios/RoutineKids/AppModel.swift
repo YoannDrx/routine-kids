@@ -22,6 +22,14 @@ final class AppModel {
     private let envelopeStore: HouseholdEnvelopeStore
     private var pendingMutations: [CompletionMutation]
 
+    static var isRunningUITests: Bool {
+#if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-routinekids-ui-testing")
+#else
+        false
+#endif
+    }
+
     init(defaults: UserDefaults = .standard) {
         if let stored = defaults.string(forKey: "routinekids.device-id") {
             deviceId = stored
@@ -33,6 +41,28 @@ final class AppModel {
         offlineStore = OfflineMutationStore(defaults: defaults)
         envelopeStore = HouseholdEnvelopeStore(defaults: defaults)
         pendingMutations = offlineStore.load()
+
+#if DEBUG
+        if Self.isRunningUITests {
+            offlineStore.clear()
+            envelopeStore.clear()
+
+            if ProcessInfo.processInfo.arguments.contains("-routinekids-ui-testing-board") {
+                let fixture = Self.uiTestEnvelope
+                envelope = fixture
+                selectedProfileId = fixture.household.childProfiles.first?.id
+                completedTaskIds = Set(
+                    fixture.completions
+                        .filter { $0.childProfileId == selectedProfileId }
+                        .map(\.taskId)
+                )
+                phase = .ready
+            } else {
+                phase = .signedOut
+            }
+            return
+        }
+#endif
 
         if let cachedEnvelope = envelopeStore.load() {
             envelope = cachedEnvelope
@@ -341,3 +371,117 @@ final class AppModel {
         }
     }
 }
+
+#if DEBUG
+private extension AppModel {
+    static var uiTestEnvelope: HouseholdEnvelope {
+        let morningTasks = [
+            RoutineTask(
+                id: "ui-brush-teeth",
+                title: "Se brosser les dents",
+                shortLabel: "Dents",
+                icon: "brush",
+                imageUrl: nil,
+                color: "#22d3ee",
+                durationMinutes: 3,
+                scheduleDays: Array(0...6),
+                points: 1
+            ),
+            RoutineTask(
+                id: "ui-get-dressed",
+                title: "S’habiller",
+                shortLabel: "Habits",
+                icon: "sparkles",
+                imageUrl: nil,
+                color: "#fb7185",
+                durationMinutes: 5,
+                scheduleDays: Array(0...6),
+                points: 1
+            ),
+        ]
+        let eveningTasks = [
+            RoutineTask(
+                id: "ui-read-book",
+                title: "Lire une histoire",
+                shortLabel: "Histoire",
+                icon: "book-open",
+                imageUrl: nil,
+                color: "#818cf8",
+                durationMinutes: 10,
+                scheduleDays: Array(0...6),
+                points: 1
+            ),
+        ]
+        let routines = [
+            Routine(id: "ui-morning", title: "Décollage du matin", period: "MORNING", tasks: morningTasks),
+            Routine(id: "ui-evening", title: "Retour sur Terre", period: "EVENING", tasks: eveningTasks),
+        ]
+
+        return HouseholdEnvelope(
+            apiVersion: 1,
+            serverTime: "2026-08-17T17:00:00Z",
+            dayKey: "2026-08-17",
+            appAccountToken: "00000000-0000-0000-0000-000000000001",
+            parentGate: ParentGate(pinConfigured: true),
+            household: Household(
+                id: "ui-household",
+                name: "Équipage RoutineKids",
+                locale: "fr",
+                timeZone: "Europe/Paris",
+                soundsEnabled: true,
+                morningStart: "06:30",
+                morningEnd: "09:00",
+                eveningStart: "17:30",
+                eveningEnd: "21:00",
+                subscription: nil,
+                childProfiles: [
+                    ChildProfile(
+                        id: "ui-luna",
+                        name: "Luna",
+                        age: 6,
+                        avatar: "👩‍🚀",
+                        photoUrl: nil,
+                        headline: "Cap sur les étoiles",
+                        routines: routines
+                    ),
+                    ChildProfile(
+                        id: "ui-noah",
+                        name: "Noah",
+                        age: 8,
+                        avatar: "🧑‍🚀",
+                        photoUrl: nil,
+                        headline: "Commandant de bord",
+                        routines: routines.map {
+                            Routine(
+                                id: "noah-\($0.id)",
+                                title: $0.title,
+                                period: $0.period,
+                                tasks: $0.tasks.map {
+                                    RoutineTask(
+                                        id: "noah-\($0.id)",
+                                        title: $0.title,
+                                        shortLabel: $0.shortLabel,
+                                        icon: $0.icon,
+                                        imageUrl: nil,
+                                        color: $0.color,
+                                        durationMinutes: $0.durationMinutes,
+                                        scheduleDays: $0.scheduleDays,
+                                        points: $0.points
+                                    )
+                                }
+                            )
+                        }
+                    ),
+                ]
+            ),
+            completions: [
+                TaskCompletion(
+                    taskId: "ui-brush-teeth",
+                    childProfileId: "ui-luna",
+                    completedAt: "2026-08-17T07:00:00Z"
+                ),
+            ]
+        )
+    }
+}
+#endif

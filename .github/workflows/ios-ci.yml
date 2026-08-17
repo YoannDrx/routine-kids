@@ -1,0 +1,47 @@
+name: iOS CI
+
+on:
+  pull_request:
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Select Xcode 26.3
+        run: sudo xcode-select --switch /Applications/Xcode_26.3.app
+
+      - name: Install XcodeGen
+        run: brew list xcodegen >/dev/null 2>&1 || brew install xcodegen
+
+      - name: Generate the Xcode project
+        run: xcodegen generate --spec ios/project.yml
+
+      - name: Validate the privacy manifest
+        run: plutil -lint ios/RoutineKids/PrivacyInfo.xcprivacy
+
+      - name: Run unit and UI tests
+        run: >-
+          xcodebuild
+          -project ios/RoutineKids.xcodeproj
+          -scheme RoutineKids
+          -destination 'platform=iOS Simulator,OS=latest,name=iPhone 17 Pro'
+          test
+          CODE_SIGNING_ALLOWED=NO

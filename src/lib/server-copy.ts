@@ -58,6 +58,7 @@ type ServerCopy = {
     settingsSaved: string;
     invalidPremiumPlan: string;
     premiumLoadError: string;
+    commercialSalesClosed: string;
     premiumMonthlyActivated: string;
     premiumLifetimeActivated: string;
     parentPinInvalidFields: string;
@@ -173,6 +174,8 @@ const frCopy: ServerCopy = {
     settingsSaved: "Les reglages parent ont ete enregistres.",
     invalidPremiumPlan: "Le plan premium est invalide.",
     premiumLoadError: "Impossible de charger le foyer premium.",
+    commercialSalesClosed:
+      "Les abonnements sont temporairement fermes pendant la recette finale. Votre compte gratuit reste pleinement utilisable.",
     premiumMonthlyActivated: "Mode Capitaine mensuel active.",
     premiumLifetimeActivated: "Mode Capitaine a vie active.",
     parentPinInvalidFields: "Le code parent contient des champs invalides.",
@@ -308,6 +311,8 @@ const enCopy: ServerCopy = {
     settingsSaved: "Parent settings were saved.",
     invalidPremiumPlan: "Premium plan is invalid.",
     premiumLoadError: "Unable to load the premium household.",
+    commercialSalesClosed:
+      "Subscriptions are temporarily closed during final launch testing. Your free account remains fully usable.",
     premiumMonthlyActivated: "Monthly Captain mode is now active.",
     premiumLifetimeActivated: "Lifetime Captain mode is now active.",
     parentPinInvalidFields: "Parent code fields are invalid.",

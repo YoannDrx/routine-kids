@@ -11,9 +11,10 @@ struct SignInView: View {
     var body: some View {
         @Bindable var model = model
 
-        VStack(spacing: 20) {
+        ScrollView {
+            VStack(spacing: 20) {
             Text("RoutineKids")
-                .font(.system(size: 42, weight: .bold, design: .rounded))
+                .font(RoutineTypography.display(size: 42, relativeTo: .largeTitle))
             Text(isSignUp ? String(localized: "auth.signup.title") : String(localized: "auth.signin.title"))
                 .foregroundStyle(.secondary)
 
@@ -95,11 +96,14 @@ struct SignInView: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
+            }
+            .padding(28)
+            .frame(maxWidth: 460)
+            .background(.ultraThinMaterial, in: .rect(cornerRadius: 32))
+            .padding()
+            .accessibilityIdentifier("sign-in-screen")
         }
-        .padding(28)
-        .frame(maxWidth: 460)
-        .background(.ultraThinMaterial, in: .rect(cornerRadius: 32))
-        .padding()
+        .scrollBounceBehavior(.basedOnSize)
         .sheet(isPresented: $forgotPasswordPresented) {
             ForgotPasswordView(initialEmail: email)
         }

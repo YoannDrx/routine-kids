@@ -1,10 +1,12 @@
 import Link from "next/link";
 
+import { isCommercialSalesEnabled } from "@/lib/config";
 import { billingPlans } from "@/lib/data/billing-plans";
 import { getCurrentAppMessages } from "@/lib/i18n.server";
 
 export default async function PricingPage() {
   const messages = await getCurrentAppMessages();
+  const commercialSalesEnabled = isCommercialSalesEnabled();
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[1400px] flex-col gap-6 px-4 py-6 md:px-6">
@@ -33,6 +35,20 @@ export default async function PricingPage() {
           </Link>
         </div>
       </header>
+
+      {!commercialSalesEnabled ? (
+        <section
+          aria-live="polite"
+          className="mx-auto w-full max-w-4xl rounded-[28px] border border-amber-300/30 bg-amber-300/10 px-5 py-4 text-amber-50"
+        >
+          <h2 className="font-display text-2xl">
+            {messages.pricing.salesPausedTitle}
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-amber-50/75">
+            {messages.pricing.salesPausedDescription}
+          </p>
+        </section>
+      ) : null}
 
       <section className="mx-auto grid w-full max-w-4xl gap-4 md:grid-cols-2">
         {billingPlans.map((plan) => {

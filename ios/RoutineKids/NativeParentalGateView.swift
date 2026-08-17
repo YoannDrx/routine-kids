@@ -17,7 +17,7 @@ struct NativeParentalGateView: View {
                     .foregroundStyle(.pink)
 
                 Text("Espace parents")
-                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .font(RoutineTypography.display(size: 30, relativeTo: .title))
 
                 Text(
                     pinConfigured

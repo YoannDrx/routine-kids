@@ -108,7 +108,7 @@ struct BoardView: View {
                     )
                 Text("Routine") + Text("Kids").foregroundStyle(.orange)
             }
-            .font(.system(size: 17, weight: .black, design: .rounded))
+            .font(RoutineTypography.display(size: 17, relativeTo: .headline, weight: .black))
 
             Spacer()
 
@@ -151,6 +151,7 @@ struct BoardView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Réglages parents")
+            .accessibilityIdentifier("parent-settings-button")
         }
         .padding(.horizontal, 16)
         .frame(minHeight: 58)
@@ -179,7 +180,7 @@ struct BoardView: View {
         VStack(spacing: 16) {
             Text("🚀").font(.system(size: 58))
             Text("Préparons la première mission")
-                .font(.system(size: 30, weight: .bold, design: .rounded))
+                .font(RoutineTypography.display(size: 30, relativeTo: .title))
                 .multilineTextAlignment(.center)
             Text("Créez le profil de votre enfant. RoutineKids préparera automatiquement les routines du matin et du soir.")
                 .foregroundStyle(.white.opacity(0.72))
@@ -304,7 +305,7 @@ private struct CompactTaskCard: View {
                     }
                 }
                 Text(task.shortLabel ?? task.title)
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .font(RoutineTypography.display(size: 10, relativeTo: .caption2, weight: .black))
                     .textCase(.uppercase)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)

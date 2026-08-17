@@ -54,7 +54,7 @@ struct NativeProfileEditorView: View {
                                     ? String(localized: "profile.create.title")
                                     : String(localized: "profile.edit.title")
                             )
-                                .font(.system(size: 34, weight: .bold, design: .rounded))
+                                .font(RoutineTypography.display(size: 34, relativeTo: .largeTitle))
                             Text(
                                 profile == nil
                                     ? String(localized: "profile.create.subtitle")

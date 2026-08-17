@@ -25,7 +25,13 @@ listées à la fin restent des conditions bloquantes.
 - Checkout impose désormais le nom, la fonte Nunito et les couleurs RoutineKids.
   Le portail client exige une configuration Stripe dédiée via
   `STRIPE_BILLING_PORTAL_CONFIGURATION_ID` : il ne peut plus utiliser par défaut le
-  portail Pressay présent sur le compte Stripe partagé.
+  portail d'un autre produit.
+- RoutineKids dispose désormais de son propre compte Stripe, de ses deux tarifs live,
+  d'une clé restreinte, d'un portail client et d'un webhook live. Les trois secrets
+  runtime Stripe sont présents dans Vercel Production.
+- Un verrou `COMMERCIAL_SALES_ENABLED=false` bloque les nouveaux Checkout live tant
+  que la recette finale n'est pas terminée. Les previews restent testables et les
+  abonnés existants conservent l'accès à leur portail.
 - Le script `pnpm billing:reconcile-legacy` audite les droits historiques. L'option
   `--apply` écrit d'abord un snapshot privé en mode `0600`, puis ramène à Free les
   abonnements premium sans preuve fournisseur.
@@ -74,10 +80,10 @@ La réconciliation du 16 août a examiné sept abonnements et ramené quatre dro
   deux colonnes sur iPad paysage, au lieu d'un `Form` noir générique.
 - Onboarding et planificateur ont été rethémés dans la même famille visuelle.
 
-La parité stricte n'est pas encore certifiée : les parcours photo/crop sont maintenant
-présents, mais les captures App Store n'ont pas été régénérées et la recette visuelle,
-typographique et accessibilité sur iPhone/iPad physiques reste à faire. L'app utilise
-encore une police système arrondie plutôt qu'une police de marque embarquée.
+Fredoka et Nunito sont maintenant embarquées dans le bundle iOS sous licence OFL et
+utilisées par la hiérarchie de marque. La parité stricte n'est pas encore certifiée :
+les captures App Store n'ont pas été régénérées et la recette visuelle et accessibilité
+sur iPhone/iPad physiques reste à faire.
 
 ### Livraison et dépendances
 
@@ -92,13 +98,14 @@ encore une police système arrondie plutôt qu'une police de marque embarquée.
 ## Validation locale finale
 
 - Prisma : quatre migrations appliquées sur une base PostgreSQL 16 neuve.
-- `pnpm verify` : schéma, TypeScript, ESLint, 45/45 tests Vitest et build Next passent.
+- `pnpm verify` : schéma, TypeScript, ESLint, 49/49 tests Vitest et build Next passent.
 - Playwright : 16 scénarios passent et 2 doublons métier sont ignorés sur la seconde
   résolution. Les contrôles publics couvrent 1024×768 et 1366×1024 ; les parcours
   authentifiés couvrent onboarding, CRUD, limites Free, planning, séparation de deux
   foyers et webhook Stripe signé/idempotent sur une base PostgreSQL jetable.
-- iOS : build Release pour appareil générique, 3 tests XCTest et 2 tests Swift
-  Testing passent sur iPhone 17 Pro / iOS 26.3.1.
+- iOS : 3 tests XCTest, 2 tests Swift Testing et 2 XCUITest passent sur iPhone 17 Pro /
+  iOS 26.3.1. Les tests UI couvrent le board familial en paysage, le gate parental et
+  l'écran de connexion au plus grand Dynamic Type. Une CI macOS dédiée les rejoue.
 - `pnpm audit --prod` : aucune vulnérabilité connue.
 - L'avis `GHSA-ggr8-5vv4-36mx` découvert le 17 août dans la dépendance transitive
   Prisma `deepmerge-ts` est neutralisé par un override vers la version corrigée 8.0.1 ;
@@ -109,29 +116,23 @@ fait pas échouer la suite ; elle reste à surveiller dans les logs de productio
 
 ## Bloqueurs externes avant merge et commercialisation
 
-1. Ajouter un secret GitHub Actions `VERCEL_TOKEN` dédié et limité au projet. Sans ce
+1. Ajouter le secret GitHub Actions `VERCEL_TOKEN` dédié et limité au projet. Le
+   formulaire Vercel est préparé avec le scope RoutineKids et une expiration d'un an.
+   Sans ce
    secret, le nouveau contrôle post-déploiement de `main` échouera.
-2. Décider si RoutineKids utilise un compte Stripe dédié. Le compte actuellement
-   connecté expose publiquement l'identité Pressay ; ce choix de marque et d'identité
-   commerciale ne doit pas être fait implicitement.
-3. Créer une clé Stripe live restreinte, une configuration Billing Portal RoutineKids
-   et le webhook live, puis ajouter `STRIPE_SECRET_KEY`,
-   `STRIPE_BILLING_PORTAL_CONFIGURATION_ID` et `STRIPE_WEBHOOK_SECRET` à Vercel
-   Production. Au 17 août, ces trois variables sont absentes.
-4. Valider la stratégie TVA/taxes et les registrations avant toute activation de
+2. Valider la stratégie TVA/taxes et les registrations avant toute activation de
    Stripe Tax.
-5. Faire un vrai cycle Resend : inscription, réception, vérification, oubli, réception
+3. Faire un vrai cycle Resend : inscription, réception, vérification, oubli, réception
    et reset.
-6. Terminer la recette linguistique, la police de marque et la recette
-   accessibilité/visuelle sur iPhone et iPad physiques, puis régénérer les captures
-   App Store.
-7. Archiver et téléverser le build iOS 4 qui contient les nouvelles API/UI natives ;
+4. Terminer la recette linguistique et la recette accessibilité/visuelle sur iPhone et
+   iPad physiques, puis régénérer les captures App Store.
+5. Archiver et téléverser le build iOS 5 qui contient les nouvelles API/UI natives ;
    le build 3 actuellement sélectionné dans App Store Connect est désormais obsolète.
-8. Valider StoreKit Sandbox/TestFlight : achat, restore, renouvellement, expiration,
+6. Valider StoreKit Sandbox/TestFlight : achat, restore, renouvellement, expiration,
    révocation et remboursement.
-9. Accepter Paid Apps, finaliser banque/fiscalité, faire relire les textes légaux et
+7. Accepter Paid Apps, finaliser banque/fiscalité, faire relire les textes légaux et
    soumettre l'app et ses abonnements ensemble.
-10. Promouvoir le commit final de `main`, rejouer la matrice de routes publiques,
+8. Promouvoir le commit final de `main`, rejouer la matrice de routes publiques,
    effectuer un achat Stripe live contrôlé, configurer uptime/alertes et vérifier le
    rollback.
 

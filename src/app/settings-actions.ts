@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { z } from "zod";
 
-import { isDatabaseConfigured } from "@/lib/config";
+import {
+  canStartCommercialCheckout,
+  isDatabaseConfigured,
+} from "@/lib/config";
 import { ensureHouseholdBaseline } from "@/lib/household-bootstrap";
 import {
   getHouseholdOverview,
@@ -242,15 +245,13 @@ export async function activateBoardPremiumAction(input: {
   }
 
   try {
-    const stripe = getStripeClient();
     const appUrl = getAppUrl();
-    const price = await getValidatedFamilyPrice(parsed.data.interval);
 
     if (
       isPremiumSubscription(subscription) &&
       subscription.stripeCustomerId
     ) {
-      const portal = await stripe.billingPortal.sessions.create({
+      const portal = await getStripeClient().billingPortal.sessions.create({
         customer: subscription.stripeCustomerId,
         configuration: getStripeBillingPortalConfigurationId(),
         return_url: `${appUrl}/settings?billing=portal-return`,
@@ -262,6 +263,16 @@ export async function activateBoardPremiumAction(input: {
         checkoutUrl: portal.url,
       };
     }
+
+    if (!canStartCommercialCheckout(user.email)) {
+      return {
+        status: "error",
+        message: copy.actions.commercialSalesClosed,
+      };
+    }
+
+    const stripe = getStripeClient();
+    const price = await getValidatedFamilyPrice(parsed.data.interval);
 
     const checkout = await stripe.checkout.sessions.create({
       mode: "subscription",

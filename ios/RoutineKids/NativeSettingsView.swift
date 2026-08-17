@@ -34,7 +34,7 @@ struct NativeSettingsView: View {
                     }
                     .buttonStyle(.plain)
                     Text("Paramètres")
-                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                        .font(RoutineTypography.display(size: 26, relativeTo: .title2))
                     Spacer()
                     Text(model.envelope?.household.name ?? "RoutineKids")
                         .font(.subheadline.weight(.semibold))
@@ -229,7 +229,7 @@ struct NativeSettingsView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 13) {
             Label(title, systemImage: icon)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(RoutineTypography.display(size: 18, relativeTo: .headline))
                 .foregroundStyle(accent)
             content()
         }

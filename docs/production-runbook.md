@@ -26,6 +26,7 @@ Configurer les environnements Preview puis Production en suivant `.env.example` 
 - token Vercel Blob privé ;
 - Resend et expéditeur sur un domaine vérifié ;
 - secret/webhook et deux Price IDs Stripe ;
+- verrou `COMMERCIAL_SALES_ENABLED=false` jusqu'au go/no-go final ;
 - bundle ID, App ID, deux Product IDs et certificats racine Apple ;
 - adresse publique de support.
 
@@ -85,8 +86,10 @@ de build non fonctionnelles en CI ; utiliser de vrais secrets seulement dans Ver
 4. Promouvoir le même commit en Production.
 5. Vérifier les logs d'erreur dans l'heure qui suit et les webhooks fournisseurs.
 
-Configurer un moniteur HTTPS sur `/api/health` toutes les cinq minutes. Alerter après
-deux échecs consécutifs et sur tout taux de webhook 5xx non nul.
+Le workflow GitHub Actions `Production health` contrôle déjà `/api/health` toutes les
+cinq minutes, avec deux nouvelles tentatives avant échec. Conserver les notifications
+GitHub Actions actives et ajouter, avant l'ouverture commerciale, une alerte indépendante
+sur tout taux de webhook 5xx non nul.
 
 ## 8. Rollback
 

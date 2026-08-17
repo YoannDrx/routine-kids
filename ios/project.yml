@@ -10,7 +10,7 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "4"
+    CURRENT_PROJECT_VERSION: "5"
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: G9WFV7HNV6
     ROUTINEKIDS_API_BASE_URL: https://routine-kids.vercel.app
@@ -28,6 +28,9 @@ targets:
         CFBundleDisplayName: RoutineKids
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UIAppFonts:
+          - Fredoka-Variable.ttf
+          - Nunito-Variable.ttf
         ITSAppUsesNonExemptEncryption: false
         LSApplicationCategoryType: public.app-category.education
         NSPhotoLibraryUsageDescription: RoutineKids utilise une photo choisie par le parent pour personnaliser le profil enfant.
@@ -55,6 +58,7 @@ targets:
       storeKitConfiguration: StoreKit/RoutineKids.storekit
       testTargets:
         - RoutineKidsTests
+        - RoutineKidsUITests
   RoutineKidsTests:
     type: bundle.unit-test
     platform: iOS
@@ -66,3 +70,14 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: com.yoannandrieux.routinekids.tests
+  RoutineKidsUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: RoutineKidsUITests
+    dependencies:
+      - target: RoutineKids
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.yoannandrieux.routinekids.uitests

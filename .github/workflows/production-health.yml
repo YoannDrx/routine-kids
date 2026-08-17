@@ -1,0 +1,43 @@
+name: Production health
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-health
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check the public health endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+
+          curl \
+            --fail-with-body \
+            --retry 2 \
+            --retry-all-errors \
+            --retry-delay 10 \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --output "$response_file" \
+            https://routine-kids.vercel.app/api/health
+
+          node -e '
+            const fs = require("node:fs");
+            const payload = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            if (payload.status !== "ok" || payload.service !== "routinekids-web") {
+              throw new Error("RoutineKids health payload is not healthy");
+            }
+          ' "$response_file"
