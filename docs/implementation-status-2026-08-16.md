@@ -1,4 +1,4 @@
-# État d'implémentation — 16 août 2026
+# État d'implémentation — 17 août 2026
 
 Ce document décrit l'état vérifié de la branche
 `codex/routinekids-production-readiness` après la remise en état issue de l'audit.
@@ -22,6 +22,10 @@ listées à la fin restent des conditions bloquantes.
 - Checkout déclare l'identifiant d'intégration RoutineKids. `automatic_tax` reste
   volontairement désactivé jusqu'à validation des obligations et registrations
   fiscales.
+- Checkout impose désormais le nom, la fonte Nunito et les couleurs RoutineKids.
+  Le portail client exige une configuration Stripe dédiée via
+  `STRIPE_BILLING_PORTAL_CONFIGURATION_ID` : il ne peut plus utiliser par défaut le
+  portail Pressay présent sur le compte Stripe partagé.
 - Le script `pnpm billing:reconcile-legacy` audite les droits historiques. L'option
   `--apply` écrit d'abord un snapshot privé en mode `0600`, puis ramène à Free les
   abonnements premium sans preuve fournisseur.
@@ -88,14 +92,17 @@ encore une police système arrondie plutôt qu'une police de marque embarquée.
 ## Validation locale finale
 
 - Prisma : quatre migrations appliquées sur une base PostgreSQL 16 neuve.
-- `pnpm verify` : schéma, TypeScript, ESLint, 41/41 tests Vitest et build Next passent.
+- `pnpm verify` : schéma, TypeScript, ESLint, 45/45 tests Vitest et build Next passent.
 - Playwright : 16 scénarios passent et 2 doublons métier sont ignorés sur la seconde
   résolution. Les contrôles publics couvrent 1024×768 et 1366×1024 ; les parcours
   authentifiés couvrent onboarding, CRUD, limites Free, planning, séparation de deux
   foyers et webhook Stripe signé/idempotent sur une base PostgreSQL jetable.
-- iOS : build simulateur, 3 tests XCTest et 2 tests Swift Testing passent sur iPhone
-  16 Pro / iOS 18.5.
+- iOS : build Release pour appareil générique, 3 tests XCTest et 2 tests Swift
+  Testing passent sur iPhone 17 Pro / iOS 26.3.1.
 - `pnpm audit --prod` : aucune vulnérabilité connue.
+- L'avis `GHSA-ggr8-5vv4-36mx` découvert le 17 août dans la dépendance transitive
+  Prisma `deepmerge-ts` est neutralisé par un override vers la version corrigée 8.0.1 ;
+  Prisma generate/validate et la suite complète passent avec cet override.
 
 L'erreur Better Auth `ECONNRESET` observée à l'arrêt de certains scénarios publics ne
 fait pas échouer la suite ; elle reste à surveiller dans les logs de production.
@@ -104,23 +111,27 @@ fait pas échouer la suite ; elle reste à surveiller dans les logs de productio
 
 1. Ajouter un secret GitHub Actions `VERCEL_TOKEN` dédié et limité au projet. Sans ce
    secret, le nouveau contrôle post-déploiement de `main` échouera.
-2. Créer une clé Stripe live restreinte et le webhook live, puis ajouter
-   `STRIPE_SECRET_KEY` et `STRIPE_WEBHOOK_SECRET` à Vercel Production. Au 16 août, ces
-   deux variables sont absentes.
-3. Valider la stratégie TVA/taxes et les registrations avant toute activation de
+2. Décider si RoutineKids utilise un compte Stripe dédié. Le compte actuellement
+   connecté expose publiquement l'identité Pressay ; ce choix de marque et d'identité
+   commerciale ne doit pas être fait implicitement.
+3. Créer une clé Stripe live restreinte, une configuration Billing Portal RoutineKids
+   et le webhook live, puis ajouter `STRIPE_SECRET_KEY`,
+   `STRIPE_BILLING_PORTAL_CONFIGURATION_ID` et `STRIPE_WEBHOOK_SECRET` à Vercel
+   Production. Au 17 août, ces trois variables sont absentes.
+4. Valider la stratégie TVA/taxes et les registrations avant toute activation de
    Stripe Tax.
-4. Faire un vrai cycle Resend : inscription, réception, vérification, oubli, réception
+5. Faire un vrai cycle Resend : inscription, réception, vérification, oubli, réception
    et reset.
-5. Terminer la recette linguistique, la police de marque et la recette
+6. Terminer la recette linguistique, la police de marque et la recette
    accessibilité/visuelle sur iPhone et iPad physiques, puis régénérer les captures
    App Store.
-6. Archiver et téléverser le build iOS 4 qui contient les nouvelles API/UI natives ;
+7. Archiver et téléverser le build iOS 4 qui contient les nouvelles API/UI natives ;
    le build 3 actuellement sélectionné dans App Store Connect est désormais obsolète.
-7. Valider StoreKit Sandbox/TestFlight : achat, restore, renouvellement, expiration,
+8. Valider StoreKit Sandbox/TestFlight : achat, restore, renouvellement, expiration,
    révocation et remboursement.
-8. Accepter Paid Apps, finaliser banque/fiscalité, faire relire les textes légaux et
+9. Accepter Paid Apps, finaliser banque/fiscalité, faire relire les textes légaux et
    soumettre l'app et ses abonnements ensemble.
-9. Promouvoir le commit final de `main`, rejouer la matrice de routes publiques,
+10. Promouvoir le commit final de `main`, rejouer la matrice de routes publiques,
    effectuer un achat Stripe live contrôlé, configurer uptime/alertes et vérifier le
    rollback.
 

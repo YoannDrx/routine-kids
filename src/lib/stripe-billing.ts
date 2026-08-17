@@ -47,6 +47,35 @@ export function getFamilyPriceId(interval: FamilyBillingInterval) {
   return priceId;
 }
 
+export function getStripeBillingPortalConfigurationId() {
+  const configurationId =
+    process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID?.trim();
+
+  if (!configurationId) {
+    throw new Error(
+      "STRIPE_BILLING_PORTAL_CONFIGURATION_ID is not configured.",
+    );
+  }
+
+  return configurationId;
+}
+
+export function getRoutineKidsCheckoutBranding(
+  appUrl = getAppUrl(),
+): Stripe.Checkout.SessionCreateParams.BrandingSettings {
+  return {
+    background_color: "#0f0b24",
+    border_style: "rounded",
+    button_color: "#ec4899",
+    display_name: "RoutineKids",
+    font_family: "nunito",
+    icon: {
+      type: "url",
+      url: `${appUrl}/apple-icon`,
+    },
+  };
+}
+
 export async function getValidatedFamilyPrice(
   interval: FamilyBillingInterval,
 ) {

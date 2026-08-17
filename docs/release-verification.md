@@ -1,6 +1,6 @@
 # RoutineKids — vérification de release
 
-Dernière mise à jour : 16 août 2026
+Dernière mise à jour : 17 août 2026
 
 ## Résultat automatisé
 
@@ -10,13 +10,13 @@ Dernière mise à jour : 16 août 2026
 | Prisma validate/generate | PASS — Prisma Client 6.19.2 |
 | TypeScript | PASS |
 | ESLint | PASS |
-| Vitest | PASS — 41 tests, 14 fichiers |
+| Vitest | PASS — 45 tests, 15 fichiers |
 | Next.js production build | PASS — Next.js 16.3.1, 32 routes compilées |
 | Playwright | PASS — 16 scénarios, 2 doublons métier ignorés ; deux résolutions publiques |
 | Audit dépendances production | PASS — aucune vulnérabilité connue |
 | Swift typecheck | PASS — tous les fichiers `ios/RoutineKids/*.swift` |
-| Tests iPhone | PASS — 3 XCTest + 2 Swift Testing, iPhone 16 Pro / iOS 18.5 |
-| Build simulateur | PASS — iPhone 16 Pro / iOS 18.5, build applicatif 4 |
+| Tests iPhone | PASS — 3 XCTest + 2 Swift Testing, iPhone 17 Pro / iOS 26.3.1 |
+| Build Release appareil | PASS — cible iOS générique, sans signature, build applicatif 4 |
 | Privacy manifest | PASS — `plutil -lint` |
 | Diff whitespace | PASS — `git diff --check` |
 | GitHub Actions | PASS — verify, GitGuardian et Vercel |
@@ -26,6 +26,7 @@ Commandes de référence :
 ```bash
 RESEND_API_KEY=re_verify_placeholder \
 EMAIL_FROM='RoutineKids Verify <verify@example.com>' \
+STRIPE_BILLING_PORTAL_CONFIGURATION_ID=bpc_verify_placeholder \
 pnpm verify
 
 DATABASE_URL='postgresql://…/routinekids' \
@@ -68,7 +69,9 @@ TestFlight sur appareils physiques.
 
 ## Gates externes restants
 
-1. Réauthentification Stripe, clé live restreinte, endpoint webhook et secret de signature.
+1. Choix d'un compte Stripe dédié ou validation explicite du compte partagé Pressay,
+   puis clé live restreinte, configuration Billing Portal RoutineKids, endpoint
+   webhook et secret de signature.
 2. Secret GitHub `VERCEL_TOKEN`, merge contrôlé, déploiement Vercel de production,
    smoke tests publics et test de livraison des notifications Apple V2.
 3. Téléversement du build 4 et recette Sandbox/TestFlight sur iPhone et iPad.

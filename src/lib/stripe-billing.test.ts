@@ -6,13 +6,50 @@ vi.mock("@/lib/env.server", () => ({ ensureServerEnv: vi.fn() }));
 
 import {
   familyPriceConfiguration,
+  getRoutineKidsCheckoutBranding,
   getStripeBillingEnvironment,
+  getStripeBillingPortalConfigurationId,
   getLocalPlanForStripeSubscription,
   getSubscriptionPeriod,
   toSubscriptionStatus,
 } from "@/lib/stripe-billing";
 
 describe("RoutineKids Stripe billing", () => {
+  it("requires a dedicated RoutineKids Billing Portal configuration", () => {
+    const previousConfigurationId =
+      process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID;
+
+    delete process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID;
+    expect(() => getStripeBillingPortalConfigurationId()).toThrow(
+      "STRIPE_BILLING_PORTAL_CONFIGURATION_ID is not configured.",
+    );
+
+    process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID = "  bpc_routinekids  ";
+    expect(getStripeBillingPortalConfigurationId()).toBe("bpc_routinekids");
+
+    if (previousConfigurationId === undefined) {
+      delete process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID;
+    } else {
+      process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID =
+        previousConfigurationId;
+    }
+  });
+
+  it("brands Checkout with the original RoutineKids visual identity", () => {
+    expect(getRoutineKidsCheckoutBranding("https://routine-kids.vercel.app"))
+      .toEqual({
+        background_color: "#0f0b24",
+        border_style: "rounded",
+        button_color: "#ec4899",
+        display_name: "RoutineKids",
+        font_family: "nunito",
+        icon: {
+          type: "url",
+          url: "https://routine-kids.vercel.app/apple-icon",
+        },
+      });
+  });
+
   it("derives the billing environment from the signed event livemode flag", () => {
     expect(getStripeBillingEnvironment(true)).toBe("PRODUCTION");
     expect(getStripeBillingEnvironment(false)).toBe("TEST");

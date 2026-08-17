@@ -32,6 +32,8 @@ import { deletePrivateImages } from "@/lib/media-storage";
 import { getParentStepUpStatus } from "@/lib/parent-security";
 import {
   getAppUrl,
+  getRoutineKidsCheckoutBranding,
+  getStripeBillingPortalConfigurationId,
   getStripeClient,
   getValidatedFamilyPrice,
   type FamilyBillingInterval,
@@ -250,6 +252,7 @@ export async function activateBoardPremiumAction(input: {
     ) {
       const portal = await stripe.billingPortal.sessions.create({
         customer: subscription.stripeCustomerId,
+        configuration: getStripeBillingPortalConfigurationId(),
         return_url: `${appUrl}/settings?billing=portal-return`,
       });
 
@@ -263,6 +266,7 @@ export async function activateBoardPremiumAction(input: {
     const checkout = await stripe.checkout.sessions.create({
       mode: "subscription",
       integration_identifier: "routinekids_checkout_qksmvzpx",
+      branding_settings: getRoutineKidsCheckoutBranding(appUrl),
       client_reference_id: user.id,
       customer: subscription.stripeCustomerId ?? undefined,
       customer_email: subscription.stripeCustomerId ? undefined : user.email,
@@ -350,6 +354,7 @@ export async function openBillingPortalAction(): Promise<SettingsMutationResult>
   try {
     const portal = await getStripeClient().billingPortal.sessions.create({
       customer: subscription.stripeCustomerId,
+      configuration: getStripeBillingPortalConfigurationId(),
       return_url: `${getAppUrl()}/settings?billing=portal-return`,
     });
 

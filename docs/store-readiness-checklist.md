@@ -1,6 +1,6 @@
 # RoutineKids — checklist de préparation aux stores
 
-Date de référence : 16 août 2026
+Date de référence : 17 août 2026
 
 Branche : `codex/routinekids-production-readiness`
 Périmètre V1 : web de production + App Store iPhone/iPad. Android n'existe pas dans
@@ -41,7 +41,7 @@ de suppression de compte, restauration d'achat et expiration d'abonnement en Tes
 | FAIT | Inscription et reset de mot de passe natifs | Aucun renvoi obligatoire vers un navigateur |
 | FAIT | Sécurité HTTP/PWA | CSP, HSTS production, no-store authentifié, service worker limité |
 | FAIT | Prix Stripe strictement validés côté serveur | EUR 4,99/mois et 39,99/an, périodicité et statut contrôlés |
-| FAIT | Vérifications web | Prisma, TypeScript, ESLint, 41 tests Vitest, build et audit dépendances passent localement |
+| FAIT | Vérifications web | Prisma, TypeScript, ESLint, 45 tests Vitest, build et audit dépendances passent localement |
 | FAIT | Vérifications iOS | 3 XCTest + 2 Swift Testing et build 4 simulateur passent |
 | FAIT | Cycle de session iOS | Origine Better Auth envoyée, cookies du domaine purgés même si le sign-out serveur échoue, reconnexion validée sans réinstallation |
 | FAIT | Playwright local final | 16 scénarios réussis, dont parcours authentifiés et webhook Stripe ; à rejouer après déploiement public |
@@ -68,8 +68,9 @@ déploiement web précédent ; ne supprimer aucune colonne/table dans l'urgence.
 | FAIT | Alias stable choisi | `https://routine-kids.vercel.app` |
 | FAIT | Secrets cœur configurés | Neon, Better Auth, Blob et certificats racine Apple |
 | FAIT | IDs de prix Stripe live configurés | Mensuel `price_1U2y48H4VwBfiTEIheyAI0FY`, annuel `price_1U2y6DH4VwBfiTEIHBYtVejc` |
-| FAIT | Resend production | Clé dédiée `sending_access`, expéditeur `routinekids@yodev.fr`, e-mail de test accepté |
+| PARTIEL | Resend production | Clé dédiée et expéditeur configurés ; acceptation API constatée, réception réelle vérification/reset encore à confirmer |
 | BLOQUÉ | Runtime Stripe live | Ajouter une clé restreinte avec Customers, Checkout, Billing Portal et Subscriptions |
+| BLOQUÉ | Portail Stripe dédié | Créer une configuration RoutineKids et ajouter `STRIPE_BILLING_PORTAL_CONFIGURATION_ID` |
 | PRÊT | Déploiement production | Déployer seulement après Neon + e-mail + Stripe runtime |
 | PRÊT | Webhook Stripe | URL `/api/billing/stripe-webhook`, événements checkout/subscription, secret dans Vercel |
 | PRÊT | Smoke tests publics | `/`, auth, e-mail, reset, `/privacy`, `/terms`, `/support`, `/api/health` |
@@ -83,9 +84,10 @@ déploiement web précédent ; ne supprimer aucune colonne/table dans l'urgence.
 | FAIT | Produit live | `prod_V34CEIffnjMeYy` — RoutineKids Family Plus |
 | FAIT | Tarif mensuel live | 4,99 EUR TTC/mois |
 | FAIT | Tarif annuel live | 39,99 EUR TTC/an, environ 33 % de remise |
+| BLOQUÉ | Identité du compte | Le compte Stripe partagé expose publiquement Pressay ; choisir un compte RoutineKids dédié ou valider explicitement cette cohabitation |
 | BLOQUÉ | Clé live applicative | La clé CLI actuelle est volontairement en lecture seule |
 | PRÊT | Endpoint webhook live | À créer après que la route soit réellement déployée |
-| PRÊT | Portail client | Vérifier annulation, retour vers l'app et moyens de paiement |
+| PRÊT | Portail client | Configuration dédiée exigée par le code ; vérifier produits RoutineKids, annulation, retour et moyens de paiement |
 | PRÊT | Achat live contrôlé | Utiliser un vrai compte interne, rembourser si nécessaire, vérifier l'idempotence |
 
 Le lancement conserve 4,99/39,99 comme prix fondateur. Réévaluer après trois mois ou
