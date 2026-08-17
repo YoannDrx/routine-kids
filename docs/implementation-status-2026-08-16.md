@@ -91,9 +91,11 @@ sur iPhone/iPad physiques reste à faire.
   mis à jour uniquement en versions patch/minor. Prisma 6, TypeScript 5 et ESLint 9
   sont conservés pour la V1.
 - GitHub Actions exécute les scénarios Playwright authentifiés sur PostgreSQL.
-- Les variables GitHub `VERCEL_PROJECT_ID` et `VERCEL_TEAM_ID` sont configurées.
-- Après un push sur `main`, un job CI vérifie que le dernier déploiement Vercel
-  Production `READY` correspond exactement au SHA attendu.
+- Après un push sur `main`, un job CI vérifie que l'objet de déploiement Production
+  publié par Vercel dans GitHub correspond exactement au SHA attendu et se termine
+  avec le statut `success`.
+- Ce contrôle utilise le `GITHUB_TOKEN` éphémère limité au dépôt. Aucun jeton Vercel
+  permanent à portée d'équipe n'est nécessaire.
 
 ## Validation locale finale
 
@@ -116,21 +118,17 @@ fait pas échouer la suite ; elle reste à surveiller dans les logs de productio
 
 ## Bloqueurs externes avant merge et commercialisation
 
-1. Ajouter le secret GitHub Actions `VERCEL_TOKEN` dédié et limité au projet. Le
-   formulaire Vercel est préparé avec le scope RoutineKids et une expiration d'un an.
-   Sans ce
-   secret, le nouveau contrôle post-déploiement de `main` échouera.
-2. Valider la stratégie TVA/taxes et les registrations avant toute activation de
+1. Valider la stratégie TVA/taxes et les registrations avant toute activation de
    Stripe Tax.
-3. Faire un vrai cycle Resend : inscription, réception, vérification, oubli, réception
+2. Faire un vrai cycle Resend : inscription, réception, vérification, oubli, réception
    et reset.
-4. Terminer la recette linguistique et la recette accessibilité/visuelle sur iPhone et
+3. Terminer la recette linguistique et la recette accessibilité/visuelle sur iPhone et
    iPad physiques, puis régénérer les captures App Store.
-5. Archiver et téléverser le build iOS 5 qui contient les nouvelles API/UI natives ;
+4. Archiver et téléverser le build iOS 5 qui contient les nouvelles API/UI natives ;
    le build 3 actuellement sélectionné dans App Store Connect est désormais obsolète.
-6. Valider StoreKit Sandbox/TestFlight : achat, restore, renouvellement, expiration,
+5. Valider StoreKit Sandbox/TestFlight : achat, restore, renouvellement, expiration,
    révocation et remboursement.
-7. Accepter Paid Apps, finaliser banque/fiscalité, faire relire les textes légaux et
+6. Accepter Paid Apps, finaliser banque/fiscalité, faire relire les textes légaux et
    soumettre l'app et ses abonnements ensemble.
 8. Promouvoir le commit final de `main`, rejouer la matrice de routes publiques,
    effectuer un achat Stripe live contrôlé, configurer uptime/alertes et vérifier le

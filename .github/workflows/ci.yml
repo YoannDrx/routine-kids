@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  deployments: read
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -69,9 +70,7 @@ jobs:
     timeout-minutes: 10
     env:
       EXPECTED_GIT_SHA: ${{ github.sha }}
-      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
-      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

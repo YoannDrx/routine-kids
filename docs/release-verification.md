@@ -70,8 +70,8 @@ TestFlight sur appareils physiques.
 
 ## Gates externes restants
 
-1. Secret GitHub `VERCEL_TOKEN`, merge contrôlé, déploiement Vercel de production,
-   smoke tests publics et test de livraison des notifications Apple V2.
+1. Merge contrôlé, déploiement Vercel de production vérifié via GitHub, smoke tests
+   publics et test de livraison des notifications Apple V2.
 2. Recette Stripe live contrôlée sur le compte RoutineKids désormais configuré.
 3. Téléversement du build 5 et recette Sandbox/TestFlight sur iPhone et iPad.
 4. Contrat Paid Apps, fiscalité et coordonnées bancaires complétés par le titulaire.
