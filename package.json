@@ -1,11 +1,68 @@
 {
   "name": "routine-kids",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.30.3",
   "private": true,
-  "description": "Static RoutineKids project",
+  "description": "RoutineKids family routines app for web, iPhone, and iPad",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js"
+    "check:git-target": "node scripts/verify-git-target.mjs",
+    "check:vercel-production": "node scripts/verify-vercel-production.mjs",
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "build:verify": "VERCEL_ENV=preview next build --turbopack",
+    "postinstall": "prisma generate",
+    "start": "next start",
+    "lint": "eslint .",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "test:e2e": "playwright test",
+    "verify": "pnpm check:git-target && pnpm prisma:validate && pnpm typecheck && pnpm lint && pnpm test:ci && pnpm build:verify",
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "billing:reconcile-legacy": "node --env-file-if-exists=.env.local scripts/reconcile-legacy-subscriptions.mjs",
+    "prisma:push": "prisma db push",
+    "db:setup": "pnpm prisma:generate && pnpm prisma:push",
+    "prototype:serve": "node server.js"
+  },
+  "dependencies": {
+    "@apple/app-store-server-library": "^3.1.0",
+    "@prisma/client": "^6.16.2",
+    "@vercel/blob": "^2.8.0",
+    "better-auth": "^1.6.29",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.31.0",
+    "next": "16.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "resend": "^6.20.0",
+    "stripe": "^22.5.0",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "eslint": "^9.36.0",
+    "eslint-config-next": "16.3.1",
+    "prisma": "^6.16.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.2",
+    "vitest": "^4.1.10"
+  },
+  "pnpm": {
+    "overrides": {
+      "deepmerge-ts": "8.0.1",
+      "effect": "3.20.0"
+    },
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma"
+    ]
   }
 }
-

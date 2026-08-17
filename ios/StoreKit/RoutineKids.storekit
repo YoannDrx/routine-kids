@@ -1,0 +1,88 @@
+{
+  "identifier" : "9A969E0C-4A96-4D66-856C-EC9DC0813187",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "fr_FR",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "FRA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "22300397",
+      "localizations" : [
+        {
+          "description" : "Toutes les routines familiales et les futures fonctionnalités premium.",
+          "displayName" : "RoutineKids Family Plus",
+          "locale" : "fr_FR"
+        }
+      ],
+      "name" : "RoutineKids Family Plus",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "C9014886-F667-45C2-B956-9EA378F813E6",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Jusqu’à 6 profils et 20 missions par routine, avec synchronisation familiale.",
+              "displayName" : "Family Plus mensuel",
+              "locale" : "fr_FR"
+            }
+          ],
+          "productID" : "com.yoannandrieux.routinekids.familyplus.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Family Plus mensuel",
+          "subscriptionGroupID" : "22300397",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "39.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "718AFA07-9923-4C01-BEB6-217E51F18DA0",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Jusqu’à 6 profils et 20 missions par routine, avec environ 33 % d’économie par rapport au mensuel.",
+              "displayName" : "Family Plus annuel",
+              "locale" : "fr_FR"
+            }
+          ],
+          "productID" : "com.yoannandrieux.routinekids.familyplus.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Family Plus annuel",
+          "subscriptionGroupID" : "22300397",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

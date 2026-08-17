@@ -1,0 +1,724 @@
+{
+  "sourceLanguage": "fr",
+  "strings": {
+    "account.delete.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "La suppression du compte a échoué. Réessayez plus tard." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Account deletion failed. Please try again later." } }
+    } },
+    "account.delete.message": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Toutes les routines, profils, images et données du foyer « %@ » seront supprimés." } },
+      "en": { "stringUnit": { "state": "translated", "value": "All routines, profiles, images, and data for “%@” will be deleted." } }
+    } },
+    "auth.reset.sent": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Si cette adresse existe, un lien de réinitialisation vient d’être envoyé." } },
+      "en": { "stringUnit": { "state": "translated", "value": "If this address exists, a reset link has just been sent." } }
+    } },
+    "auth.signin.action": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Se connecter" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Sign in" } }
+    } },
+    "auth.signin.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Connexion impossible. Vérifiez vos identifiants." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Unable to sign in. Check your credentials." } }
+    } },
+    "auth.signin.switch": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "J’ai déjà un compte" } },
+      "en": { "stringUnit": { "state": "translated", "value": "I already have an account" } }
+    } },
+    "auth.signin.title": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Espace parent" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Parent space" } }
+    } },
+    "auth.signup.action": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Créer mon compte" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Create my account" } }
+    } },
+    "auth.signup.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Création impossible. Vérifiez les informations saisies." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Unable to create the account. Check the information entered." } }
+    } },
+    "auth.signup.switch": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Créer un compte" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Create an account" } }
+    } },
+    "auth.signup.title": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Créer le compte parent" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Create parent account" } }
+    } },
+    "auth.signup.verify": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Compte créé. Consultez votre e-mail pour confirmer votre adresse." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Account created. Check your email to confirm your address." } }
+    } },
+    "billing.period.day": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "jour" } },
+      "en": { "stringUnit": { "state": "translated", "value": "day" } }
+    } },
+    "billing.period.generic": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "période" } },
+      "en": { "stringUnit": { "state": "translated", "value": "period" } }
+    } },
+    "billing.period.month": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "mois" } },
+      "en": { "stringUnit": { "state": "translated", "value": "month" } }
+    } },
+    "billing.period.multiple": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "%lld %@" } },
+      "en": { "stringUnit": { "state": "translated", "value": "%lld %@s" } }
+    } },
+    "billing.period.week": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "semaine" } },
+      "en": { "stringUnit": { "state": "translated", "value": "week" } }
+    } },
+    "billing.period.year": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "an" } },
+      "en": { "stringUnit": { "state": "translated", "value": "year" } }
+    } },
+    "parent.gate.password": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Mot de passe" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Password" } }
+    } },
+    "parent.gate.password.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Mot de passe incorrect." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Incorrect password." } }
+    } },
+    "parent.gate.password.hint": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Confirmez le mot de passe du compte parent." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Confirm the parent account password." } }
+    } },
+    "parent.gate.pin": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Code parent" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Parent PIN" } }
+    } },
+    "parent.gate.pin.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Code parent incorrect." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Incorrect parent PIN." } }
+    } },
+    "parent.gate.pin.hint": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Saisissez le code parent à 4 chiffres." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Enter the 4-digit parent PIN." } }
+    } },
+    "parent.gate.rate.limit": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Trop de tentatives. Réessayez dans dix minutes." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Too many attempts. Try again in ten minutes." } }
+    } },
+    "profile.age.short": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "%lld ans" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Age %lld" } }
+    } },
+    "profile.create.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Le profil n’a pas pu être créé. Réessayez." } },
+      "en": { "stringUnit": { "state": "translated", "value": "The profile could not be created. Try again." } }
+    } },
+    "settings.astronaut.count": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "%lld astronaute(s)" } },
+      "en": { "stringUnit": { "state": "translated", "value": "%lld astronaut(s)" } }
+    } },
+    "task.completed": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Terminée" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Completed" } }
+    } },
+    "task.pending": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "À faire" } },
+      "en": { "stringUnit": { "state": "translated", "value": "To do" } }
+    } },
+    "template.create": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Créer une mission" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Create a mission" } }
+    } },
+    "template.delete": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Supprimer cette mission" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Delete this mission" } }
+    } },
+    "template.delete.confirm": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Supprimer cette mission de la bibliothèque ?" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Delete this mission from the library?" } }
+    } },
+    "template.delete.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "La mission n’a pas pu être supprimée." } },
+      "en": { "stringUnit": { "state": "translated", "value": "The mission could not be deleted." } }
+    } },
+    "template.duration": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Durée : %lld min" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Duration: %lld min" } }
+    } },
+    "template.edit": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Modifier la mission" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Edit mission" } }
+    } },
+    "template.photo.choose": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Choisir et recadrer une image" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Choose and crop an image" } }
+    } },
+    "template.photo.remove": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Retirer l’image" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Remove image" } }
+    } },
+    "template.save.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "La mission n’a pas pu être enregistrée." } },
+      "en": { "stringUnit": { "state": "translated", "value": "The mission could not be saved." } }
+    } },
+    "template.section.details": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Détails" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Details" } }
+    } },
+    "template.section.icon": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Icône" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Icon" } }
+    } },
+    "template.section.photo": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Image" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Image" } }
+    } },
+    "template.short": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Libellé court" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Short label" } }
+    } },
+    "template.title": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Nom de la mission" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Mission name" } }
+    } },
+    "Astronaute": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Astronaut" } }
+    } },
+    "Créer": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Create" } }
+    } },
+    "Créer une mission": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Create a mission" } }
+    } },
+    "Enregistrer": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Save" } }
+    } },
+    "Gérer les routines et missions": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Manage routines and missions" } }
+    } },
+    "Jours d’affectation": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Scheduled days" } }
+    } },
+    "Mode hors ligne, synchronisation en attente": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Offline mode, waiting to sync" } }
+    } },
+    "Modifier": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Edit" } }
+    } },
+    "Modifier le foyer et les horaires": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Edit household and schedule" } }
+    } },
+    "Nom de la mission": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Mission name" } }
+    } },
+    "Période": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Period" } }
+    } },
+    "Planificateur de missions": { "localizations": {
+      "en": { "stringUnit": { "state": "translated", "value": "Mission planner" } }
+    } },
+    "common.cancel": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Annuler" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Cancel" } }
+    } },
+    "common.save": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Enregistrer" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Save" } }
+    } },
+    "household.locale": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Langue" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Language" } }
+    } },
+    "household.morning.end": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Fin du matin" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Morning ends" } }
+    } },
+    "household.morning.start": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Début du matin" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Morning starts" } }
+    } },
+    "household.evening.end": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Fin du soir" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Evening ends" } }
+    } },
+    "household.evening.start": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Début du soir" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Evening starts" } }
+    } },
+    "household.name": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Nom du foyer" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Household name" } }
+    } },
+    "household.section.identity": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Foyer" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Household" } }
+    } },
+    "household.section.routines": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Routines" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Routines" } }
+    } },
+    "household.settings.title": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Réglages du foyer" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Household settings" } }
+    } },
+    "household.sounds": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Sons et célébrations" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Sounds and celebrations" } }
+    } },
+    "household.timezone": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Fuseau horaire" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Time zone" } }
+    } },
+    "household.update.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Les réglages du foyer n’ont pas pu être enregistrés." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Household settings could not be saved." } }
+    } },
+    "photo.crop.hint": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Déplacez et pincez la photo pour cadrer le portrait." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Move and pinch the photo to frame the portrait." } }
+    } },
+    "photo.crop.title": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Recadrer la photo" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Crop photo" } }
+    } },
+    "photo.crop.use": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Utiliser cette photo" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Use this photo" } }
+    } },
+    "profile.age.format": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Âge : %lld ans" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Age: %lld" } }
+    } },
+    "profile.create.action": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Lancer les routines" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Launch the routines" } }
+    } },
+    "profile.create.eyebrow": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "NOUVEL ASTRONAUTE" } },
+      "en": { "stringUnit": { "state": "translated", "value": "NEW ASTRONAUT" } }
+    } },
+    "profile.create.navigation": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Créer un profil" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Create profile" } }
+    } },
+    "profile.create.subtitle": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Deux routines prêtes à jouer seront créées automatiquement." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Two ready-to-play routines will be created automatically." } }
+    } },
+    "profile.create.title": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Qui rejoint l’équipage ?" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Who is joining the crew?" } }
+    } },
+    "profile.delete": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Supprimer ce profil" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Delete this profile" } }
+    } },
+    "profile.delete.confirm.action": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Supprimer définitivement" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Delete permanently" } }
+    } },
+    "profile.delete.confirm.message": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Ses routines, validations et photos seront supprimées." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Their routines, completions, and photos will be deleted." } }
+    } },
+    "profile.delete.confirm.title": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Supprimer cet astronaute ?" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Delete this astronaut?" } }
+    } },
+    "profile.delete.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Le profil n’a pas pu être supprimé." } },
+      "en": { "stringUnit": { "state": "translated", "value": "The profile could not be deleted." } }
+    } },
+    "profile.edit.eyebrow": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "FICHE ASTRONAUTE" } },
+      "en": { "stringUnit": { "state": "translated", "value": "ASTRONAUT PROFILE" } }
+    } },
+    "profile.edit.navigation": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Modifier le profil" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Edit profile" } }
+    } },
+    "profile.edit.subtitle": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Personnalisez son portrait et ses informations." } },
+      "en": { "stringUnit": { "state": "translated", "value": "Customize their portrait and information." } }
+    } },
+    "profile.edit.title": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Mission profil" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Profile mission" } }
+    } },
+    "profile.headline": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Petite phrase (facultatif)" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Short phrase (optional)" } }
+    } },
+    "profile.name": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Prénom" } },
+      "en": { "stringUnit": { "state": "translated", "value": "First name" } }
+    } },
+    "profile.photo": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Photo de profil" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Profile photo" } }
+    } },
+    "profile.photo.choose": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Choisir et recadrer" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Choose and crop" } }
+    } },
+    "profile.photo.remove": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Retirer la photo" } },
+      "en": { "stringUnit": { "state": "translated", "value": "Remove photo" } }
+    } },
+    "profile.photo.delete.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "La photo n’a pas pu être supprimée." } },
+      "en": { "stringUnit": { "state": "translated", "value": "The photo could not be removed." } }
+    } },
+    "profile.update.error": { "localizations": {
+      "fr": { "stringUnit": { "state": "translated", "value": "Le profil n’a pas pu être enregistré." } },
+      "en": { "stringUnit": { "state": "translated", "value": "The profile could not be saved." } }
+    } },
+    "NOUVEL ASTRONAUTE": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "NEW ASTRONAUT" }
+        }
+      }
+    },
+    "Qui rejoint l’équipage ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Who is joining the crew?" }
+        }
+      }
+    },
+    "Deux routines prêtes à jouer seront créées automatiquement.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Two ready-to-play routines will be created automatically." }
+        }
+      }
+    },
+    "Avatar": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Avatar" }
+        }
+      }
+    },
+    "Prénom": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "First name" }
+        }
+      }
+    },
+    "Petite phrase (facultatif)": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Short phrase (optional)" }
+        }
+      }
+    },
+    "Lancer les routines": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Launch the routines" }
+        }
+      }
+    },
+    "Créer un profil": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Create a profile" }
+        }
+      }
+    },
+    "Annuler": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Cancel" }
+        }
+      }
+    },
+    "Mode hors ligne · synchronisation en attente": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Offline mode · waiting to sync" }
+        }
+      }
+    },
+    "Ajouter un astronaute": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Add an astronaut" }
+        }
+      }
+    },
+    "Heure actuelle": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Current time" }
+        }
+      }
+    },
+    "Matin": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Morning" }
+        }
+      }
+    },
+    "Soir": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Evening" }
+        }
+      }
+    },
+    "Réglages parents": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Parent settings" }
+        }
+      }
+    },
+    "Préparons la première mission": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Let’s prepare the first mission" }
+        }
+      }
+    },
+    "Créez le profil de votre enfant. RoutineKids préparera automatiquement les routines du matin et du soir.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Create your child’s profile. RoutineKids will automatically prepare morning and evening routines." }
+        }
+      }
+    },
+    "Créer le premier profil": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Create the first profile" }
+        }
+      }
+    },
+    "Ajouter des missions": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Add missions" }
+        }
+      }
+    },
+    "Paramètres": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Settings" }
+        }
+      }
+    },
+    "Ajouter": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Add" }
+        }
+      }
+    },
+    "Routines matin et soir": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Morning and evening routines" }
+        }
+      }
+    },
+    "Centre de support": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Support center" }
+        }
+      }
+    },
+    "Se déconnecter": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Sign out" }
+        }
+      }
+    },
+    "Supprimer mon compte et mes données": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Delete my account and data" }
+        }
+      }
+    },
+    "La suppression est définitive. Un abonnement Apple doit être résilié séparément.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Deletion is permanent. An Apple subscription must be cancelled separately." }
+        }
+      }
+    },
+    "Abonnement actif": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Active subscription" }
+        }
+      }
+    },
+    "Gérer l’abonnement": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Manage subscription" }
+        }
+      }
+    },
+    "Restaurer les achats": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Restore purchases" }
+        }
+      }
+    },
+    "Paiement via votre identifiant Apple. Renouvellement automatique sauf résiliation au moins 24 h avant l’échéance.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Payment is charged to your Apple ID. Auto-renews unless cancelled at least 24 hours before renewal." }
+        }
+      }
+    },
+    "Confidentialité": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Privacy" }
+        }
+      }
+    },
+    "Conditions": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Terms" }
+        }
+      }
+    },
+    "Suppression définitive": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Permanent deletion" }
+        }
+      }
+    },
+    "Si vous payez via Apple, gérez d’abord l’abonnement dans l’App Store pour éviter son renouvellement.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "If you pay through Apple, manage the subscription in the App Store first to prevent renewal." }
+        }
+      }
+    },
+    "Tapez SUPPRIMER": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Type DELETE" }
+        }
+      }
+    },
+    "Supprimer définitivement": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Delete permanently" }
+        }
+      }
+    },
+    "Supprimer le compte": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Delete account" }
+        }
+      }
+    },
+    "Prénom du parent": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Parent’s first name" }
+        }
+      }
+    },
+    "Email": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Email" }
+        }
+      }
+    },
+    "Mot de passe oublié": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Forgot password" }
+        }
+      }
+    },
+    "Support": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Support" }
+        }
+      }
+    },
+    "La même confirmation est affichée pour toutes les adresses afin de protéger les comptes.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "The same confirmation is shown for every address to protect accounts." }
+        }
+      }
+    },
+    "Si cette adresse existe, un lien de réinitialisation vient d’être envoyé.": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "If this address exists, a reset link has been sent." }
+        }
+      }
+    },
+    "Envoyer le lien": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Send link" }
+        }
+      }
+    },
+    "Fermer": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Close" }
+        }
+      }
+    },
+    "Espace parents": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Parent area" }
+        }
+      }
+    },
+    "Ouvrir les réglages": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Open settings" }
+        }
+      }
+    },
+    "Vérification parentale": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Parent verification" }
+        }
+      }
+    },
+    "Synchronisation…": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Syncing…" }
+        }
+      }
+    },
+    "Routine vide": {
+      "localizations": {
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Empty routine" }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
