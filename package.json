@@ -28,18 +28,18 @@
   },
   "dependencies": {
     "@apple/app-store-server-library": "^3.1.0",
-    "@prisma/client": "^6.16.2",
+    "@prisma/client": "^7.10.0",
     "@vercel/blob": "^2.8.0",
-    "better-auth": "^1.6.29",
+    "better-auth": "^1.7.2",
     "clsx": "^2.1.1",
-    "lucide-react": "^1.31.0",
-    "next": "16.3.1",
+    "lucide-react": "^1.41.0",
+    "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "resend": "^6.20.0",
-    "stripe": "^22.5.0",
+    "resend": "^6.26.0",
+    "stripe": "^22.6.1",
     "tailwind-merge": "^3.6.0",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
